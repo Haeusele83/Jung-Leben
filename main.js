@@ -34,10 +34,10 @@ async function loadProducts() {
   }
 
   try {
-    const response = await fetch("products.json");
+    const response = await fetch("./products.json");
 
     if (!response.ok) {
-      throw new Error("Produktdaten konnten nicht geladen werden.");
+      throw new Error(`products.json wurde nicht gefunden. Status: ${response.status}`);
     }
 
     products = await response.json();
@@ -53,6 +53,7 @@ async function loadProducts() {
     const errorHtml = `
       <div class="products-error">
         <h3>Produktdaten konnten nicht geladen werden.</h3>
+        <p>${error.message}</p>
         <p>
           Bitte prüfe, ob die Datei <strong>products.json</strong> im Hauptordner liegt
           und ob du die Seite über Live Server gestartet hast.
@@ -68,17 +69,27 @@ async function loadProducts() {
       productDetail.innerHTML = errorHtml;
     }
 
-    console.error(error);
+    console.error("Fehler beim Laden oder Anzeigen der Produktdaten:", error);
   }
 }
 
-// Produktübersicht bewusst reduziert rendern
+// Produktübersicht bewusst reduziert anzeigen
 function renderProductOverview(productList) {
   if (!productGrid) {
     return;
   }
 
   productGrid.innerHTML = "";
+
+  if (!productList || productList.length === 0) {
+    productGrid.innerHTML = `
+      <div class="products-error">
+        <h3>Keine Produkte gefunden.</h3>
+        <p>Für diese Kategorie sind aktuell keine Produkte hinterlegt.</p>
+      </div>
+    `;
+    return;
+  }
 
   productList.forEach((product) => {
     const productCard = document.createElement("article");
@@ -97,9 +108,15 @@ function renderProductOverview(productList) {
 
         <p class="product-teaser">${product.teaser}</p>
 
-        <a href="${product.reviewUrl}" class="product-cta">
-          Erfahrungsbericht lesen
-        </a>
+        <div class="product-card-actions">
+          <a href="${product.reviewUrl}" class="product-cta">
+            Erfahrung lesen
+          </a>
+
+          <a href="${product.detailUrl}" class="detail-secondary-link">
+            Details
+          </a>
+        </div>
       </div>
     `;
 
@@ -126,21 +143,49 @@ function renderProductDetail() {
         <h3>Produkt nicht gefunden.</h3>
         <p>
           Das gewünschte Produkt konnte nicht gefunden werden.
-          Bitte gehe zurück zur Produktübersicht.
+          Bitte gehe zurück zur Produktübersicht oder zu den Erfahrungsberichten.
         </p>
-        <a href="produkte.html" class="btn btn-primary">Zur Produktübersicht</a>
+        <div class="article-actions">
+          <a href="produkte.html" class="btn btn-primary">Zur Produktübersicht</a>
+          <a href="wissen.html" class="detail-secondary-link">Zu den Erfahrungsberichten</a>
+        </div>
       </div>
     `;
     return;
   }
 
+  const provider = selectedProduct.provider || "";
+  const affiliateUrl = selectedProduct.affiliateUrl || "#";
+
+  const isIherbProduct =
+    provider.toLowerCase().includes("iherb") ||
+    affiliateUrl.toLowerCase().includes("iherb");
+
+  const providerButtonText = isIherbProduct
+    ? "Bei iHerb ansehen"
+    : "Zum Anbieter";
+
+  const providerHint = isIherbProduct
+    ? "Dieses Produkt ist für die spätere iHerb-Anbindung vorbereitet."
+    : "Dieses Produkt verweist auf den aktuell vorgesehenen Anbieter.";
+
   productDetail.innerHTML = `
-    <div class="product-detail-grid">
-      <div class="product-detail-image ${selectedProduct.imageClass}">
-        <span class="product-badge">${selectedProduct.badge}</span>
+    <div class="product-detail-layout">
+      <div class="product-detail-visual">
+        <div class="product-detail-image ${selectedProduct.imageClass}">
+          <span class="product-badge">${selectedProduct.badge}</span>
+        </div>
+
+        <div class="product-detail-side-note">
+          <strong>Robertos Einordnung</strong>
+          <p>
+            Dieses Produkt wird nicht isoliert betrachtet, sondern im Zusammenhang mit Alltag,
+            Routine und persönlicher Verträglichkeit eingeordnet.
+          </p>
+        </div>
       </div>
 
-      <div class="product-detail-card">
+      <div class="product-detail-card improved-detail-card">
         <span class="product-tag">${selectedProduct.categoryLabel}</span>
 
         <h2>${selectedProduct.name}</h2>
@@ -149,55 +194,71 @@ function renderProductDetail() {
           ${selectedProduct.description}
         </p>
 
-        <div class="product-detail-price">
-          <span>Preis</span>
-          <strong>${selectedProduct.price}</strong>
-        </div>
-
-        <div class="detail-meta-list">
-          <div class="product-meta">
+        <div class="detail-provider-box">
+          <div>
             <span>Anbieter</span>
             <strong>${selectedProduct.provider}</strong>
           </div>
 
-          <div class="product-meta">
-            <span>Bewertung</span>
-            <strong>★ ${selectedProduct.rating} / 5</strong>
+          <div>
+            <span>Preis</span>
+            <strong>${selectedProduct.price}</strong>
           </div>
+        </div>
 
+        <div class="detail-meta-list improved-meta-list">
           <div class="product-meta">
             <span>Fokus</span>
             <strong>${selectedProduct.focus}</strong>
           </div>
 
           <div class="product-meta">
-            <span>Typ</span>
+            <span>Produkttyp</span>
             <strong>${selectedProduct.type}</strong>
+          </div>
+
+          <div class="product-meta">
+            <span>Einordnung</span>
+            <strong>${selectedProduct.categoryLabel}</strong>
+          </div>
+
+          <div class="product-meta">
+            <span>Bewertung</span>
+            <strong>★ ${selectedProduct.rating} / 5</strong>
           </div>
         </div>
 
-        <div class="product-detail-actions">
+        <div class="product-detail-actions improved-detail-actions">
           <a href="${selectedProduct.affiliateUrl}" class="product-cta" target="_blank" rel="nofollow sponsored">
-            Zum Anbieter
+            ${providerButtonText}
           </a>
 
           <a href="${selectedProduct.reviewUrl}" class="detail-secondary-link">
-            Erfahrungsbericht nochmals lesen
+            Erfahrungsbericht lesen
+          </a>
+
+          <a href="wissen.html#routine" class="detail-secondary-link">
+            Routine ansehen
           </a>
         </div>
+
+        <p class="provider-hint">
+          ${providerHint}
+        </p>
       </div>
     </div>
 
-    <div class="product-detail-text">
+    <div class="product-detail-text improved-detail-text">
       <p class="eyebrow">Einordnung</p>
       <h2>Warum dieses Produkt interessant sein kann</h2>
       <p>${selectedProduct.detailText}</p>
 
       <div class="article-verdict">
-        <strong>Hinweis</strong>
+        <strong>Wichtiger Hinweis</strong>
         <p>
-          Der Preis und die Verfügbarkeit können sich beim Anbieter ändern. Die Angaben auf Jung Leben dienen
-          als Orientierung und werden später bei einer echten iHerb-/Affiliate-Anbindung dynamisch aktualisiert.
+          Die Angaben auf Jung Leben dienen der persönlichen Orientierung und ersetzen keine medizinische Beratung.
+          Preise, Verfügbarkeit und Produktinformationen können sich beim Anbieter ändern.
+          Prüfe vor dem Kauf immer die Angaben auf der Anbieterseite.
         </p>
       </div>
     </div>

@@ -4373,3 +4373,169 @@ img {
     padding: 22px;
   }
 }
+/* Produktdetailseite – Longevity Curator optimiert */
+
+.product-detail-hero {
+  background:
+    linear-gradient(135deg, rgba(18, 60, 47, 0.94), rgba(31, 122, 99, 0.74)),
+    url("img/jungle-hero.png");
+  background-size: cover;
+  background-position: center;
+}
+
+.product-detail-layout {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 36px;
+  align-items: stretch;
+  margin-bottom: 46px;
+}
+
+.product-detail-visual {
+  display: grid;
+  gap: 22px;
+}
+
+.product-detail-side-note {
+  padding: 28px;
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(135deg, rgba(18, 60, 47, 0.98), rgba(31, 122, 99, 0.94));
+  color: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+
+.product-detail-side-note strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--gold);
+  font-size: 0.88rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.product-detail-side-note p {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.improved-detail-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-provider-box {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin: 28px 0;
+}
+
+.detail-provider-box div {
+  padding: 22px;
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(135deg, rgba(232, 244, 239, 0.96), rgba(246, 231, 207, 0.62));
+  border: 1px solid rgba(31, 122, 99, 0.12);
+}
+
+.detail-provider-box span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.detail-provider-box strong {
+  color: var(--green-dark);
+  font-size: 1.18rem;
+}
+
+.improved-meta-list {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.improved-detail-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.provider-hint {
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.improved-detail-text {
+  max-width: 980px;
+}
+
+.detail-trust-section {
+  padding: 0 0 86px;
+  background: var(--cream);
+}
+
+.detail-trust-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.detail-trust-card {
+  min-height: 240px;
+  padding: 30px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow-card);
+}
+
+.detail-trust-card h3 {
+  margin-bottom: 10px;
+  color: var(--green-dark);
+  font-size: 1.22rem;
+}
+
+.detail-trust-card p {
+  color: var(--muted);
+  font-size: 0.98rem;
+}
+
+@media (max-width: 1020px) {
+  .product-detail-layout,
+  .detail-trust-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-provider-box {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .detail-trust-section {
+    padding-bottom: 62px;
+  }
+
+  .product-detail-side-note,
+  .detail-trust-card {
+    padding: 26px;
+    border-radius: 28px;
+  }
+}
+.product-card-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.product-card-actions .detail-secondary-link {
+  min-height: 46px;
+  font-size: 0.94rem;
+}
