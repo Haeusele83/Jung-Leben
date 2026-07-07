@@ -3284,3 +3284,1092 @@ img {
     width: 100%;
   }
 }
+/* Wissen-Seite Roberto / Longevity Curator */
+
+.lc-blog-intro-section {
+  padding: 86px 0;
+  background: var(--cream);
+}
+
+.lc-blog-intro-grid {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 70px;
+  align-items: start;
+}
+
+.lc-blog-intro-grid h2 {
+  color: var(--green-dark);
+  font-size: clamp(2.1rem, 3.2vw, 3.35rem);
+  line-height: 1.06;
+  letter-spacing: -0.05em;
+}
+
+.lc-blog-intro-grid p {
+  margin-bottom: 18px;
+  color: var(--muted);
+  font-size: 1.07rem;
+}
+
+.lc-featured-blogs-section {
+  padding: 86px 0;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(242, 191, 103, 0.13), transparent 25%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(232, 244, 239, 0.62));
+}
+
+.lc-blog-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 26px;
+}
+
+.lc-blog-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  transition: 0.24s ease;
+}
+
+.lc-blog-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 26px 56px rgba(18, 60, 47, 0.16);
+}
+
+.lc-blog-card-large {
+  grid-row: span 1;
+}
+
+.lc-blog-image {
+  min-height: 245px;
+  background-size: cover;
+  background-position: center;
+}
+
+.lc-blog-image-omega {
+  background:
+    linear-gradient(135deg, rgba(31, 122, 99, 0.62), rgba(31, 122, 99, 0.08)),
+    url("img/jungle-hero.png");
+}
+
+.lc-blog-image-deo {
+  background:
+    linear-gradient(135deg, rgba(242, 191, 103, 0.70), rgba(31, 122, 99, 0.12)),
+    url("img/jungle-hero.png");
+}
+
+.lc-blog-image-toothpaste {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.20), rgba(31, 122, 99, 0.72)),
+    url("img/jungle-hero.png");
+}
+
+.lc-blog-image-tryptophan {
+  background:
+    linear-gradient(135deg, rgba(11, 43, 33, 0.72), rgba(11, 43, 33, 0.08)),
+    url("img/jungle-hero.png");
+}
+
+.lc-blog-image-shilajit {
+  background:
+    linear-gradient(135deg, rgba(46, 169, 133, 0.76), rgba(11, 43, 33, 0.12)),
+    url("img/jungle-hero.png");
+}
+
+.lc-blog-content {
+  padding: 28px;
+}
+
+.lc-blog-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.lc-blog-meta span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: var(--green-soft);
+  color: var(--green-dark);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.lc-blog-content h3 {
+  margin-bottom: 12px;
+  color: var(--green-dark);
+  font-size: 1.42rem;
+  line-height: 1.18;
+}
+
+.lc-blog-content p {
+  margin-bottom: 22px;
+  color: var(--muted);
+}
+
+.lc-article {
+  position: relative;
+}
+
+.lc-article .article-lead {
+  font-size: 1.1rem;
+  color: var(--muted);
+}
+
+.lc-blog-cta-section {
+  padding: 86px 0;
+  background: var(--cream);
+}
+
+.lc-blog-cta-box {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 42px;
+  padding: 46px;
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(135deg, rgba(18, 60, 47, 0.98), rgba(31, 122, 99, 0.94));
+  color: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+
+.lc-blog-cta-box h2 {
+  margin-bottom: 14px;
+  color: var(--white);
+  font-size: clamp(2rem, 3vw, 3.2rem);
+  line-height: 1.08;
+  letter-spacing: -0.05em;
+}
+
+.lc-blog-cta-box .eyebrow {
+  color: var(--gold);
+}
+
+.lc-blog-cta-box p {
+  max-width: 760px;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+@media (max-width: 1020px) {
+  .lc-blog-intro-grid,
+  .lc-blog-cta-box {
+    grid-template-columns: 1fr;
+  }
+
+  .lc-blog-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lc-blog-cta-box .btn {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 760px) {
+  .lc-blog-intro-section,
+  .lc-featured-blogs-section,
+  .lc-blog-cta-section {
+    padding: 62px 0;
+  }
+
+  .lc-blog-content {
+    padding: 24px;
+  }
+
+  .lc-blog-cta-box {
+    padding: 30px;
+    border-radius: 28px;
+  }
+
+  .lc-blog-cta-box .btn {
+    width: 100%;
+  }
+}
+/* Über mich / Roberto / Longevity Curator */
+
+.roberto-intro-section {
+  padding: 86px 0;
+  background: var(--cream);
+}
+
+.roberto-intro-grid {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 70px;
+  align-items: center;
+}
+
+.roberto-profile-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.roberto-image-placeholder {
+  min-height: 360px;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(135deg, rgba(11, 43, 33, 0.62), rgba(31, 122, 99, 0.18)),
+    url("img/jungle-hero.png");
+  background-size: cover;
+  background-position: center;
+}
+
+.roberto-image-placeholder span {
+  width: 160px;
+  height: 160px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--green-dark);
+  font-size: 1.3rem;
+  font-weight: 900;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
+}
+
+.roberto-profile-content {
+  padding: 32px;
+}
+
+.profile-label {
+  display: inline-flex;
+  margin-bottom: 14px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--green-soft);
+  color: var(--green-dark);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+}
+
+.roberto-profile-content h2 {
+  margin-bottom: 8px;
+  color: var(--green-dark);
+  font-size: 2.4rem;
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.roberto-profile-content p {
+  margin-bottom: 24px;
+  color: var(--muted);
+}
+
+.profile-facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.profile-facts div {
+  padding: 16px 12px;
+  border-radius: 18px;
+  background: var(--green-soft);
+  text-align: center;
+}
+
+.profile-facts strong {
+  display: block;
+  color: var(--green-dark);
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.profile-facts span {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.roberto-intro-text h2,
+.roberto-mission-grid h2,
+.story-text h2 {
+  margin-bottom: 18px;
+  color: var(--green-dark);
+  font-size: clamp(2.1rem, 3.2vw, 3.35rem);
+  line-height: 1.06;
+  letter-spacing: -0.05em;
+}
+
+.roberto-intro-text p,
+.roberto-mission-grid p,
+.story-text p {
+  margin-bottom: 18px;
+  color: var(--muted);
+  font-size: 1.07rem;
+}
+
+/* Mission */
+
+.roberto-mission-section {
+  padding: 86px 0;
+  background:
+    radial-gradient(circle at 90% 12%, rgba(242, 191, 103, 0.13), transparent 25%),
+    linear-gradient(135deg, rgba(232, 244, 239, 0.96), rgba(246, 231, 207, 0.62));
+}
+
+.roberto-mission-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 70px;
+  align-items: center;
+}
+
+.mission-card-list {
+  display: grid;
+  gap: 18px;
+}
+
+.mission-card {
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 18px;
+  padding: 24px;
+  border: 1px solid rgba(31, 122, 99, 0.14);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.90);
+  box-shadow: var(--shadow-card);
+}
+
+.mission-card > span {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--green-main), var(--green-dark));
+  color: var(--white);
+  font-weight: 900;
+}
+
+.mission-card strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--green-dark);
+  font-size: 1.08rem;
+}
+
+.mission-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.98rem;
+}
+
+/* Story */
+
+.roberto-story-section {
+  padding: 86px 0;
+  background: var(--cream);
+}
+
+.roberto-story-grid {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 70px;
+  align-items: center;
+}
+
+.story-quote-card {
+  padding: 42px;
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(135deg, rgba(18, 60, 47, 0.98), rgba(31, 122, 99, 0.94));
+  box-shadow: var(--shadow-soft);
+}
+
+.story-quote-card p {
+  color: var(--white);
+  font-size: clamp(1.55rem, 2.5vw, 2.35rem);
+  line-height: 1.18;
+  letter-spacing: -0.04em;
+  font-weight: 900;
+}
+
+/* Werte */
+
+.roberto-values-section {
+  padding: 86px 0;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(46, 169, 133, 0.08), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(232, 244, 239, 0.66));
+}
+
+.roberto-values-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+}
+
+.roberto-value-card {
+  min-height: 260px;
+  padding: 30px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow-card);
+  transition: 0.24s ease;
+}
+
+.roberto-value-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 26px 56px rgba(18, 60, 47, 0.16);
+}
+
+.roberto-value-card h3 {
+  margin-bottom: 10px;
+  color: var(--green-dark);
+  font-size: 1.22rem;
+}
+
+.roberto-value-card p {
+  color: var(--muted);
+  font-size: 0.98rem;
+}
+
+/* Funnel CTA */
+
+.roberto-funnel-section {
+  padding: 86px 0;
+  background: var(--cream);
+}
+
+.roberto-funnel-box {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 42px;
+  padding: 46px;
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(135deg, rgba(18, 60, 47, 0.98), rgba(31, 122, 99, 0.94));
+  color: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+
+.roberto-funnel-box h2 {
+  margin-bottom: 14px;
+  color: var(--white);
+  font-size: clamp(2rem, 3vw, 3.2rem);
+  line-height: 1.08;
+  letter-spacing: -0.05em;
+}
+
+.roberto-funnel-box .eyebrow {
+  color: var(--gold);
+}
+
+.roberto-funnel-box p {
+  max-width: 800px;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+/* Responsive Über mich */
+
+@media (max-width: 1020px) {
+  .roberto-intro-grid,
+  .roberto-mission-grid,
+  .roberto-story-grid,
+  .roberto-funnel-box {
+    grid-template-columns: 1fr;
+  }
+
+  .roberto-values-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .roberto-funnel-box .btn {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 760px) {
+  .roberto-intro-section,
+  .roberto-mission-section,
+  .roberto-story-section,
+  .roberto-values-section,
+  .roberto-funnel-section {
+    padding: 62px 0;
+  }
+
+  .roberto-profile-content,
+  .story-quote-card,
+  .roberto-funnel-box {
+    padding: 30px;
+    border-radius: 28px;
+  }
+
+  .profile-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-card {
+    grid-template-columns: 1fr;
+  }
+
+  .roberto-values-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .roberto-funnel-box .btn {
+    width: 100%;
+  }
+}
+/* Roberto Profilbild */
+
+.roberto-image-placeholder {
+  display: none;
+}
+
+.roberto-image-wrap {
+  min-height: 420px;
+  overflow: hidden;
+  background: var(--green-soft);
+}
+
+.roberto-image-wrap img {
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+/* Mission Abschnitt optisch vereinheitlicht */
+
+.roberto-mission-section {
+  padding: 86px 0;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(46, 169, 133, 0.08), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(232, 244, 239, 0.66));
+}
+
+.roberto-mission-section .section-heading {
+  max-width: 850px;
+  margin-bottom: 44px;
+}
+
+.roberto-mission-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+}
+
+.roberto-mission-card {
+  min-height: 260px;
+  padding: 30px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow-card);
+  transition: 0.24s ease;
+}
+
+.roberto-mission-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 26px 56px rgba(18, 60, 47, 0.16);
+}
+
+.roberto-mission-card .mission-icon {
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 24px;
+  border-radius: 20px;
+  background: var(--green-soft);
+  font-size: 1.75rem;
+}
+
+.roberto-mission-card h3 {
+  margin-bottom: 10px;
+  color: var(--green-dark);
+  font-size: 1.22rem;
+  line-height: 1.18;
+}
+
+.roberto-mission-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.98rem;
+  line-height: 1.65;
+}
+
+@media (max-width: 1020px) {
+  .roberto-mission-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .roberto-mission-section {
+    padding: 62px 0;
+  }
+
+  .roberto-mission-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .roberto-mission-card {
+    min-height: auto;
+    padding: 28px;
+    border-radius: 28px;
+  }
+
+  .roberto-image-wrap,
+  .roberto-image-wrap img {
+    min-height: 340px;
+  }
+}
+/* Startseite final – Longevity Curator */
+
+.home-hero {
+  min-height: 820px;
+}
+
+.home-hero::before {
+  background-image: url("img/jungle-hero.png");
+  background-position: center 45%;
+  filter: saturate(1.22) contrast(1.08) brightness(1.02);
+  transform: scale(1.025);
+}
+
+.home-hero .hero-overlay {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(5, 30, 23, 0.94) 0%,
+      rgba(5, 30, 23, 0.82) 36%,
+      rgba(5, 30, 23, 0.42) 72%,
+      rgba(5, 30, 23, 0.12) 100%
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(5, 30, 23, 0.18),
+      rgba(5, 30, 23, 0.08) 48%,
+      rgba(251, 250, 247, 0.14) 100%
+    );
+}
+
+.home-hero-content {
+  grid-template-columns: minmax(0, 920px);
+  justify-content: start;
+}
+
+.home-hero .hero-text {
+  max-width: 920px;
+}
+
+.home-hero h1 {
+  max-width: 920px;
+  font-size: clamp(3.2rem, 5.8vw, 6.35rem);
+  line-height: 0.96;
+  letter-spacing: -0.075em;
+}
+
+.home-hero .hero-lead {
+  max-width: 760px;
+  color: rgba(255, 255, 255, 0.94);
+  font-weight: 600;
+}
+
+.home-hero .hero-benefits span {
+  color: var(--white);
+  background: rgba(7, 39, 30, 0.54);
+  border-color: rgba(255, 255, 255, 0.20);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
+}
+
+/* Roberto Teaser auf Startseite */
+
+.home-curator-section {
+  padding: 86px 0;
+  background: var(--cream);
+}
+
+.home-curator-grid {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 70px;
+  align-items: center;
+}
+
+.home-curator-image {
+  min-height: 520px;
+  border-radius: var(--radius-lg);
+  background-image:
+    linear-gradient(135deg, rgba(11, 43, 33, 0.26), rgba(31, 122, 99, 0.08)),
+    url("img/roberto.jpg"),
+    url("img/jungle-hero.png");
+  background-size: cover;
+  background-position: center;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border);
+}
+
+.home-curator-text h2 {
+  margin-bottom: 18px;
+  color: var(--green-dark);
+  font-size: clamp(2.1rem, 3.2vw, 3.35rem);
+  line-height: 1.06;
+  letter-spacing: -0.05em;
+}
+
+.home-curator-text p {
+  margin-bottom: 18px;
+  color: var(--muted);
+  font-size: 1.07rem;
+}
+
+.home-curator-text .btn {
+  margin-top: 10px;
+}
+
+/* Funnel CTA */
+
+.home-funnel-cta {
+  margin-top: 36px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 36px;
+  padding: 34px;
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(135deg, rgba(18, 60, 47, 0.98), rgba(31, 122, 99, 0.94));
+  color: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+
+.home-funnel-cta .eyebrow {
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+
+.home-funnel-cta h3 {
+  margin-bottom: 10px;
+  color: var(--white);
+  font-size: clamp(1.7rem, 2.6vw, 2.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+}
+
+.home-funnel-cta p {
+  max-width: 720px;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.home-funnel-cta .btn-primary {
+  white-space: nowrap;
+}
+
+@media (max-width: 1020px) {
+  .home-hero {
+    min-height: auto;
+    padding: 150px 0 105px;
+  }
+
+  .home-hero-content,
+  .home-curator-grid,
+  .home-funnel-cta {
+    grid-template-columns: 1fr;
+  }
+
+  .home-curator-image {
+    min-height: 440px;
+  }
+
+  .home-funnel-cta .btn {
+    justify-self: start;
+  }
+}
+
+@media (max-width: 760px) {
+  .home-hero {
+    padding: 135px 0 90px;
+  }
+
+  .home-hero h1 {
+    font-size: 3rem;
+  }
+
+  .home-curator-section {
+    padding: 62px 0;
+  }
+
+  .home-curator-image {
+    min-height: 360px;
+    border-radius: 28px;
+  }
+
+  .home-funnel-cta {
+    padding: 30px;
+    border-radius: 28px;
+  }
+
+  .home-funnel-cta .btn {
+    width: 100%;
+  }
+}
+/* Roberto Best-Case Routine */
+
+.routine-section {
+  padding: 86px 0;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(242, 191, 103, 0.13), transparent 25%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(232, 244, 239, 0.62));
+}
+
+.routine-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+}
+
+.routine-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  transition: 0.24s ease;
+}
+
+.routine-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 26px 56px rgba(18, 60, 47, 0.16);
+}
+
+.routine-card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 26px;
+  border-bottom: 1px solid var(--border);
+}
+
+.routine-icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  background: var(--green-soft);
+  font-size: 1.9rem;
+}
+
+.routine-card-header h3 {
+  margin: 0 0 4px;
+  color: var(--green-dark);
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+.routine-card-header span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.routine-morning {
+  background: linear-gradient(135deg, rgba(255, 221, 155, 0.32), rgba(255, 255, 255, 0.92));
+}
+
+.routine-midday {
+  background: linear-gradient(135deg, rgba(232, 244, 239, 0.86), rgba(255, 255, 255, 0.94));
+}
+
+.routine-evening {
+  background: linear-gradient(135deg, rgba(222, 229, 255, 0.44), rgba(255, 255, 255, 0.94));
+}
+
+.routine-list {
+  display: grid;
+  gap: 0;
+  padding: 10px 26px 26px;
+}
+
+.routine-item {
+  display: grid;
+  gap: 5px;
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(31, 122, 99, 0.10);
+  transition: 0.22s ease;
+}
+
+.routine-item:last-child {
+  border-bottom: none;
+}
+
+.routine-item:hover {
+  padding-left: 8px;
+}
+
+.routine-item strong {
+  color: var(--green-dark);
+  font-size: 1.02rem;
+}
+
+.routine-item span {
+  color: var(--muted);
+  font-size: 0.94rem;
+  line-height: 1.45;
+}
+
+.routine-item-muted {
+  opacity: 0.78;
+}
+
+.routine-note {
+  margin-top: 30px;
+  padding: 28px;
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(135deg, rgba(18, 60, 47, 0.98), rgba(31, 122, 99, 0.94));
+  color: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+
+.routine-note strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--gold);
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.routine-note p {
+  max-width: 980px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+@media (max-width: 1100px) {
+  .routine-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .routine-section {
+    padding: 62px 0;
+  }
+
+  .routine-card-header {
+    padding: 24px;
+  }
+
+  .routine-list {
+    padding: 8px 24px 24px;
+  }
+
+  .routine-note {
+    padding: 24px;
+    border-radius: 28px;
+  }
+}
+/* Startseite – Routine Preview */
+
+.home-routine-preview-section {
+  padding: 86px 0;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(46, 169, 133, 0.08), transparent 28%),
+    linear-gradient(135deg, rgba(232, 244, 239, 0.96), rgba(246, 231, 207, 0.62));
+}
+
+.home-routine-preview-grid {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  gap: 70px;
+  align-items: center;
+}
+
+.home-routine-preview-text h2 {
+  margin-bottom: 18px;
+  color: var(--green-dark);
+  font-size: clamp(2.1rem, 3.2vw, 3.35rem);
+  line-height: 1.06;
+  letter-spacing: -0.05em;
+}
+
+.home-routine-preview-text p {
+  margin-bottom: 18px;
+  color: var(--muted);
+  font-size: 1.07rem;
+}
+
+.home-routine-preview-text .btn {
+  margin-top: 10px;
+}
+
+.home-routine-preview-card {
+  display: grid;
+  gap: 18px;
+  padding: 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow-card);
+}
+
+.routine-preview-column {
+  display: grid;
+  gap: 8px;
+  padding: 24px;
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(135deg, rgba(232, 244, 239, 0.96), rgba(246, 231, 207, 0.62));
+  border: 1px solid rgba(31, 122, 99, 0.12);
+}
+
+.routine-preview-column span {
+  color: var(--green-main);
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.routine-preview-column strong {
+  color: var(--green-dark);
+  font-size: 1.08rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 1020px) {
+  .home-routine-preview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .home-routine-preview-section {
+    padding: 62px 0;
+  }
+
+  .home-routine-preview-card {
+    padding: 26px;
+    border-radius: 28px;
+  }
+
+  .routine-preview-column {
+    padding: 22px;
+  }
+}
