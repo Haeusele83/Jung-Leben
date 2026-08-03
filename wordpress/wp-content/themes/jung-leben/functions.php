@@ -23,6 +23,7 @@ function jung_leben_setup(): void
 
     add_theme_support('title-tag');
     add_theme_support('post-thumbnails');
+
     add_theme_support('custom-logo', [
         'height'      => 120,
         'width'       => 320,
@@ -65,23 +66,27 @@ function jung_leben_enqueue_assets(): void
         $theme->get('Version')
     );
 
-    $site_css_path = get_template_directory() . '/assets/css/site.css';
+    $site_css_path = get_template_directory()
+        . '/assets/css/site.css';
 
     if (file_exists($site_css_path)) {
         wp_enqueue_style(
             'jung-leben-site',
-            get_template_directory_uri() . '/assets/css/site.css',
+            get_template_directory_uri()
+                . '/assets/css/site.css',
             ['jung-leben-style'],
             (string) filemtime($site_css_path)
         );
     }
 
-    $site_js_path = get_template_directory() . '/assets/js/site.js';
+    $site_js_path = get_template_directory()
+        . '/assets/js/site.js';
 
     if (file_exists($site_js_path)) {
         wp_enqueue_script(
             'jung-leben-site',
-            get_template_directory_uri() . '/assets/js/site.js',
+            get_template_directory_uri()
+                . '/assets/js/site.js',
             [],
             (string) filemtime($site_js_path),
             true
