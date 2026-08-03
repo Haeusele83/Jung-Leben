@@ -318,3 +318,184 @@ if (newsletterForm) {
 
 // Produktdaten beim Laden der Seite abrufen
 loadProducts();
+// =========================================================
+// Robertos Reise und Erfahrungen – Slider
+// =========================================================
+
+(() => {
+  const sliders = document.querySelectorAll("[data-journey-slider]");
+
+  if (!sliders.length) {
+    return;
+  }
+
+  sliders.forEach((slider) => {
+    const slides = Array.from(
+      slider.querySelectorAll("[data-journey-slide]")
+    );
+
+    const dots = Array.from(
+      slider.querySelectorAll("[data-journey-dot]")
+    );
+
+    const previousButton = slider.querySelector(
+      "[data-journey-prev]"
+    );
+
+    const nextButton = slider.querySelector(
+      "[data-journey-next]"
+    );
+
+    const currentDisplay = slider.querySelector(
+      "[data-journey-current]"
+    );
+
+    if (slides.length < 2) {
+      return;
+    }
+
+    const changeInterval = 7000;
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    let currentIndex = 0;
+    let intervalId = null;
+
+    /**
+     * Bestimmten Slide anzeigen.
+     *
+     * @param {number} requestedIndex
+     */
+    const showSlide = (requestedIndex) => {
+      currentIndex =
+        (requestedIndex + slides.length) % slides.length;
+
+      slides.forEach((slide, index) => {
+        const isActive = index === currentIndex;
+
+        slide.classList.toggle("is-active", isActive);
+        slide.setAttribute(
+          "aria-hidden",
+          String(!isActive)
+        );
+      });
+
+      dots.forEach((dot, index) => {
+        const isActive = index === currentIndex;
+
+        dot.classList.toggle("is-active", isActive);
+        dot.setAttribute(
+          "aria-current",
+          String(isActive)
+        );
+      });
+
+      if (currentDisplay) {
+        currentDisplay.textContent = String(
+          currentIndex + 1
+        );
+      }
+    };
+
+    /**
+     * Automatischen Wechsel stoppen.
+     */
+    const stopAutomaticChange = () => {
+      if (intervalId !== null) {
+        window.clearInterval(intervalId);
+        intervalId = null;
+      }
+    };
+
+    /**
+     * Automatischen Wechsel starten.
+     */
+    const startAutomaticChange = () => {
+      stopAutomaticChange();
+
+      if (prefersReducedMotion) {
+        return;
+      }
+
+      intervalId = window.setInterval(() => {
+        showSlide(currentIndex + 1);
+      }, changeInterval);
+    };
+
+    /**
+     * Nach manueller Bedienung neu starten.
+     */
+    const restartAutomaticChange = () => {
+      stopAutomaticChange();
+      startAutomaticChange();
+    };
+
+    previousButton?.addEventListener("click", () => {
+      showSlide(currentIndex - 1);
+      restartAutomaticChange();
+    });
+
+    nextButton?.addEventListener("click", () => {
+      showSlide(currentIndex + 1);
+      restartAutomaticChange();
+    });
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener("click", () => {
+        showSlide(index);
+        restartAutomaticChange();
+      });
+    });
+
+    slider.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        showSlide(currentIndex - 1);
+        restartAutomaticChange();
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        showSlide(currentIndex + 1);
+        restartAutomaticChange();
+      }
+    });
+
+    slider.addEventListener(
+      "mouseenter",
+      stopAutomaticChange
+    );
+
+    slider.addEventListener(
+      "mouseleave",
+      startAutomaticChange
+    );
+
+    slider.addEventListener(
+      "focusin",
+      stopAutomaticChange
+    );
+
+    slider.addEventListener("focusout", (event) => {
+      if (!slider.contains(event.relatedTarget)) {
+        startAutomaticChange();
+      }
+    });
+
+    document.addEventListener(
+      "visibilitychange",
+      () => {
+        if (document.hidden) {
+          stopAutomaticChange();
+        } else {
+          startAutomaticChange();
+        }
+      }
+    );
+
+    showSlide(0);
+    startAutomaticChange();
+  });
+})();
