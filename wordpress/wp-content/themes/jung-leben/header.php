@@ -6,6 +6,12 @@
  */
 
 declare(strict_types=1);
+
+$theme_logo_path = get_template_directory()
+    . '/assets/images/logo-jung-leben.png';
+
+$theme_logo_url = get_template_directory_uri()
+    . '/assets/images/logo-jung-leben.png';
 ?>
 <!doctype html>
 <html <?php language_attributes(); ?>>
@@ -26,20 +32,41 @@ declare(strict_types=1);
 <header class="site-header">
     <div class="container header-content">
 
-        <a
-            href="<?php echo esc_url(home_url('/')); ?>"
-            class="logo"
-            aria-label="<?php esc_attr_e(
-                'Zur Startseite von Jung Leben',
-                'jung-leben'
-            ); ?>"
-        >
-            <span class="logo-icon" aria-hidden="true">JL</span>
+        <div class="site-branding">
+            <?php if (has_custom_logo()) : ?>
 
-            <span class="logo-text">
-                <?php echo esc_html(get_bloginfo('name')); ?>
-            </span>
-        </a>
+                <?php the_custom_logo(); ?>
+
+            <?php elseif (file_exists($theme_logo_path)) : ?>
+
+                <a
+                    class="site-logo-link"
+                    href="<?php echo esc_url(home_url('/')); ?>"
+                    aria-label="<?php esc_attr_e(
+                        'Zur Startseite von Jung Leben',
+                        'jung-leben'
+                    ); ?>"
+                >
+                    <img
+                        class="site-logo-image"
+                        src="<?php echo esc_url($theme_logo_url); ?>"
+                        alt="<?php echo esc_attr(
+                            get_bloginfo('name')
+                        ); ?>"
+                    >
+                </a>
+
+            <?php else : ?>
+
+                <a
+                    class="site-title-link"
+                    href="<?php echo esc_url(home_url('/')); ?>"
+                >
+                    <?php echo esc_html(get_bloginfo('name')); ?>
+                </a>
+
+            <?php endif; ?>
+        </div>
 
         <nav
             class="main-nav"
@@ -71,7 +98,9 @@ declare(strict_types=1);
             aria-controls="mainNav"
             aria-expanded="false"
         >
-            <span aria-hidden="true">☰</span>
+            <span class="nav-toggle__line"></span>
+            <span class="nav-toggle__line"></span>
+            <span class="nav-toggle__line"></span>
         </button>
 
     </div>
