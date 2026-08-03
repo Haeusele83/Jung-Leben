@@ -35,6 +35,15 @@ $routinen_page = get_page_by_path('routinen');
 $routinen_url = $routinen_page instanceof WP_Post
     ? get_permalink($routinen_page)
     : home_url('/routinen/');
+    
+/**
+ * Kontaktseite ermitteln.
+ */
+$kontakt_page = get_page_by_path('kontakt');
+
+$kontakt_url = $kontakt_page instanceof WP_Post
+    ? get_permalink($kontakt_page)
+    : home_url('/kontakt/');
 
 /**
  * Seite «Über mich» ermitteln.
@@ -843,6 +852,115 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                         ?>
                     </p>
                 </aside>
+
+            </div>
+
+        </div>
+    </section>
+    <!-- Community und Kontakt -->
+    <section
+        class="home-community-section"
+        aria-labelledby="community-title"
+    >
+        <div class="container">
+
+            <div class="home-community-card">
+
+                <div class="home-community-content">
+
+                    <p class="eyebrow">
+                        <?php
+                        esc_html_e(
+                            'Du bist dran',
+                            'jung-leben'
+                        );
+                        ?>
+                    </p>
+
+                    <h2 id="community-title">
+                        <?php
+                        esc_html_e(
+                            'Hast du ein Anliegen oder eine Erfahrung, die du teilen möchtest?',
+                            'jung-leben'
+                        );
+                        ?>
+                    </h2>
+
+                    <p class="home-community-lead">
+                        <?php
+                        esc_html_e(
+                            'Jung Leben lebt nicht nur von Empfehlungen und Informationen, sondern auch vom persönlichen Austausch. Deine Erfahrungen, Fragen und Beobachtungen können wertvolle Impulse liefern.',
+                            'jung-leben'
+                        );
+                        ?>
+                    </p>
+
+                    <p>
+                        <?php
+                        esc_html_e(
+                            'Erzähl uns, was dich beschäftigt, welche Routinen dir helfen oder welche Themen du auf Jung Leben gerne wiederfinden möchtest.',
+                            'jung-leben'
+                        );
+                        ?>
+                    </p>
+
+                </div>
+
+                <div class="home-community-action">
+
+                    <div
+                        class="home-community-symbol"
+                        aria-hidden="true"
+                    >
+                        <span class="home-community-symbol__center">
+                            JL
+                        </span>
+
+                        <span
+                            class="home-community-symbol__point
+                            home-community-symbol__point--one"
+                        ></span>
+
+                        <span
+                            class="home-community-symbol__point
+                            home-community-symbol__point--two"
+                        ></span>
+
+                        <span
+                            class="home-community-symbol__point
+                            home-community-symbol__point--three"
+                        ></span>
+
+                        <span
+                            class="home-community-symbol__point
+                            home-community-symbol__point--four"
+                        ></span>
+                    </div>
+
+                    <a
+                        href="<?php echo esc_url($kontakt_url); ?>"
+                        class="btn btn-primary home-community-button"
+                    >
+                        <?php
+                        esc_html_e(
+                            'Kontaktiere uns',
+                            'jung-leben'
+                        );
+                        ?>
+
+                        <span aria-hidden="true">→</span>
+                    </a>
+
+                    <p class="home-community-note">
+                        <?php
+                        esc_html_e(
+                            'Wir freuen uns auf deine Nachricht.',
+                            'jung-leben'
+                        );
+                        ?>
+                    </p>
+
+                </div>
 
             </div>
 

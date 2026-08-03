@@ -5767,3 +5767,247 @@ img {
     grid-template-columns: 1fr;
   }
 }
+/* =========================================================
+   Jung Leben – Community und Kontakt
+   ========================================================= */
+
+.home-community-section {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(5rem, 9vw, 8rem) 0;
+  background: #ffffff;
+}
+
+.home-community-section::before {
+  position: absolute;
+  top: -180px;
+  right: -140px;
+  width: 430px;
+  height: 430px;
+  background: rgba(210, 244, 207, 0.55);
+  border-radius: 50%;
+  content: "";
+}
+
+.home-community-card {
+  position: relative;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.35fr)
+    minmax(260px, 0.65fr);
+  align-items: center;
+  gap: clamp(2.5rem, 6vw, 6rem);
+  overflow: hidden;
+  padding: clamp(2.5rem, 6vw, 5.5rem);
+  background:
+    radial-gradient(
+      circle at 90% 15%,
+      rgba(245, 207, 104, 0.2),
+      transparent 32%
+    ),
+    linear-gradient(
+      135deg,
+      #d9f8d5 0%,
+      #edf9e9 58%,
+      #f8f5ea 100%
+    );
+  border: 1px solid rgba(7, 63, 29, 0.08);
+  border-radius: 30px;
+  box-shadow: 0 26px 60px rgba(7, 63, 29, 0.11);
+}
+
+/* Textbereich */
+
+.home-community-content {
+  position: relative;
+  z-index: 2;
+  max-width: 720px;
+}
+
+.home-community-content .eyebrow {
+  margin: 0 0 1rem;
+  color: #0a5227;
+}
+
+.home-community-content h2 {
+  max-width: 16ch;
+  margin: 0;
+  color: #073f1d;
+  font-size: clamp(2.7rem, 5.5vw, 5rem);
+  font-weight: 750;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.home-community-content p {
+  max-width: 680px;
+  margin: 1.25rem 0 0;
+  color: #52655a;
+  font-size: 1.04rem;
+  line-height: 1.72;
+}
+
+.home-community-content .home-community-lead {
+  color: #294433;
+  font-size: clamp(1.05rem, 1.5vw, 1.18rem);
+  font-weight: 600;
+}
+
+/* Rechte Aktionsseite */
+
+.home-community-action {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 320px;
+  text-align: center;
+}
+
+/* Symbol für Austausch und Community */
+
+.home-community-symbol {
+  position: relative;
+  width: 155px;
+  height: 155px;
+  margin-bottom: 2rem;
+}
+
+.home-community-symbol::before,
+.home-community-symbol::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 115px;
+  height: 2px;
+  background: rgba(7, 63, 29, 0.28);
+  content: "";
+  transform-origin: center;
+}
+
+.home-community-symbol::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.home-community-symbol::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.home-community-symbol__center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 74px;
+  height: 74px;
+  background: #073f1d;
+  color: #ffffff;
+  border: 7px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  box-shadow: 0 15px 30px rgba(7, 63, 29, 0.2);
+  font-size: 1rem;
+  font-weight: 800;
+  transform: translate(-50%, -50%);
+}
+
+.home-community-symbol__point {
+  position: absolute;
+  z-index: 2;
+  width: 26px;
+  height: 26px;
+  background: #f5cf68;
+  border: 5px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 8px 18px rgba(7, 63, 29, 0.13);
+}
+
+.home-community-symbol__point--one {
+  top: 5px;
+  left: 5px;
+}
+
+.home-community-symbol__point--two {
+  top: 5px;
+  right: 5px;
+}
+
+.home-community-symbol__point--three {
+  right: 5px;
+  bottom: 5px;
+}
+
+.home-community-symbol__point--four {
+  bottom: 5px;
+  left: 5px;
+}
+
+/* Kontaktbutton */
+
+.home-community-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  min-width: 190px;
+}
+
+.home-community-button span {
+  font-size: 1.15rem;
+  transition: transform 180ms ease;
+}
+
+.home-community-button:hover span {
+  transform: translateX(4px);
+}
+
+.home-community-note {
+  margin: 0.9rem 0 0;
+  color: #597062;
+  font-size: 0.85rem;
+}
+
+/* Tablet */
+
+@media (max-width: 950px) {
+  .home-community-card {
+    grid-template-columns: 1fr;
+  }
+
+  .home-community-action {
+    align-items: flex-start;
+    min-height: auto;
+    text-align: left;
+  }
+
+  .home-community-symbol {
+    display: none;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .home-community-section {
+    padding: 4.5rem 0;
+  }
+
+  .home-community-card {
+    gap: 2rem;
+    padding: 2.4rem 1.4rem;
+    border-radius: 22px;
+  }
+
+  .home-community-content h2 {
+    max-width: none;
+    font-size: clamp(2.5rem, 12vw, 3.6rem);
+  }
+
+  .home-community-button {
+    width: 100%;
+  }
+}
