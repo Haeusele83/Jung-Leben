@@ -375,7 +375,7 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
         </div>
     </section>
 
-        <!-- Robertos Reise und Erfahrungen -->
+    <!-- Robertos Reise und Erfahrungen -->
     <section
         class="home-journey-section"
         aria-labelledby="journey-title"
@@ -383,10 +383,11 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
         <div class="container home-journey-layout">
 
             <header class="home-journey-heading">
+
                 <p class="eyebrow">
                     <?php
                     esc_html_e(
-                        'Von Erfahrungen und Empfehlungen',
+                        'Erfahrungen und Empfehlungen',
                         'jung-leben'
                     );
                     ?>
@@ -395,13 +396,13 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                 <h2 id="journey-title">
                     <?php
                     esc_html_e(
-                        "Roberto's Reise und Erfahrungen",
+                        'Robertos Reise und Erfahrungen',
                         'jung-leben'
                     );
                     ?>
                 </h2>
 
-                <p>
+                <p class="home-journey-heading__text">
                     <?php
                     esc_html_e(
                         'Persönliche Beobachtungen, bewusste Routinen und ehrliche Einordnungen bilden die Grundlage von Jung Leben.',
@@ -421,6 +422,7 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                     );
                     ?>
                 </a>
+
             </header>
 
             <div
@@ -432,7 +434,7 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                     'jung-leben'
                 ); ?>"
                 aria-label="<?php esc_attr_e(
-                    "Roberto's Reise und Erfahrungen",
+                    'Robertos Reise und Erfahrungen',
                     'jung-leben'
                 ); ?>"
             >
@@ -444,14 +446,8 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                         data-journey-slide
                         aria-hidden="false"
                     >
-                        <div
-                            class="journey-slide__number"
-                            aria-hidden="true"
-                        >
-                            01
-                        </div>
-
                         <div class="journey-slide__content">
+
                             <p class="journey-slide__label">
                                 <?php
                                 esc_html_e(
@@ -470,7 +466,7 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                                 ?>
                             </h3>
 
-                            <p>
+                            <p class="journey-slide__text">
                                 <?php
                                 esc_html_e(
                                     'Jung Leben entstand aus der persönlichen Auseinandersetzung mit Vitalität, Wohlbefinden und der Frage, welche Entscheidungen langfristig wirklich guttun.',
@@ -487,6 +483,7 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                                 );
                                 ?>
                             </span>
+
                         </div>
                     </article>
 
@@ -496,14 +493,8 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                         data-journey-slide
                         aria-hidden="true"
                     >
-                        <div
-                            class="journey-slide__number"
-                            aria-hidden="true"
-                        >
-                            02
-                        </div>
-
                         <div class="journey-slide__content">
+
                             <p class="journey-slide__label">
                                 <?php
                                 esc_html_e(
@@ -522,7 +513,7 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                                 ?>
                             </h3>
 
-                            <p>
+                            <p class="journey-slide__text">
                                 <?php
                                 esc_html_e(
                                     'Produkte und Routinen werden nicht isoliert betrachtet. Entscheidend ist, wie verständlich sie sind, wie sie sich in den Alltag integrieren lassen und ob sie zur persönlichen Situation passen.',
@@ -539,6 +530,7 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                                 );
                                 ?>
                             </span>
+
                         </div>
                     </article>
 
@@ -548,14 +540,8 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                         data-journey-slide
                         aria-hidden="true"
                     >
-                        <div
-                            class="journey-slide__number"
-                            aria-hidden="true"
-                        >
-                            03
-                        </div>
-
                         <div class="journey-slide__content">
+
                             <p class="journey-slide__label">
                                 <?php
                                 esc_html_e(
@@ -574,7 +560,7 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                                 ?>
                             </h3>
 
-                            <p>
+                            <p class="journey-slide__text">
                                 <?php
                                 esc_html_e(
                                     'Erfahrungen werden offen eingeordnet und mit ergänzenden Informationen verbunden. Jung Leben möchte Möglichkeiten aufzeigen, ohne die eine richtige Lösung vorzuschreiben.',
@@ -591,6 +577,7 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                                 );
                                 ?>
                             </span>
+
                         </div>
                     </article>
 
@@ -599,6 +586,7 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                 <div class="journey-slider__footer">
 
                     <div class="journey-slider__controls">
+
                         <button
                             class="journey-slider__arrow"
                             type="button"
@@ -613,7 +601,6 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
 
                         <div
                             class="journey-slider__dots"
-                            role="tablist"
                             aria-label="<?php esc_attr_e(
                                 'Erfahrung auswählen',
                                 'jung-leben'
@@ -664,23 +651,15 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                         >
                             <span aria-hidden="true">→</span>
                         </button>
+
                     </div>
 
                     <p
                         class="journey-slider__status"
                         aria-live="polite"
-                        aria-atomic="true"
                     >
                         <span data-journey-current>1</span>
                         <span aria-hidden="true"> / </span>
-                        <span class="screen-reader-text">
-                            <?php
-                            esc_html_e(
-                                'von',
-                                'jung-leben'
-                            );
-                            ?>
-                        </span>
                         <span>3</span>
                     </p>
 
