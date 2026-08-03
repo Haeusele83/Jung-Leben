@@ -212,6 +212,78 @@ if ($hero_background_url !== '') {
         esc_url_raw($hero_background_url)
     );
 }
+/**
+ * Inhalte des Bereichs «Über Jung Leben» laden.
+ */
+$about_eyebrow = $get_home_text(
+    'jl_home_about_eyebrow',
+    'Über Jung Leben'
+);
+
+$about_title = $get_home_text(
+    'jl_home_about_title',
+    'Praktische Erfahrung statt Produkt-Blabla.'
+);
+
+$about_text_one = $get_home_text(
+    'jl_home_about_text_one',
+    'Jung Leben ist aus Robertos persönlicher Auseinandersetzung mit Gesundheit, Vitalität und Langlebigkeit entstanden. Im Mittelpunkt stehen Erfahrungen aus dem Alltag – ehrlich, nachvollziehbar und ohne leere Versprechen.'
+);
+
+$about_text_two = $get_home_text(
+    'jl_home_about_text_two',
+    'Die Plattform verbindet persönliche Beobachtungen mit sorgfältig ausgewählten Produkten, Routinen und fundierten Informationen. Ziel ist nicht, die eine perfekte Lösung zu präsentieren, sondern Orientierung für bewusste Entscheidungen zu geben.'
+);
+
+$about_button_text = $get_home_text(
+    'jl_home_about_button_text',
+    'Mehr über Roberto'
+);
+
+$about_button_url = $get_home_url(
+    'jl_home_about_button_url',
+    $ueber_mich_url
+);
+
+/**
+ * Optionales Bild für den Bereich «Über Jung Leben».
+ */
+$about_image = function_exists('get_field')
+    ? get_field(
+        'jl_home_about_image',
+        $front_page_id
+    )
+    : null;
+
+$about_image_url = '';
+
+if (
+    is_array($about_image)
+    && isset($about_image['url'])
+    && is_string($about_image['url'])
+) {
+    $about_image_url = $about_image['url'];
+} elseif (is_int($about_image)) {
+    $attachment_url = wp_get_attachment_image_url(
+        $about_image,
+        'full'
+    );
+
+    if (is_string($attachment_url)) {
+        $about_image_url = $attachment_url;
+    }
+} elseif (is_string($about_image)) {
+    $about_image_url = trim($about_image);
+}
+
+$about_image_style = '';
+
+if ($about_image_url !== '') {
+    $about_image_style = sprintf(
+        'background-image: url("%s");',
+        esc_url_raw($about_image_url)
+    );
+}
 ?>
 
 <main id="main-content">
@@ -302,64 +374,57 @@ if ($hero_background_url !== '') {
         </div>
     </section>
 
-    <!-- Über Jung Leben -->
+        <!-- Über Jung Leben -->
     <section class="home-curator-section">
         <div class="container home-curator-grid">
 
             <div
                 class="home-curator-image"
-                aria-hidden="true"
+                role="img"
+                aria-label="<?php echo esc_attr($about_title); ?>"
+                <?php if ($about_image_style !== '') : ?>
+                    style="<?php echo esc_attr(
+                        $about_image_style
+                    ); ?>"
+                <?php endif; ?>
             ></div>
 
             <div class="home-curator-text">
 
-                <p class="eyebrow">
-                    <?php
-                    esc_html_e(
-                        'Über Jung Leben',
-                        'jung-leben'
-                    );
-                    ?>
-                </p>
+                <?php if ($about_eyebrow !== '') : ?>
+                    <p class="eyebrow">
+                        <?php echo esc_html($about_eyebrow); ?>
+                    </p>
+                <?php endif; ?>
 
                 <h2>
-                    <?php
-                    esc_html_e(
-                        'Praktische Erfahrung statt Produkt-Blabla.',
-                        'jung-leben'
-                    );
-                    ?>
+                    <?php echo esc_html($about_title); ?>
                 </h2>
 
-                <p>
-                    <?php
-                    esc_html_e(
-                        'Jung Leben ist aus Robertos persönlicher Auseinandersetzung mit Gesundheit, Vitalität und Langlebigkeit entstanden. Im Mittelpunkt stehen Erfahrungen aus dem Alltag – ehrlich, nachvollziehbar und ohne leere Versprechen.',
-                        'jung-leben'
-                    );
-                    ?>
-                </p>
+                <?php if ($about_text_one !== '') : ?>
+                    <p>
+                        <?php echo esc_html($about_text_one); ?>
+                    </p>
+                <?php endif; ?>
 
-                <p>
-                    <?php
-                    esc_html_e(
-                        'Die Plattform verbindet persönliche Beobachtungen mit sorgfältig ausgewählten Produkten, Routinen und fundierten Informationen. Ziel ist nicht, die eine perfekte Lösung zu präsentieren, sondern Orientierung für bewusste Entscheidungen zu geben.',
-                        'jung-leben'
-                    );
-                    ?>
-                </p>
+                <?php if ($about_text_two !== '') : ?>
+                    <p>
+                        <?php echo esc_html($about_text_two); ?>
+                    </p>
+                <?php endif; ?>
 
-                <a
-                    href="<?php echo esc_url($ueber_mich_url); ?>"
-                    class="btn btn-primary"
-                >
-                    <?php
-                    esc_html_e(
-                        'Mehr über Roberto',
-                        'jung-leben'
-                    );
-                    ?>
-                </a>
+                <?php if ($about_button_text !== '') : ?>
+                    <a
+                        href="<?php echo esc_url(
+                            $about_button_url
+                        ); ?>"
+                        class="btn btn-primary"
+                    >
+                        <?php echo esc_html(
+                            $about_button_text
+                        ); ?>
+                    </a>
+                <?php endif; ?>
 
             </div>
         </div>
