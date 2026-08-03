@@ -828,6 +828,100 @@ function jung_leben_register_homepage_fields(): void
                 'new_lines'     => '',
                 'required'      => 1,
             ],
+                        [
+                'key'       => 'field_jl_home_community_tab',
+                'label'     => __('Kontaktbereich', 'jung-leben'),
+                'name'      => '',
+                'type'      => 'tab',
+                'placement' => 'top',
+            ],
+            [
+                'key'           => 'field_jl_home_community_enabled',
+                'label'         => __('Kontaktbereich anzeigen', 'jung-leben'),
+                'name'          => 'jl_home_community_enabled',
+                'type'          => 'true_false',
+                'default_value' => 1,
+                'ui'            => 1,
+                'ui_on_text'    => __('Ja', 'jung-leben'),
+                'ui_off_text'   => __('Nein', 'jung-leben'),
+            ],
+            [
+                'key'           => 'field_jl_home_community_eyebrow',
+                'label'         => __('Kurze Einleitung', 'jung-leben'),
+                'name'          => 'jl_home_community_eyebrow',
+                'type'          => 'text',
+                'default_value' => 'Du bist dran',
+                'maxlength'     => 100,
+            ],
+            [
+                'key'           => 'field_jl_home_community_title',
+                'label'         => __('Überschrift', 'jung-leben'),
+                'name'          => 'jl_home_community_title',
+                'type'          => 'textarea',
+                'default_value' =>
+                    'Hast du ein Anliegen oder eine Erfahrung, die du teilen möchtest?',
+                'rows'          => 3,
+                'new_lines'     => '',
+                'required'      => 1,
+            ],
+            [
+                'key'           => 'field_jl_home_community_lead',
+                'label'         => __('Einleitungstext', 'jung-leben'),
+                'name'          => 'jl_home_community_lead',
+                'type'          => 'textarea',
+                'default_value' =>
+                    'Jung Leben lebt nicht nur von Empfehlungen und Informationen, sondern auch vom persönlichen Austausch. Deine Erfahrungen, Fragen und Beobachtungen können wertvolle Impulse liefern.',
+                'rows'          => 5,
+                'new_lines'     => '',
+            ],
+            [
+                'key'           => 'field_jl_home_community_text',
+                'label'         => __('Zweiter Textabschnitt', 'jung-leben'),
+                'name'          => 'jl_home_community_text',
+                'type'          => 'textarea',
+                'default_value' =>
+                    'Erzähl uns, was dich beschäftigt, welche Routinen dir helfen oder welche Themen du auf Jung Leben gerne wiederfinden möchtest.',
+                'rows'          => 4,
+                'new_lines'     => '',
+            ],
+            [
+                'key'           => 'field_jl_home_community_symbol',
+                'label'         => __('Text im Symbol', 'jung-leben'),
+                'name'          => 'jl_home_community_symbol',
+                'type'          => 'text',
+                'instructions'  => __(
+                    'Kurzer Text im grafischen Symbol, zum Beispiel JL.',
+                    'jung-leben'
+                ),
+                'default_value' => 'JL',
+                'maxlength'     => 4,
+            ],
+            [
+                'key'           => 'field_jl_home_community_button_text',
+                'label'         => __('Button-Text', 'jung-leben'),
+                'name'          => 'jl_home_community_button_text',
+                'type'          => 'text',
+                'default_value' => 'Kontaktiere uns',
+                'maxlength'     => 60,
+            ],
+            [
+                'key'          => 'field_jl_home_community_button_url',
+                'label'        => __('Button-Ziel', 'jung-leben'),
+                'name'         => 'jl_home_community_button_url',
+                'type'         => 'url',
+                'instructions' => __(
+                    'Leer lassen, um automatisch auf die Kontaktseite zu verlinken.',
+                    'jung-leben'
+                ),
+            ],
+            [
+                'key'           => 'field_jl_home_community_note',
+                'label'         => __('Hinweis unter dem Button', 'jung-leben'),
+                'name'          => 'jl_home_community_note',
+                'type'          => 'text',
+                'default_value' => 'Wir freuen uns auf deine Nachricht.',
+                'maxlength'     => 120,
+            ],
         ],
 
         'location' => [

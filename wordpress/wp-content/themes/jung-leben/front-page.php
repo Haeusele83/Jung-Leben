@@ -586,6 +586,52 @@ $routine_items = array_values(
     )
 );
 $routine_item_count = count($routine_items);
+/**
+ * Inhalte des Community- und Kontaktbereichs laden.
+ */
+$community_enabled = $get_home_bool(
+    'jl_home_community_enabled'
+);
+
+$community_eyebrow = $get_home_text(
+    'jl_home_community_eyebrow',
+    'Du bist dran'
+);
+
+$community_title = $get_home_text(
+    'jl_home_community_title',
+    'Hast du ein Anliegen oder eine Erfahrung, die du teilen möchtest?'
+);
+
+$community_lead = $get_home_text(
+    'jl_home_community_lead',
+    'Jung Leben lebt nicht nur von Empfehlungen und Informationen, sondern auch vom persönlichen Austausch. Deine Erfahrungen, Fragen und Beobachtungen können wertvolle Impulse liefern.'
+);
+
+$community_text = $get_home_text(
+    'jl_home_community_text',
+    'Erzähl uns, was dich beschäftigt, welche Routinen dir helfen oder welche Themen du auf Jung Leben gerne wiederfinden möchtest.'
+);
+
+$community_symbol = $get_home_text(
+    'jl_home_community_symbol',
+    'JL'
+);
+
+$community_button_text = $get_home_text(
+    'jl_home_community_button_text',
+    'Kontaktiere uns'
+);
+
+$community_button_url = $get_home_url(
+    'jl_home_community_button_url',
+    $kontakt_url
+);
+
+$community_note = $get_home_text(
+    'jl_home_community_note',
+    'Wir freuen uns auf deine Nachricht.'
+);
 ?>
 
 <main id="main-content">
@@ -1234,117 +1280,118 @@ $routine_item_count = count($routine_items);
         </section>
 
     <?php endif; ?>
-    <!-- Community und Kontakt -->
-    <section
-        class="home-community-section"
-        aria-labelledby="community-title"
-    >
-        <div class="container">
+       <?php if ($community_enabled) : ?>
 
-            <div class="home-community-card">
+        <!-- Community und Kontakt -->
+        <section
+            class="home-community-section"
+            aria-labelledby="community-title"
+        >
+            <div class="container">
 
-                <div class="home-community-content">
+                <div class="home-community-card">
 
-                    <p class="eyebrow">
-                        <?php
-                        esc_html_e(
-                            'Du bist dran',
-                            'jung-leben'
-                        );
-                        ?>
-                    </p>
+                    <div class="home-community-content">
 
-                    <h2 id="community-title">
-                        <?php
-                        esc_html_e(
-                            'Hast du ein Anliegen oder eine Erfahrung, die du teilen möchtest?',
-                            'jung-leben'
-                        );
-                        ?>
-                    </h2>
+                        <?php if ($community_eyebrow !== '') : ?>
+                            <p class="eyebrow">
+                                <?php echo esc_html(
+                                    $community_eyebrow
+                                ); ?>
+                            </p>
+                        <?php endif; ?>
 
-                    <p class="home-community-lead">
-                        <?php
-                        esc_html_e(
-                            'Jung Leben lebt nicht nur von Empfehlungen und Informationen, sondern auch vom persönlichen Austausch. Deine Erfahrungen, Fragen und Beobachtungen können wertvolle Impulse liefern.',
-                            'jung-leben'
-                        );
-                        ?>
-                    </p>
+                        <h2 id="community-title">
+                            <?php echo esc_html(
+                                $community_title
+                            ); ?>
+                        </h2>
 
-                    <p>
-                        <?php
-                        esc_html_e(
-                            'Erzähl uns, was dich beschäftigt, welche Routinen dir helfen oder welche Themen du auf Jung Leben gerne wiederfinden möchtest.',
-                            'jung-leben'
-                        );
-                        ?>
-                    </p>
+                        <?php if ($community_lead !== '') : ?>
+                            <p class="home-community-lead">
+                                <?php echo esc_html(
+                                    $community_lead
+                                ); ?>
+                            </p>
+                        <?php endif; ?>
 
-                </div>
+                        <?php if ($community_text !== '') : ?>
+                            <p>
+                                <?php echo esc_html(
+                                    $community_text
+                                ); ?>
+                            </p>
+                        <?php endif; ?>
 
-                <div class="home-community-action">
-
-                    <div
-                        class="home-community-symbol"
-                        aria-hidden="true"
-                    >
-                        <span
-                            class="home-community-symbol__center"
-                        >
-                            JL
-                        </span>
-
-                        <span
-                            class="home-community-symbol__point
-                            home-community-symbol__point--one"
-                        ></span>
-
-                        <span
-                            class="home-community-symbol__point
-                            home-community-symbol__point--two"
-                        ></span>
-
-                        <span
-                            class="home-community-symbol__point
-                            home-community-symbol__point--three"
-                        ></span>
-
-                        <span
-                            class="home-community-symbol__point
-                            home-community-symbol__point--four"
-                        ></span>
                     </div>
 
-                    <a
-                        href="<?php echo esc_url($kontakt_url); ?>"
-                        class="btn btn-primary
-                        home-community-button"
-                    >
-                        <?php
-                        esc_html_e(
-                            'Kontaktiere uns',
-                            'jung-leben'
-                        );
-                        ?>
+                    <div class="home-community-action">
 
-                        <span aria-hidden="true">→</span>
-                    </a>
+                        <div
+                            class="home-community-symbol"
+                            aria-hidden="true"
+                        >
+                            <span
+                                class="home-community-symbol__center"
+                            >
+                                <?php echo esc_html(
+                                    $community_symbol
+                                ); ?>
+                            </span>
 
-                    <p class="home-community-note">
-                        <?php
-                        esc_html_e(
-                            'Wir freuen uns auf deine Nachricht.',
-                            'jung-leben'
-                        );
-                        ?>
-                    </p>
+                            <span
+                                class="home-community-symbol__point
+                                home-community-symbol__point--one"
+                            ></span>
+
+                            <span
+                                class="home-community-symbol__point
+                                home-community-symbol__point--two"
+                            ></span>
+
+                            <span
+                                class="home-community-symbol__point
+                                home-community-symbol__point--three"
+                            ></span>
+
+                            <span
+                                class="home-community-symbol__point
+                                home-community-symbol__point--four"
+                            ></span>
+                        </div>
+
+                        <?php if ($community_button_text !== '') : ?>
+                            <a
+                                href="<?php echo esc_url(
+                                    $community_button_url
+                                ); ?>"
+                                class="btn btn-primary
+                                home-community-button"
+                            >
+                                <?php echo esc_html(
+                                    $community_button_text
+                                ); ?>
+
+                                <span aria-hidden="true">→</span>
+                            </a>
+                        <?php endif; ?>
+
+                        <?php if ($community_note !== '') : ?>
+                            <p class="home-community-note">
+                                <?php echo esc_html(
+                                    $community_note
+                                ); ?>
+                            </p>
+                        <?php endif; ?>
+
+                    </div>
 
                 </div>
-            </div>
 
-        </div>
-    </section>
+            </div>
+        </section>
+
+    <?php endif; ?>
 
     <!-- Inhalte aus dem WordPress-Editor -->
     <?php while (have_posts()) : ?>
