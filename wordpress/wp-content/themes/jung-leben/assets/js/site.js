@@ -4,17 +4,28 @@ const mainNav = document.getElementById("mainNav");
 
 if (navToggle && mainNav) {
   navToggle.addEventListener("click", () => {
-    mainNav.classList.toggle("open");
+    const isOpen = mainNav.classList.toggle("open");
+
+    navToggle.setAttribute("aria-expanded", String(isOpen));
+    navToggle.setAttribute(
+      "aria-label",
+      isOpen ? "Navigation schliessen" : "Navigation öffnen"
+    );
   });
 }
 
-// Navigation schliessen, wenn ein Link geklickt wird
+// Navigation schliessen, wenn ein Link gewählt wird
 const navLinks = document.querySelectorAll(".main-nav a");
 
 navLinks.forEach((link) => {
   link.addEventListener("click", () => {
     if (mainNav) {
       mainNav.classList.remove("open");
+    }
+
+    if (navToggle) {
+      navToggle.setAttribute("aria-expanded", "false");
+      navToggle.setAttribute("aria-label", "Navigation öffnen");
     }
   });
 });

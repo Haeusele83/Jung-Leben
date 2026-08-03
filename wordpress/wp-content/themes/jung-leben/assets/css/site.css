@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --green-deep: #0b2b21;
   --green-dark: #123c2f;
   --green-main: #1f7a63;
@@ -171,7 +171,7 @@ img {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background-image: url("img/jungle-hero.png");
+  background-image: url("../images/jungle-hero.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -541,19 +541,19 @@ img {
 .product-image-one {
   background:
     linear-gradient(135deg, rgba(31, 122, 99, 0.70), rgba(31, 122, 99, 0.08)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .product-image-two {
   background:
     linear-gradient(135deg, rgba(18, 60, 47, 0.76), rgba(18, 60, 47, 0.08)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .product-image-three {
   background:
     linear-gradient(135deg, rgba(242, 191, 103, 0.72), rgba(242, 191, 103, 0.08)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .product-content {
@@ -590,7 +590,7 @@ img {
 }
 
 .product-link::after {
-  content: "→";
+  content: "â†’";
   margin-left: 8px;
   transition: 0.2s ease;
 }
@@ -931,7 +931,7 @@ img {
       rgba(5, 30, 23, 0.52),
       rgba(5, 30, 23, 0.20)
     ),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
   background-size: cover;
   background-position: center;
   filter: saturate(1.18) contrast(1.06);
@@ -1053,37 +1053,37 @@ img {
 .image-energy {
   background:
     linear-gradient(135deg, rgba(31, 122, 99, 0.68), rgba(31, 122, 99, 0.10)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .image-sleep {
   background:
     linear-gradient(135deg, rgba(14, 47, 37, 0.72), rgba(14, 47, 37, 0.10)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .image-balance {
   background:
     linear-gradient(135deg, rgba(242, 191, 103, 0.72), rgba(31, 122, 99, 0.12)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .image-wellbeing {
   background:
     linear-gradient(135deg, rgba(46, 169, 133, 0.70), rgba(242, 191, 103, 0.14)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .image-focus {
   background:
     linear-gradient(135deg, rgba(11, 43, 33, 0.68), rgba(242, 191, 103, 0.14)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .image-nature {
   background:
     linear-gradient(135deg, rgba(31, 122, 99, 0.64), rgba(255, 255, 255, 0.10)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .shop-product-content {
@@ -1240,19 +1240,19 @@ img {
 .blog-image-energy {
   background:
     linear-gradient(135deg, rgba(31, 122, 99, 0.62), rgba(31, 122, 99, 0.08)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .blog-image-sleep {
   background:
     linear-gradient(135deg, rgba(11, 43, 33, 0.72), rgba(11, 43, 33, 0.08)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .blog-image-balance {
   background:
     linear-gradient(135deg, rgba(242, 191, 103, 0.72), rgba(31, 122, 99, 0.10)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .blog-content {
@@ -1316,7 +1316,7 @@ img {
 }
 
 .blog-link::after {
-  content: "→";
+  content: "â†’";
   margin-left: 8px;
   transition: 0.2s ease;
 }
@@ -1484,7 +1484,7 @@ img {
     padding: 24px;
   }
 }
-/* Über uns */
+/* Ãœber uns */
 
 .about-intro-section {
   padding: 86px 0;
@@ -1668,7 +1668,7 @@ img {
   margin-bottom: 0;
 }
 
-/* Responsive Über uns */
+/* Responsive Ãœber uns */
 
 @media (max-width: 1020px) {
   .about-intro-grid,
@@ -1774,36 +1774,36 @@ img {
   font-size: 1.18rem;
 }
 
-/* Zusätzliche Demo-Bilder */
+/* ZusÃ¤tzliche Demo-Bilder */
 
 .image-beauty {
   background:
     linear-gradient(135deg, rgba(242, 191, 103, 0.70), rgba(31, 122, 99, 0.10)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .image-digestion {
   background:
     linear-gradient(135deg, rgba(31, 122, 99, 0.72), rgba(242, 191, 103, 0.12)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .image-serum {
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.20), rgba(31, 122, 99, 0.72)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .image-greens {
   background:
     linear-gradient(135deg, rgba(46, 169, 133, 0.76), rgba(11, 43, 33, 0.12)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .image-relax {
   background:
     linear-gradient(135deg, rgba(11, 43, 33, 0.68), rgba(242, 191, 103, 0.16)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 .products-error {
   grid-column: 1 / -1;
@@ -1823,7 +1823,7 @@ img {
 .products-error p {
   color: var(--muted);
 }
-/* Optimierte Produktübersicht */
+/* Optimierte ProduktÃ¼bersicht */
 
 .compact-product-card {
   min-height: auto;
@@ -2110,25 +2110,25 @@ img {
 .experience-image-energy {
   background:
     linear-gradient(135deg, rgba(31, 122, 99, 0.62), rgba(31, 122, 99, 0.08)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .experience-image-sleep {
   background:
     linear-gradient(135deg, rgba(11, 43, 33, 0.72), rgba(11, 43, 33, 0.08)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .experience-image-balance {
   background:
     linear-gradient(135deg, rgba(242, 191, 103, 0.72), rgba(31, 122, 99, 0.10)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .experience-image-beauty {
   background:
     linear-gradient(135deg, rgba(242, 191, 103, 0.70), rgba(31, 122, 99, 0.12)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .experience-content {
@@ -2334,7 +2334,7 @@ img {
 }
 
 .home-hero::before {
-  background-image: url("img/jungle-hero.png");
+  background-image: url("../images/jungle-hero.png");
   background-position: center 42%;
   filter: saturate(1.28) contrast(1.08) brightness(1.05);
   transform: scale(1.03);
@@ -2688,7 +2688,7 @@ img {
 }
 
 .home-hero::before {
-  background-image: url("img/jungle-hero.png");
+  background-image: url("../images/jungle-hero.png");
   background-position: center 45%;
   filter: saturate(1.22) contrast(1.08) brightness(1.02);
   transform: scale(1.025);
@@ -3353,31 +3353,31 @@ img {
 .lc-blog-image-omega {
   background:
     linear-gradient(135deg, rgba(31, 122, 99, 0.62), rgba(31, 122, 99, 0.08)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .lc-blog-image-deo {
   background:
     linear-gradient(135deg, rgba(242, 191, 103, 0.70), rgba(31, 122, 99, 0.12)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .lc-blog-image-toothpaste {
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.20), rgba(31, 122, 99, 0.72)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .lc-blog-image-tryptophan {
   background:
     linear-gradient(135deg, rgba(11, 43, 33, 0.72), rgba(11, 43, 33, 0.08)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .lc-blog-image-shilajit {
   background:
     linear-gradient(135deg, rgba(46, 169, 133, 0.76), rgba(11, 43, 33, 0.12)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
 }
 
 .lc-blog-content {
@@ -3494,7 +3494,7 @@ img {
     width: 100%;
   }
 }
-/* Über mich / Roberto / Longevity Curator */
+/* Ãœber mich / Roberto / Longevity Curator */
 
 .roberto-intro-section {
   padding: 86px 0;
@@ -3522,7 +3522,7 @@ img {
   place-items: center;
   background:
     linear-gradient(135deg, rgba(11, 43, 33, 0.62), rgba(31, 122, 99, 0.18)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
   background-size: cover;
   background-position: center;
 }
@@ -3779,7 +3779,7 @@ img {
   color: rgba(255, 255, 255, 0.76);
 }
 
-/* Responsive Über mich */
+/* Responsive Ãœber mich */
 
 @media (max-width: 1020px) {
   .roberto-intro-grid,
@@ -3936,14 +3936,14 @@ img {
     min-height: 340px;
   }
 }
-/* Startseite final – Longevity Curator */
+/* Startseite final â€“ Longevity Curator */
 
 .home-hero {
   min-height: 820px;
 }
 
 .home-hero::before {
-  background-image: url("img/jungle-hero.png");
+  background-image: url("../images/jungle-hero.png");
   background-position: center 45%;
   filter: saturate(1.22) contrast(1.08) brightness(1.02);
   transform: scale(1.025);
@@ -4015,7 +4015,7 @@ img {
   background-image:
     linear-gradient(135deg, rgba(11, 43, 33, 0.26), rgba(31, 122, 99, 0.08)),
     url("img/roberto.jpg"),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
   background-size: cover;
   background-position: center;
   box-shadow: var(--shadow-card);
@@ -4285,7 +4285,7 @@ img {
     border-radius: 28px;
   }
 }
-/* Startseite – Routine Preview */
+/* Startseite â€“ Routine Preview */
 
 .home-routine-preview-section {
   padding: 86px 0;
@@ -4373,12 +4373,12 @@ img {
     padding: 22px;
   }
 }
-/* Produktdetailseite – Longevity Curator optimiert */
+/* Produktdetailseite â€“ Longevity Curator optimiert */
 
 .product-detail-hero {
   background:
     linear-gradient(135deg, rgba(18, 60, 47, 0.94), rgba(31, 122, 99, 0.74)),
-    url("img/jungle-hero.png");
+    url("../images/jungle-hero.png");
   background-size: cover;
   background-position: center;
 }
@@ -4538,4 +4538,41 @@ img {
 .product-card-actions .detail-secondary-link {
   min-height: 46px;
   font-size: 0.94rem;
+}
+/* WordPress-Navigation */
+
+.main-nav-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.main-nav .current-menu-item > a,
+.main-nav .current_page_item > a {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--white);
+}
+
+@media (max-width: 760px) {
+  .main-nav {
+    width: auto;
+  }
+
+  .main-nav-list {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .main-nav-list li {
+    width: 100%;
+  }
+
+  .main-nav-list a {
+    display: block;
+    width: 100%;
+  }
 }
