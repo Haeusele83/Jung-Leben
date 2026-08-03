@@ -595,6 +595,239 @@ function jung_leben_register_homepage_fields(): void
                 'default_value' => 'Orientierung',
                 'maxlength'     => 60,
             ],
+                        [
+                'key'       => 'field_jl_home_routines_tab',
+                'label'     => __('Tagesroutinen', 'jung-leben'),
+                'name'      => '',
+                'type'      => 'tab',
+                'placement' => 'top',
+            ],
+            [
+                'key'           => 'field_jl_home_routines_eyebrow',
+                'label'         => __('Kurze Einleitung', 'jung-leben'),
+                'name'          => 'jl_home_routines_eyebrow',
+                'type'          => 'text',
+                'default_value' => 'Mögliche Tagesroutinen',
+                'maxlength'     => 100,
+            ],
+            [
+                'key'           => 'field_jl_home_routines_title',
+                'label'         => __('Überschrift', 'jung-leben'),
+                'name'          => 'jl_home_routines_title',
+                'type'          => 'textarea',
+                'default_value' =>
+                    'Eine mögliche Tagesstruktur für Longevity-Produkte.',
+                'rows'          => 2,
+                'new_lines'     => '',
+                'required'      => 1,
+            ],
+            [
+                'key'           => 'field_jl_home_routines_text_one',
+                'label'         => __('Erster Textabschnitt', 'jung-leben'),
+                'name'          => 'jl_home_routines_text_one',
+                'type'          => 'textarea',
+                'default_value' =>
+                    'Roberto ordnet ausgewählte Produkte nach Tageszeit: morgens für Energie und Zellstoffwechsel, mittags für Balance und Pflanzenstoffe, abends für Entspannung und Regeneration.',
+                'rows'          => 4,
+                'new_lines'     => '',
+            ],
+            [
+                'key'           => 'field_jl_home_routines_text_two',
+                'label'         => __('Zweiter Textabschnitt', 'jung-leben'),
+                'name'          => 'jl_home_routines_text_two',
+                'type'          => 'textarea',
+                'default_value' =>
+                    'Die dargestellte Routine ist keine fixe Einnahmeempfehlung, sondern eine persönliche Orientierung für Menschen, die bewusst mit Nahrungsergänzungen und Produktkombinationen umgehen möchten.',
+                'rows'          => 4,
+                'new_lines'     => '',
+            ],
+            [
+                'key'           => 'field_jl_home_routines_button_text',
+                'label'         => __('Button-Text', 'jung-leben'),
+                'name'          => 'jl_home_routines_button_text',
+                'type'          => 'text',
+                'default_value' => 'Routine ansehen',
+                'maxlength'     => 60,
+            ],
+            [
+                'key'          => 'field_jl_home_routines_button_url',
+                'label'        => __('Button-Ziel', 'jung-leben'),
+                'name'         => 'jl_home_routines_button_url',
+                'type'         => 'url',
+                'instructions' => __(
+                    'Leer lassen, um automatisch auf die Routinen-Seite zu verlinken.',
+                    'jung-leben'
+                ),
+            ],
+
+            /*
+             * Morgenroutine
+             */
+            [
+                'key'     => 'field_jl_home_routines_morning_heading',
+                'label'   => __('Morgenroutine', 'jung-leben'),
+                'name'    => '',
+                'type'    => 'message',
+                'message' => __(
+                    'Inhalte für den ersten Eintrag der Tagesroutine.',
+                    'jung-leben'
+                ),
+            ],
+            [
+                'key'           => 'field_jl_home_routines_morning_enabled',
+                'label'         => __('Morgenroutine anzeigen', 'jung-leben'),
+                'name'          => 'jl_home_routines_morning_enabled',
+                'type'          => 'true_false',
+                'default_value' => 1,
+                'ui'            => 1,
+                'ui_on_text'    => __('Ja', 'jung-leben'),
+                'ui_off_text'   => __('Nein', 'jung-leben'),
+            ],
+            [
+                'key'           => 'field_jl_home_routines_morning_icon',
+                'label'         => __('Symbol', 'jung-leben'),
+                'name'          => 'jl_home_routines_morning_icon',
+                'type'          => 'text',
+                'default_value' => '☀',
+                'maxlength'     => 10,
+                'instructions'  => __(
+                    'Zum Beispiel ein Emoji oder ein einzelnes Symbol.',
+                    'jung-leben'
+                ),
+            ],
+            [
+                'key'           => 'field_jl_home_routines_morning_label',
+                'label'         => __('Bezeichnung', 'jung-leben'),
+                'name'          => 'jl_home_routines_morning_label',
+                'type'          => 'text',
+                'default_value' => 'Morgens',
+                'maxlength'     => 50,
+            ],
+            [
+                'key'           => 'field_jl_home_routines_morning_products',
+                'label'         => __('Produkte', 'jung-leben'),
+                'name'          => 'jl_home_routines_morning_products',
+                'type'          => 'textarea',
+                'default_value' =>
+                    'NADH, Ashwagandha, Q10, Resveratrol',
+                'rows'          => 3,
+                'new_lines'     => '',
+            ],
+
+            /*
+             * Mittagsroutine
+             */
+            [
+                'key'     => 'field_jl_home_routines_midday_heading',
+                'label'   => __('Mittagsroutine', 'jung-leben'),
+                'name'    => '',
+                'type'    => 'message',
+                'message' => __(
+                    'Inhalte für den zweiten Eintrag der Tagesroutine.',
+                    'jung-leben'
+                ),
+            ],
+            [
+                'key'           => 'field_jl_home_routines_midday_enabled',
+                'label'         => __('Mittagsroutine anzeigen', 'jung-leben'),
+                'name'          => 'jl_home_routines_midday_enabled',
+                'type'          => 'true_false',
+                'default_value' => 1,
+                'ui'            => 1,
+                'ui_on_text'    => __('Ja', 'jung-leben'),
+                'ui_off_text'   => __('Nein', 'jung-leben'),
+            ],
+            [
+                'key'           => 'field_jl_home_routines_midday_icon',
+                'label'         => __('Symbol', 'jung-leben'),
+                'name'          => 'jl_home_routines_midday_icon',
+                'type'          => 'text',
+                'default_value' => '🌿',
+                'maxlength'     => 10,
+            ],
+            [
+                'key'           => 'field_jl_home_routines_midday_label',
+                'label'         => __('Bezeichnung', 'jung-leben'),
+                'name'          => 'jl_home_routines_midday_label',
+                'type'          => 'text',
+                'default_value' => 'Mittags',
+                'maxlength'     => 50,
+            ],
+            [
+                'key'           => 'field_jl_home_routines_midday_products',
+                'label'         => __('Produkte', 'jung-leben'),
+                'name'          => 'jl_home_routines_midday_products',
+                'type'          => 'textarea',
+                'default_value' =>
+                    'Omega 3-6-9, Shilajit, OPC, Quercetin',
+                'rows'          => 3,
+                'new_lines'     => '',
+            ],
+
+            /*
+             * Abendroutine
+             */
+            [
+                'key'     => 'field_jl_home_routines_evening_heading',
+                'label'   => __('Abendroutine', 'jung-leben'),
+                'name'    => '',
+                'type'    => 'message',
+                'message' => __(
+                    'Inhalte für den dritten Eintrag der Tagesroutine.',
+                    'jung-leben'
+                ),
+            ],
+            [
+                'key'           => 'field_jl_home_routines_evening_enabled',
+                'label'         => __('Abendroutine anzeigen', 'jung-leben'),
+                'name'          => 'jl_home_routines_evening_enabled',
+                'type'          => 'true_false',
+                'default_value' => 1,
+                'ui'            => 1,
+                'ui_on_text'    => __('Ja', 'jung-leben'),
+                'ui_off_text'   => __('Nein', 'jung-leben'),
+            ],
+            [
+                'key'           => 'field_jl_home_routines_evening_icon',
+                'label'         => __('Symbol', 'jung-leben'),
+                'name'          => 'jl_home_routines_evening_icon',
+                'type'          => 'text',
+                'default_value' => '☾',
+                'maxlength'     => 10,
+            ],
+            [
+                'key'           => 'field_jl_home_routines_evening_label',
+                'label'         => __('Bezeichnung', 'jung-leben'),
+                'name'          => 'jl_home_routines_evening_label',
+                'type'          => 'text',
+                'default_value' => 'Abends',
+                'maxlength'     => 50,
+            ],
+            [
+                'key'           => 'field_jl_home_routines_evening_products',
+                'label'         => __('Produkte', 'jung-leben'),
+                'name'          => 'jl_home_routines_evening_products',
+                'type'          => 'textarea',
+                'default_value' =>
+                    'Magnesium, Weihrauch, Oreganoöl',
+                'rows'          => 3,
+                'new_lines'     => '',
+            ],
+
+            /*
+             * Hinweis
+             */
+            [
+                'key'           => 'field_jl_home_routines_notice',
+                'label'         => __('Hinweistext', 'jung-leben'),
+                'name'          => 'jl_home_routines_notice',
+                'type'          => 'textarea',
+                'default_value' =>
+                    'Produkte, Kombinationen, Dosierungen und Einnahmedauer sind individuell. Einzelne Produkte können nur für eine begrenzte Zeit sinnvoll sein. Passe deine Routine an dein persönliches Empfinden an und hole bei Unsicherheiten fachlichen Rat ein.',
+                'rows'          => 6,
+                'new_lines'     => '',
+                'required'      => 1,
+            ],
         ],
 
         'location' => [

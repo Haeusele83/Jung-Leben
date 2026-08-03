@@ -478,6 +478,114 @@ $journey_slides = array_values(
 );
 
 $journey_slide_count = count($journey_slides);
+/**
+ * Inhalte des Bereichs «Mögliche Tagesroutinen» laden.
+ */
+$routines_eyebrow = $get_home_text(
+    'jl_home_routines_eyebrow',
+    'Mögliche Tagesroutinen'
+);
+
+$routines_title = $get_home_text(
+    'jl_home_routines_title',
+    'Eine mögliche Tagesstruktur für Longevity-Produkte.'
+);
+
+$routines_text_one = $get_home_text(
+    'jl_home_routines_text_one',
+    'Roberto ordnet ausgewählte Produkte nach Tageszeit: morgens für Energie und Zellstoffwechsel, mittags für Balance und Pflanzenstoffe, abends für Entspannung und Regeneration.'
+);
+
+$routines_text_two = $get_home_text(
+    'jl_home_routines_text_two',
+    'Die dargestellte Routine ist keine fixe Einnahmeempfehlung, sondern eine persönliche Orientierung für Menschen, die bewusst mit Nahrungsergänzungen und Produktkombinationen umgehen möchten.'
+);
+
+$routines_button_text = $get_home_text(
+    'jl_home_routines_button_text',
+    'Routine ansehen'
+);
+
+$routines_button_url = $get_home_url(
+    'jl_home_routines_button_url',
+    $routinen_url
+);
+
+$routines_notice = $get_home_text(
+    'jl_home_routines_notice',
+    'Produkte, Kombinationen, Dosierungen und Einnahmedauer sind individuell. Einzelne Produkte können nur für eine begrenzte Zeit sinnvoll sein. Passe deine Routine an dein persönliches Empfinden an und hole bei Unsicherheiten fachlichen Rat ein.'
+);
+
+/**
+ * Drei feste Tageszeiten definieren.
+ */
+$routine_items = [
+    [
+        'enabled' => $get_home_bool(
+            'jl_home_routines_morning_enabled'
+        ),
+        'class' => 'morning',
+        'icon' => $get_home_text(
+            'jl_home_routines_morning_icon',
+            '☀'
+        ),
+        'label' => $get_home_text(
+            'jl_home_routines_morning_label',
+            'Morgens'
+        ),
+        'products' => $get_home_text(
+            'jl_home_routines_morning_products',
+            'NADH, Ashwagandha, Q10, Resveratrol'
+        ),
+    ],
+    [
+        'enabled' => $get_home_bool(
+            'jl_home_routines_midday_enabled'
+        ),
+        'class' => 'midday',
+        'icon' => $get_home_text(
+            'jl_home_routines_midday_icon',
+            '🌿'
+        ),
+        'label' => $get_home_text(
+            'jl_home_routines_midday_label',
+            'Mittags'
+        ),
+        'products' => $get_home_text(
+            'jl_home_routines_midday_products',
+            'Omega 3-6-9, Shilajit, OPC, Quercetin'
+        ),
+    ],
+    [
+        'enabled' => $get_home_bool(
+            'jl_home_routines_evening_enabled'
+        ),
+        'class' => 'evening',
+        'icon' => $get_home_text(
+            'jl_home_routines_evening_icon',
+            '☾'
+        ),
+        'label' => $get_home_text(
+            'jl_home_routines_evening_label',
+            'Abends'
+        ),
+        'products' => $get_home_text(
+            'jl_home_routines_evening_products',
+            'Magnesium, Weihrauch, Oreganoöl'
+        ),
+    ],
+];
+
+$routine_items = array_values(
+    array_filter(
+        $routine_items,
+        static function (array $item): bool {
+            return $item['enabled']
+                && trim($item['label']) !== '';
+        }
+    )
+);
+$routine_item_count = count($routine_items);
 ?>
 
 <main id="main-content">
@@ -1004,185 +1112,128 @@ $journey_slide_count = count($journey_slides);
 
     <?php endif; ?>
 
-    <!-- Mögliche Tagesroutinen -->
-    <section
-        class="home-routines-section"
-        aria-labelledby="routines-title"
-    >
-        <div class="container home-routines-layout">
+        <?php if ($routine_item_count > 0) : ?>
 
-            <div class="home-routines-copy">
+        <!-- Mögliche Tagesroutinen -->
+        <section
+            class="home-routines-section"
+            aria-labelledby="routines-title"
+        >
+            <div class="container home-routines-layout">
 
-                <p class="eyebrow">
-                    <?php
-                    esc_html_e(
-                        'Mögliche Tagesroutinen',
-                        'jung-leben'
-                    );
-                    ?>
-                </p>
+                <div class="home-routines-copy">
 
-                <h2 id="routines-title">
-                    <?php
-                    esc_html_e(
-                        'Eine mögliche Tagesstruktur für Longevity-Produkte.',
-                        'jung-leben'
-                    );
-                    ?>
-                </h2>
+                    <?php if ($routines_eyebrow !== '') : ?>
+                        <p class="eyebrow">
+                            <?php echo esc_html(
+                                $routines_eyebrow
+                            ); ?>
+                        </p>
+                    <?php endif; ?>
 
-                <p>
-                    <?php
-                    esc_html_e(
-                        'Roberto ordnet ausgewählte Produkte nach Tageszeit: morgens für Energie und Zellstoffwechsel, mittags für Balance und Pflanzenstoffe, abends für Entspannung und Regeneration.',
-                        'jung-leben'
-                    );
-                    ?>
-                </p>
+                    <h2 id="routines-title">
+                        <?php echo esc_html(
+                            $routines_title
+                        ); ?>
+                    </h2>
 
-                <p>
-                    <?php
-                    esc_html_e(
-                        'Die dargestellte Routine ist keine fixe Einnahmeempfehlung, sondern eine persönliche Orientierung für Menschen, die bewusst mit Nahrungsergänzungen und Produktkombinationen umgehen möchten.',
-                        'jung-leben'
-                    );
-                    ?>
-                </p>
+                    <?php if ($routines_text_one !== '') : ?>
+                        <p>
+                            <?php echo esc_html(
+                                $routines_text_one
+                            ); ?>
+                        </p>
+                    <?php endif; ?>
 
-                <a
-                    href="<?php echo esc_url($routinen_url); ?>"
-                    class="btn btn-primary"
-                >
-                    <?php
-                    esc_html_e(
-                        'Routine ansehen',
-                        'jung-leben'
-                    );
-                    ?>
-                </a>
+                    <?php if ($routines_text_two !== '') : ?>
+                        <p>
+                            <?php echo esc_html(
+                                $routines_text_two
+                            ); ?>
+                        </p>
+                    <?php endif; ?>
+
+                    <?php if ($routines_button_text !== '') : ?>
+                        <a
+                            href="<?php echo esc_url(
+                                $routines_button_url
+                            ); ?>"
+                            class="btn btn-primary"
+                        >
+                            <?php echo esc_html(
+                                $routines_button_text
+                            ); ?>
+                        </a>
+                    <?php endif; ?>
+
+                </div>
+
+                <div class="home-routines-card">
+
+                    <?php foreach ($routine_items as $item) : ?>
+
+                        <article
+                            class="routine-time routine-time--<?php
+                            echo esc_attr($item['class']);
+                            ?>"
+                        >
+                            <?php if ($item['icon'] !== '') : ?>
+                                <div
+                                    class="routine-time__icon"
+                                    aria-hidden="true"
+                                >
+                                    <?php echo esc_html(
+                                        $item['icon']
+                                    ); ?>
+                                </div>
+                            <?php endif; ?>
+
+                            <div class="routine-time__content">
+
+                                <p class="routine-time__label">
+                                    <?php echo esc_html(
+                                        $item['label']
+                                    ); ?>
+                                </p>
+
+                                <?php if ($item['products'] !== '') : ?>
+                                    <p class="routine-time__products">
+                                        <?php echo esc_html(
+                                            $item['products']
+                                        ); ?>
+                                    </p>
+                                <?php endif; ?>
+
+                            </div>
+                        </article>
+
+                    <?php endforeach; ?>
+
+                    <?php if ($routines_notice !== '') : ?>
+                        <aside class="home-routines-notice">
+
+                            <div
+                                class="home-routines-notice__icon"
+                                aria-hidden="true"
+                            >
+                                i
+                            </div>
+
+                            <p>
+                                <?php echo esc_html(
+                                    $routines_notice
+                                ); ?>
+                            </p>
+
+                        </aside>
+                    <?php endif; ?>
+
+                </div>
 
             </div>
+        </section>
 
-            <div class="home-routines-card">
-
-                <article
-                    class="routine-time
-                    routine-time--morning"
-                >
-                    <div
-                        class="routine-time__icon"
-                        aria-hidden="true"
-                    >
-                        ☀
-                    </div>
-
-                    <div class="routine-time__content">
-                        <p class="routine-time__label">
-                            <?php
-                            esc_html_e(
-                                'Morgens',
-                                'jung-leben'
-                            );
-                            ?>
-                        </p>
-
-                        <p class="routine-time__products">
-                            <?php
-                            esc_html_e(
-                                'NADH, Ashwagandha, Q10, Resveratrol',
-                                'jung-leben'
-                            );
-                            ?>
-                        </p>
-                    </div>
-                </article>
-
-                <article
-                    class="routine-time
-                    routine-time--midday"
-                >
-                    <div
-                        class="routine-time__icon"
-                        aria-hidden="true"
-                    >
-                        🌿
-                    </div>
-
-                    <div class="routine-time__content">
-                        <p class="routine-time__label">
-                            <?php
-                            esc_html_e(
-                                'Mittags',
-                                'jung-leben'
-                            );
-                            ?>
-                        </p>
-
-                        <p class="routine-time__products">
-                            <?php
-                            esc_html_e(
-                                'Omega 3-6-9, Shilajit, OPC, Quercetin',
-                                'jung-leben'
-                            );
-                            ?>
-                        </p>
-                    </div>
-                </article>
-
-                <article
-                    class="routine-time
-                    routine-time--evening"
-                >
-                    <div
-                        class="routine-time__icon"
-                        aria-hidden="true"
-                    >
-                        ☾
-                    </div>
-
-                    <div class="routine-time__content">
-                        <p class="routine-time__label">
-                            <?php
-                            esc_html_e(
-                                'Abends',
-                                'jung-leben'
-                            );
-                            ?>
-                        </p>
-
-                        <p class="routine-time__products">
-                            <?php
-                            esc_html_e(
-                                'Magnesium, Weihrauch, Oreganoöl',
-                                'jung-leben'
-                            );
-                            ?>
-                        </p>
-                    </div>
-                </article>
-
-                <aside class="home-routines-notice">
-                    <div
-                        class="home-routines-notice__icon"
-                        aria-hidden="true"
-                    >
-                        i
-                    </div>
-
-                    <p>
-                        <?php
-                        esc_html_e(
-                            'Produkte, Kombinationen, Dosierungen und Einnahmedauer sind individuell. Einzelne Produkte können nur für eine begrenzte Zeit sinnvoll sein. Passe deine Routine an dein persönliches Empfinden an und hole bei Unsicherheiten fachlichen Rat ein.',
-                            'jung-leben'
-                        );
-                        ?>
-                    </p>
-                </aside>
-
-            </div>
-        </div>
-    </section>
-
+    <?php endif; ?>
     <!-- Community und Kontakt -->
     <section
         class="home-community-section"
