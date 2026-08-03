@@ -13,6 +13,12 @@ $ratgeber_url = get_permalink(
     get_option('page_for_posts')
 );
 
+$empfehlungen_page = get_page_by_path('empfehlungen');
+
+$empfehlungen_url = $empfehlungen_page
+    ? get_permalink($empfehlungen_page)
+    : home_url('/empfehlungen/');
+
 $ueber_mich_page = get_page_by_path('ueber-mich');
 
 $ueber_mich_url = $ueber_mich_page
@@ -22,66 +28,39 @@ $ueber_mich_url = $ueber_mich_page
 
 <main id="main-content">
 
-    <section class="hero home-hero">
-        <div class="hero-overlay"></div>
+    <section class="jl-home-hero">
+    <div class="container">
 
-        <div class="container hero-content home-hero-content">
-            <div class="hero-text">
+        <div class="jl-home-hero__panel">
+            <h1 class="jl-home-hero__title">
+                <?php esc_html_e(
+                    'The goal is to die young – as late as possible',
+                    'jung-leben'
+                ); ?>
+            </h1>
 
-                <p class="eyebrow">
-                    <?php esc_html_e(
-                        'Longevity Curator',
-                        'jung-leben'
-                    ); ?>
-                </p>
-
-                <h1>
-                    <?php esc_html_e(
-                        'Jung bleiben beginnt mit bewussten Routinen.',
-                        'jung-leben'
-                    ); ?>
-                </h1>
-
-                <p class="hero-lead">
-                    <?php esc_html_e(
-                        'Roberto teilt auf Jung Leben persönliche Erfahrungen, sorgfältig ausgewählte Produkte und alltagsnahe Impulse für mehr Vitalität, Balance und bewusste Langlebigkeit.',
-                        'jung-leben'
-                    ); ?>
-                </p>
-
-                <div class="hero-actions">
-                    <a
-                        href="<?php echo esc_url($ratgeber_url); ?>"
-                        class="btn btn-primary"
-                    >
-                        <?php esc_html_e(
-                            'Erfahrungen lesen',
-                            'jung-leben'
-                        ); ?>
-                    </a>
-
-                    <a
-                        href="<?php echo esc_url(
-                            home_url('/produkte/')
-                        ); ?>"
-                        class="btn btn-light"
-                    >
-                        <?php esc_html_e(
-                            'Produkte entdecken',
-                            'jung-leben'
-                        ); ?>
-                    </a>
-                </div>
-
-                <div class="hero-benefits">
-                    <span>🌿 Longevity</span>
-                    <span>✨ Persönliche Erfahrung</span>
-                    <span>🛒 Affiliate-ready</span>
-                </div>
-
-            </div>
+            <p class="jl-home-hero__text">
+                <?php esc_html_e(
+                    'Longevity ist kein Sprint und kein Zufall. Es sind die täglichen Entscheidungen, die darüber bestimmen, wie wir altern. Jung Leben hilft dir dabei, evidenzbasierte Produkte, Routinen und Erfahrungen zu entdecken, die Vitalität, Wohlbefinden und Langlebigkeit unterstützen.',
+                    'jung-leben'
+                ); ?>
+            </p>
         </div>
-    </section>
+
+        <div class="jl-home-hero__action">
+            <a
+                href="<?php echo esc_url($empfehlungen_url); ?>"
+                class="jl-button jl-button--gold"
+            >
+                <?php esc_html_e(
+                    'Empfehlungen entdecken',
+                    'jung-leben'
+                ); ?>
+            </a>
+        </div>
+
+    </div>
+</section>
 
     <section class="home-curator-section">
         <div class="container home-curator-grid">
