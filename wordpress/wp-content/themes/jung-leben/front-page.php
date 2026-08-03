@@ -202,6 +202,179 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
         </div>
     </section>
 
+    <!-- Ein Ort der Orientierung -->
+    <section
+        class="home-orientation-section"
+        aria-labelledby="orientation-title"
+    >
+        <div class="container home-orientation-grid">
+
+            <div class="home-orientation-copy">
+
+                <p class="eyebrow">
+                    <?php
+                    esc_html_e(
+                        'Wie funktioniert Jung Leben',
+                        'jung-leben'
+                    );
+                    ?>
+                </p>
+
+                <h2 id="orientation-title">
+                    <?php
+                    esc_html_e(
+                        'Ein Ort der Orientierung',
+                        'jung-leben'
+                    );
+                    ?>
+                </h2>
+
+                <p class="home-orientation-intro">
+                    <?php
+                    esc_html_e(
+                        'Es gibt keinen vorgeschriebenen Einstiegspunkt. Du kannst Jung Leben über persönliche Erfahrungen, konkrete Empfehlungen, einzelne Produkte oder mögliche Routinen entdecken.',
+                        'jung-leben'
+                    );
+                    ?>
+                </p>
+
+                <p>
+                    <?php
+                    esc_html_e(
+                        'Alle Wege führen zu einem gemeinsamen Ziel: Informationen besser einzuordnen und bewusste Entscheidungen für dein persönliches Wohlbefinden zu treffen.',
+                        'jung-leben'
+                    );
+                    ?>
+                </p>
+
+            </div>
+
+            <div
+                class="orientation-map"
+                aria-label="<?php esc_attr_e(
+                    'Verschiedene Einstiegspunkte führen zu Jung Leben',
+                    'jung-leben'
+                ); ?>"
+            >
+
+                <svg
+                    class="orientation-map__lines"
+                    viewBox="0 0 600 520"
+                    preserveAspectRatio="none"
+                    aria-hidden="true"
+                    focusable="false"
+                >
+                    <line x1="300" y1="260" x2="300" y2="65"></line>
+                    <line x1="300" y1="260" x2="510" y2="155"></line>
+                    <line x1="300" y1="260" x2="510" y2="390"></line>
+                    <line x1="300" y1="260" x2="300" y2="465"></line>
+                    <line x1="300" y1="260" x2="90" y2="390"></line>
+                    <line x1="300" y1="260" x2="90" y2="155"></line>
+                </svg>
+
+                <div class="orientation-map__center">
+                    <span class="orientation-map__brand">
+                        <?php
+                        esc_html_e(
+                            'Jung Leben',
+                            'jung-leben'
+                        );
+                        ?>
+                    </span>
+
+                    <span class="orientation-map__purpose">
+                        <?php
+                        esc_html_e(
+                            'Orientierung',
+                            'jung-leben'
+                        );
+                        ?>
+                    </span>
+                </div>
+
+                <div
+                    class="orientation-map__node orientation-map__node--experiences"
+                >
+                    <span aria-hidden="true">✨</span>
+
+                    <?php
+                    esc_html_e(
+                        'Erfahrungen',
+                        'jung-leben'
+                    );
+                    ?>
+                </div>
+
+                <div
+                    class="orientation-map__node orientation-map__node--recommendations"
+                >
+                    <span aria-hidden="true">✓</span>
+
+                    <?php
+                    esc_html_e(
+                        'Empfehlungen',
+                        'jung-leben'
+                    );
+                    ?>
+                </div>
+
+                <div
+                    class="orientation-map__node orientation-map__node--products"
+                >
+                    <span aria-hidden="true">🌿</span>
+
+                    <?php
+                    esc_html_e(
+                        'Produkte',
+                        'jung-leben'
+                    );
+                    ?>
+                </div>
+
+                <div
+                    class="orientation-map__node orientation-map__node--routines"
+                >
+                    <span aria-hidden="true">☀</span>
+
+                    <?php
+                    esc_html_e(
+                        'Routinen',
+                        'jung-leben'
+                    );
+                    ?>
+                </div>
+
+                <div
+                    class="orientation-map__node orientation-map__node--knowledge"
+                >
+                    <span aria-hidden="true">💡</span>
+
+                    <?php
+                    esc_html_e(
+                        'Wissen',
+                        'jung-leben'
+                    );
+                    ?>
+                </div>
+
+                <div
+                    class="orientation-map__node orientation-map__node--exchange"
+                >
+                    <span aria-hidden="true">↔</span>
+
+                    <?php
+                    esc_html_e(
+                        'Austausch',
+                        'jung-leben'
+                    );
+                    ?>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
     <!-- Inhalte aus dem WordPress-Editor -->
     <?php while (have_posts()) : ?>
         <?php the_post(); ?>

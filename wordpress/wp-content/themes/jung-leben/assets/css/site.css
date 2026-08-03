@@ -4994,3 +4994,250 @@ img {
     height: 44px;
   }
 }
+/* =========================================================
+   Jung Leben – Ein Ort der Orientierung
+   ========================================================= */
+
+.home-orientation-section {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(5rem, 9vw, 8rem) 0;
+  background:
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(245, 207, 104, 0.18),
+      transparent 30%
+    ),
+    #f6f5ef;
+}
+
+.home-orientation-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(280px, 0.8fr)
+    minmax(500px, 1.2fr);
+  align-items: center;
+  gap: clamp(3rem, 7vw, 7rem);
+}
+
+.home-orientation-copy {
+  max-width: 490px;
+}
+
+.home-orientation-copy h2 {
+  max-width: 440px;
+  margin: 0.6rem 0 1.5rem;
+  color: #073f1d;
+  font-size: clamp(2.6rem, 5vw, 4.4rem);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.home-orientation-copy p {
+  margin: 0 0 1.15rem;
+  color: #52655a;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.home-orientation-copy .home-orientation-intro {
+  color: #243c2e;
+  font-size: 1.14rem;
+  font-weight: 600;
+}
+
+/* Übersicht */
+
+.orientation-map {
+  position: relative;
+  min-height: 520px;
+}
+
+.orientation-map__lines {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.orientation-map__lines line {
+  stroke: rgba(7, 63, 29, 0.22);
+  stroke-width: 2;
+  stroke-dasharray: 7 8;
+}
+
+/* Zentrum */
+
+.orientation-map__center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 190px;
+  height: 190px;
+  padding: 1.5rem;
+  background:
+    linear-gradient(
+      145deg,
+      #073f1d,
+      #0c5a2b
+    );
+  color: #ffffff;
+  border: 10px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  box-shadow:
+    0 25px 50px rgba(7, 63, 29, 0.2),
+    0 0 0 1px rgba(7, 63, 29, 0.08);
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
+
+.orientation-map__brand {
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+}
+
+.orientation-map__purpose {
+  margin-top: 0.4rem;
+  color: #f5cf68;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Einstiegspunkte */
+
+.orientation-map__node {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 165px;
+  min-height: 54px;
+  gap: 0.6rem;
+  padding: 0.75rem 1.2rem;
+  background: rgba(255, 255, 255, 0.96);
+  color: #073f1d;
+  border: 1px solid rgba(7, 63, 29, 0.12);
+  border-radius: 999px;
+  box-shadow: 0 13px 30px rgba(7, 63, 29, 0.09);
+  font-size: 0.95rem;
+  font-weight: 750;
+  text-align: center;
+}
+
+.orientation-map__node > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  background: #edf4eb;
+  border-radius: 50%;
+  font-size: 0.9rem;
+}
+
+.orientation-map__node--experiences {
+  top: 2%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.orientation-map__node--recommendations {
+  top: 23%;
+  right: 0;
+}
+
+.orientation-map__node--products {
+  right: 1%;
+  bottom: 13%;
+}
+
+.orientation-map__node--routines {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.orientation-map__node--knowledge {
+  bottom: 13%;
+  left: 1%;
+}
+
+.orientation-map__node--exchange {
+  top: 23%;
+  left: 0;
+}
+
+/* Tablet */
+
+@media (max-width: 1050px) {
+  .home-orientation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-orientation-copy {
+    max-width: 680px;
+  }
+
+  .orientation-map {
+    width: min(100%, 700px);
+    margin-inline: auto;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 700px) {
+  .home-orientation-section {
+    padding: 4.5rem 0;
+  }
+
+  .orientation-map {
+    display: grid;
+    grid-template-columns: 1fr;
+    min-height: 0;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .orientation-map__lines {
+    display: none;
+  }
+
+  .orientation-map__center,
+  .orientation-map__node {
+    position: static;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    transform: none;
+  }
+
+  .orientation-map__center {
+    order: -1;
+    min-height: 135px;
+    padding: 1.8rem;
+    border: 7px solid rgba(255, 255, 255, 0.9);
+    border-radius: 24px;
+  }
+
+  .orientation-map__node {
+    justify-content: flex-start;
+    min-height: 58px;
+    padding: 0.8rem 1rem;
+    border-radius: 14px;
+    text-align: left;
+  }
+}
