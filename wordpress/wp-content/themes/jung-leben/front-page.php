@@ -28,6 +28,15 @@ $empfehlungen_url = $empfehlungen_page instanceof WP_Post
     : home_url('/empfehlungen/');
 
 /**
+ * Routinen-Seite ermitteln.
+ */
+$routinen_page = get_page_by_path('routinen');
+
+$routinen_url = $routinen_page instanceof WP_Post
+    ? get_permalink($routinen_page)
+    : home_url('/routinen/');
+
+/**
  * Seite «Über mich» ermitteln.
  */
 $ueber_mich_page = get_page_by_path('ueber-mich');
@@ -664,6 +673,177 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                     </p>
 
                 </div>
+            </div>
+
+        </div>
+    </section>
+
+        <!-- Mögliche Tagesroutinen -->
+    <section
+        class="home-routines-section"
+        aria-labelledby="routines-title"
+    >
+        <div class="container home-routines-layout">
+
+            <div class="home-routines-copy">
+
+                <p class="eyebrow">
+                    <?php
+                    esc_html_e(
+                        'Mögliche Tagesroutinen',
+                        'jung-leben'
+                    );
+                    ?>
+                </p>
+
+                <h2 id="routines-title">
+                    <?php
+                    esc_html_e(
+                        'Eine mögliche Tagesstruktur für Longevity-Produkte.',
+                        'jung-leben'
+                    );
+                    ?>
+                </h2>
+
+                <p>
+                    <?php
+                    esc_html_e(
+                        'Roberto ordnet ausgewählte Produkte nach Tageszeit: morgens für Energie und Zellstoffwechsel, mittags für Balance und Pflanzenstoffe, abends für Entspannung und Regeneration.',
+                        'jung-leben'
+                    );
+                    ?>
+                </p>
+
+                <p>
+                    <?php
+                    esc_html_e(
+                        'Die dargestellte Routine ist keine fixe Einnahmeempfehlung, sondern eine persönliche Orientierung für Menschen, die bewusst mit Nahrungsergänzungen und Produktkombinationen umgehen möchten.',
+                        'jung-leben'
+                    );
+                    ?>
+                </p>
+
+                <a
+                    href="<?php echo esc_url($routinen_url); ?>"
+                    class="btn btn-primary"
+                >
+                    <?php
+                    esc_html_e(
+                        'Routine ansehen',
+                        'jung-leben'
+                    );
+                    ?>
+                </a>
+
+            </div>
+
+            <div class="home-routines-card">
+
+                <article class="routine-time routine-time--morning">
+                    <div
+                        class="routine-time__icon"
+                        aria-hidden="true"
+                    >
+                        ☀
+                    </div>
+
+                    <div class="routine-time__content">
+                        <p class="routine-time__label">
+                            <?php
+                            esc_html_e(
+                                'Morgens',
+                                'jung-leben'
+                            );
+                            ?>
+                        </p>
+
+                        <p class="routine-time__products">
+                            <?php
+                            esc_html_e(
+                                'NADH, Ashwagandha, Q10, Resveratrol',
+                                'jung-leben'
+                            );
+                            ?>
+                        </p>
+                    </div>
+                </article>
+
+                <article class="routine-time routine-time--midday">
+                    <div
+                        class="routine-time__icon"
+                        aria-hidden="true"
+                    >
+                        🌿
+                    </div>
+
+                    <div class="routine-time__content">
+                        <p class="routine-time__label">
+                            <?php
+                            esc_html_e(
+                                'Mittags',
+                                'jung-leben'
+                            );
+                            ?>
+                        </p>
+
+                        <p class="routine-time__products">
+                            <?php
+                            esc_html_e(
+                                'Omega 3-6-9, Shilajit, OPC, Quercetin',
+                                'jung-leben'
+                            );
+                            ?>
+                        </p>
+                    </div>
+                </article>
+
+                <article class="routine-time routine-time--evening">
+                    <div
+                        class="routine-time__icon"
+                        aria-hidden="true"
+                    >
+                        ☾
+                    </div>
+
+                    <div class="routine-time__content">
+                        <p class="routine-time__label">
+                            <?php
+                            esc_html_e(
+                                'Abends',
+                                'jung-leben'
+                            );
+                            ?>
+                        </p>
+
+                        <p class="routine-time__products">
+                            <?php
+                            esc_html_e(
+                                'Magnesium, Weihrauch, Oreganoöl',
+                                'jung-leben'
+                            );
+                            ?>
+                        </p>
+                    </div>
+                </article>
+
+                <aside class="home-routines-notice">
+                    <div
+                        class="home-routines-notice__icon"
+                        aria-hidden="true"
+                    >
+                        i
+                    </div>
+
+                    <p>
+                        <?php
+                        esc_html_e(
+                            'Produkte, Kombinationen, Dosierungen und Einnahmedauer sind individuell. Einzelne Produkte können nur für eine begrenzte Zeit sinnvoll sein. Passe deine Routine an dein persönliches Empfinden an und hole bei Unsicherheiten fachlichen Rat ein.',
+                            'jung-leben'
+                        );
+                        ?>
+                    </p>
+                </aside>
+
             </div>
 
         </div>
