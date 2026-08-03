@@ -3,7 +3,7 @@
  * Plugin Name: Jung Leben Core
  * Plugin URI: https://jung-leben.ch
  * Description: Zentrale Produkt-, Partner- und Affiliate-Funktionen für Jung Leben.
- * Version: 0.1.0
+ * Version: 0.2.0
  * Author: Jung Leben
  * Text Domain: jung-leben-core
  * Domain Path: /languages
@@ -24,7 +24,7 @@ if (! defined('ABSPATH')) {
  */
 define(
     'JUNG_LEBEN_CORE_VERSION',
-    '0.1.0'
+    '0.2.0'
 );
 
 define(
@@ -60,15 +60,19 @@ add_action(
 );
 
 /**
- * Produktverwaltung laden.
+ * Plugin-Komponenten laden.
  */
 require_once JUNG_LEBEN_CORE_PATH
     . 'includes/class-jung-leben-core-products.php';
 
+require_once JUNG_LEBEN_CORE_PATH
+    . 'includes/class-jung-leben-core-product-fields.php';
+
 /**
- * Plugin-Funktionen initialisieren.
+ * Plugin-Komponenten initialisieren.
  */
 Jung_Leben_Core_Products::init();
+Jung_Leben_Core_Product_Fields::init();
 
 /**
  * Aktivierung und Deaktivierung.
