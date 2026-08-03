@@ -10,12 +10,17 @@ declare(strict_types=1);
 get_header();
 
 /**
+ * ID der aktuell angezeigten Startseite.
+ */
+$front_page_id = (int) get_queried_object_id();
+
+/**
  * URL der WordPress-Beitragsseite ermitteln.
  */
 $ratgeber_page_id = (int) get_option('page_for_posts');
 
 $ratgeber_url = $ratgeber_page_id > 0
-    ? get_permalink($ratgeber_page_id)
+    ? (string) get_permalink($ratgeber_page_id)
     : home_url('/ratgeber/');
 
 /**
@@ -24,7 +29,7 @@ $ratgeber_url = $ratgeber_page_id > 0
 $empfehlungen_page = get_page_by_path('empfehlungen');
 
 $empfehlungen_url = $empfehlungen_page instanceof WP_Post
-    ? get_permalink($empfehlungen_page)
+    ? (string) get_permalink($empfehlungen_page)
     : home_url('/empfehlungen/');
 
 /**
@@ -33,16 +38,16 @@ $empfehlungen_url = $empfehlungen_page instanceof WP_Post
 $routinen_page = get_page_by_path('routinen');
 
 $routinen_url = $routinen_page instanceof WP_Post
-    ? get_permalink($routinen_page)
+    ? (string) get_permalink($routinen_page)
     : home_url('/routinen/');
-    
+
 /**
  * Kontaktseite ermitteln.
  */
 $kontakt_page = get_page_by_path('kontakt');
 
 $kontakt_url = $kontakt_page instanceof WP_Post
-    ? get_permalink($kontakt_page)
+    ? (string) get_permalink($kontakt_page)
     : home_url('/kontakt/');
 
 /**
@@ -51,105 +56,245 @@ $kontakt_url = $kontakt_page instanceof WP_Post
 $ueber_mich_page = get_page_by_path('ueber-mich');
 
 $ueber_mich_url = $ueber_mich_page instanceof WP_Post
-    ? get_permalink($ueber_mich_page)
+    ? (string) get_permalink($ueber_mich_page)
     : home_url('/ueber-mich/');
+
+/**
+ * ACF-Textfeld laden und bei einem leeren Feld einen
+ * definierten Standardwert verwenden.
+ */
+$get_home_text = static function (
+    string $field_name,
+    string $fallback
+) use ($front_page_id): string {
+    if (! function_exists('get_field')) {
+        return $fallback;
+    }
+
+    $value = get_field(
+        $field_name,
+        $front_page_id
+    );
+
+    if (! is_string($value)) {
+        return $fallback;
+    }
+
+    $value = trim($value);
+
+    return $value !== ''
+        ? $value
+        : $fallback;
+};
+
+/**
+ * ACF-URL laden und bei einem leeren Feld die automatisch
+ * ermittelte WordPress-Adresse verwenden.
+ */
+$get_home_url = static function (
+    string $field_name,
+    string $fallback
+) use ($front_page_id): string {
+    if (! function_exists('get_field')) {
+        return $fallback;
+    }
+
+    $value = get_field(
+        $field_name,
+        $front_page_id
+    );
+
+    if (! is_string($value)) {
+        return $fallback;
+    }
+
+    $value = trim($value);
+
+    return $value !== ''
+        ? $value
+        : $fallback;
+};
+
+/**
+ * Inhalte des Hero-Bereichs laden.
+ */
+$hero_eyebrow = $get_home_text(
+    'jl_home_hero_eyebrow',
+    'Longevity ist kein Sprint und kein Zufall'
+);
+
+$hero_title = $get_home_text(
+    'jl_home_hero_title',
+    'The goal is to die young – as late as possible'
+);
+
+$hero_text = $get_home_text(
+    'jl_home_hero_text',
+    'Es sind die täglichen Entscheidungen, die darüber bestimmen, wie wir altern. Jung Leben hilft dir dabei, evidenzbasierte Produkte, Routinen und Erfahrungen zu entdecken, die Vitalität, Wohlbefinden und Langlebigkeit unterstützen.'
+);
+
+$hero_button_one_text = $get_home_text(
+    'jl_home_hero_button_one_text',
+    'Empfehlungen entdecken'
+);
+
+$hero_button_one_url = $get_home_url(
+    'jl_home_hero_button_one_url',
+    $empfehlungen_url
+);
+
+$hero_button_two_text = $get_home_text(
+    'jl_home_hero_button_two_text',
+    'Erfahrungen lesen'
+);
+
+$hero_button_two_url = $get_home_url(
+    'jl_home_hero_button_two_url',
+    $ratgeber_url
+);
+
+$hero_benefit_one = $get_home_text(
+    'jl_home_hero_benefit_one',
+    '🌿 Longevity'
+);
+
+$hero_benefit_two = $get_home_text(
+    'jl_home_hero_benefit_two',
+    '✨ Persönliche Erfahrungen'
+);
+
+$hero_benefit_three = $get_home_text(
+    'jl_home_hero_benefit_three',
+    '💡 Bewusste Routinen'
+);
+
+/**
+ * Optionales ACF-Hintergrundbild laden.
+ *
+ * Unterstützt sicherheitshalber die Rückgabeformate:
+ * - Array
+ * - Attachment-ID
+ * - direkte URL
+ */
+$hero_background = function_exists('get_field')
+    ? get_field(
+        'jl_home_hero_background',
+        $front_page_id
+    )
+    : null;
+
+$hero_background_url = '';
+
+if (
+    is_array($hero_background)
+    && isset($hero_background['url'])
+    && is_string($hero_background['url'])
+) {
+    $hero_background_url = $hero_background['url'];
+} elseif (is_int($hero_background)) {
+    $attachment_url = wp_get_attachment_image_url(
+        $hero_background,
+        'full'
+    );
+
+    if (is_string($attachment_url)) {
+        $hero_background_url = $attachment_url;
+    }
+} elseif (is_string($hero_background)) {
+    $hero_background_url = trim($hero_background);
+}
+
+$hero_style = '';
+
+if ($hero_background_url !== '') {
+    $hero_style = sprintf(
+        'background-image: url("%s");',
+        esc_url_raw($hero_background_url)
+    );
+}
 ?>
 
 <main id="main-content">
 
     <!-- Hero-Bereich -->
-    <section class="hero home-hero">
+    <section
+        class="hero home-hero"
+        <?php if ($hero_style !== '') : ?>
+            style="<?php echo esc_attr($hero_style); ?>"
+        <?php endif; ?>
+    >
         <div class="hero-overlay"></div>
 
         <div class="container hero-content home-hero-content">
             <div class="hero-text">
 
                 <p class="eyebrow">
-                    <?php
-                    esc_html_e(
-                        'Longevity ist kein Sprint und kein Zufall',
-                        'jung-leben'
-                    );
-                    ?>
+                    <?php echo esc_html($hero_eyebrow); ?>
                 </p>
 
                 <h1>
-                    <?php
-                    esc_html_e(
-                        'The goal is to die young – as late as possible',
-                        'jung-leben'
-                    );
-                    ?>
+                    <?php echo esc_html($hero_title); ?>
                 </h1>
 
                 <p class="hero-lead">
-                    <?php
-                    esc_html_e(
-                        'Es sind die täglichen Entscheidungen, die darüber bestimmen, wie wir altern. Jung Leben hilft dir dabei, evidenzbasierte Produkte, Routinen und Erfahrungen zu entdecken, die Vitalität, Wohlbefinden und Langlebigkeit unterstützen.',
-                        'jung-leben'
-                    );
-                    ?>
+                    <?php echo esc_html($hero_text); ?>
                 </p>
 
                 <div class="hero-actions">
 
-                    <a
-                        href="<?php echo esc_url($empfehlungen_url); ?>"
-                        class="btn btn-primary"
-                    >
-                        <?php
-                        esc_html_e(
-                            'Empfehlungen entdecken',
-                            'jung-leben'
-                        );
-                        ?>
-                    </a>
+                    <?php if ($hero_button_one_text !== '') : ?>
+                        <a
+                            href="<?php echo esc_url(
+                                $hero_button_one_url
+                            ); ?>"
+                            class="btn btn-primary"
+                        >
+                            <?php echo esc_html(
+                                $hero_button_one_text
+                            ); ?>
+                        </a>
+                    <?php endif; ?>
 
-                    <a
-                        href="<?php echo esc_url($ratgeber_url); ?>"
-                        class="btn btn-light"
-                    >
-                        <?php
-                        esc_html_e(
-                            'Erfahrungen lesen',
-                            'jung-leben'
-                        );
-                        ?>
-                    </a>
+                    <?php if ($hero_button_two_text !== '') : ?>
+                        <a
+                            href="<?php echo esc_url(
+                                $hero_button_two_url
+                            ); ?>"
+                            class="btn btn-light"
+                        >
+                            <?php echo esc_html(
+                                $hero_button_two_text
+                            ); ?>
+                        </a>
+                    <?php endif; ?>
 
                 </div>
 
                 <div class="hero-benefits">
 
-                    <span>
-                        🌿
-                        <?php
-                        esc_html_e(
-                            'Longevity',
-                            'jung-leben'
-                        );
-                        ?>
-                    </span>
+                    <?php if ($hero_benefit_one !== '') : ?>
+                        <span>
+                            <?php echo esc_html(
+                                $hero_benefit_one
+                            ); ?>
+                        </span>
+                    <?php endif; ?>
 
-                    <span>
-                        ✨
-                        <?php
-                        esc_html_e(
-                            'Persönliche Erfahrungen',
-                            'jung-leben'
-                        );
-                        ?>
-                    </span>
+                    <?php if ($hero_benefit_two !== '') : ?>
+                        <span>
+                            <?php echo esc_html(
+                                $hero_benefit_two
+                            ); ?>
+                        </span>
+                    <?php endif; ?>
 
-                    <span>
-                        💡
-                        <?php
-                        esc_html_e(
-                            'Bewusste Routinen',
-                            'jung-leben'
-                        );
-                        ?>
-                    </span>
+                    <?php if ($hero_benefit_three !== '') : ?>
+                        <span>
+                            <?php echo esc_html(
+                                $hero_benefit_three
+                            ); ?>
+                        </span>
+                    <?php endif; ?>
 
                 </div>
 
@@ -282,12 +427,47 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                     aria-hidden="true"
                     focusable="false"
                 >
-                    <line x1="300" y1="260" x2="300" y2="65"></line>
-                    <line x1="300" y1="260" x2="510" y2="155"></line>
-                    <line x1="300" y1="260" x2="510" y2="390"></line>
-                    <line x1="300" y1="260" x2="300" y2="465"></line>
-                    <line x1="300" y1="260" x2="90" y2="390"></line>
-                    <line x1="300" y1="260" x2="90" y2="155"></line>
+                    <line
+                        x1="300"
+                        y1="260"
+                        x2="300"
+                        y2="65"
+                    ></line>
+
+                    <line
+                        x1="300"
+                        y1="260"
+                        x2="510"
+                        y2="155"
+                    ></line>
+
+                    <line
+                        x1="300"
+                        y1="260"
+                        x2="510"
+                        y2="390"
+                    ></line>
+
+                    <line
+                        x1="300"
+                        y1="260"
+                        x2="300"
+                        y2="465"
+                    ></line>
+
+                    <line
+                        x1="300"
+                        y1="260"
+                        x2="90"
+                        y2="390"
+                    ></line>
+
+                    <line
+                        x1="300"
+                        y1="260"
+                        x2="90"
+                        y2="155"
+                    ></line>
                 </svg>
 
                 <div class="orientation-map__center">
@@ -311,7 +491,8 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                 </div>
 
                 <div
-                    class="orientation-map__node orientation-map__node--experiences"
+                    class="orientation-map__node
+                    orientation-map__node--experiences"
                 >
                     <span aria-hidden="true">✨</span>
 
@@ -324,7 +505,8 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                 </div>
 
                 <div
-                    class="orientation-map__node orientation-map__node--recommendations"
+                    class="orientation-map__node
+                    orientation-map__node--recommendations"
                 >
                     <span aria-hidden="true">✓</span>
 
@@ -337,7 +519,8 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                 </div>
 
                 <div
-                    class="orientation-map__node orientation-map__node--products"
+                    class="orientation-map__node
+                    orientation-map__node--products"
                 >
                     <span aria-hidden="true">🌿</span>
 
@@ -350,7 +533,8 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                 </div>
 
                 <div
-                    class="orientation-map__node orientation-map__node--routines"
+                    class="orientation-map__node
+                    orientation-map__node--routines"
                 >
                     <span aria-hidden="true">☀</span>
 
@@ -363,7 +547,8 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                 </div>
 
                 <div
-                    class="orientation-map__node orientation-map__node--knowledge"
+                    class="orientation-map__node
+                    orientation-map__node--knowledge"
                 >
                     <span aria-hidden="true">💡</span>
 
@@ -376,7 +561,8 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                 </div>
 
                 <div
-                    class="orientation-map__node orientation-map__node--exchange"
+                    class="orientation-map__node
+                    orientation-map__node--exchange"
                 >
                     <span aria-hidden="true">↔</span>
 
@@ -389,7 +575,6 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                 </div>
 
             </div>
-
         </div>
     </section>
 
@@ -687,7 +872,7 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
         </div>
     </section>
 
-        <!-- Mögliche Tagesroutinen -->
+    <!-- Mögliche Tagesroutinen -->
     <section
         class="home-routines-section"
         aria-labelledby="routines-title"
@@ -748,7 +933,10 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
 
             <div class="home-routines-card">
 
-                <article class="routine-time routine-time--morning">
+                <article
+                    class="routine-time
+                    routine-time--morning"
+                >
                     <div
                         class="routine-time__icon"
                         aria-hidden="true"
@@ -777,7 +965,10 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                     </div>
                 </article>
 
-                <article class="routine-time routine-time--midday">
+                <article
+                    class="routine-time
+                    routine-time--midday"
+                >
                     <div
                         class="routine-time__icon"
                         aria-hidden="true"
@@ -806,7 +997,10 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                     </div>
                 </article>
 
-                <article class="routine-time routine-time--evening">
+                <article
+                    class="routine-time
+                    routine-time--evening"
+                >
                     <div
                         class="routine-time__icon"
                         aria-hidden="true"
@@ -854,9 +1048,9 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                 </aside>
 
             </div>
-
         </div>
     </section>
+
     <!-- Community und Kontakt -->
     <section
         class="home-community-section"
@@ -912,7 +1106,9 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                         class="home-community-symbol"
                         aria-hidden="true"
                     >
-                        <span class="home-community-symbol__center">
+                        <span
+                            class="home-community-symbol__center"
+                        >
                             JL
                         </span>
 
@@ -939,7 +1135,8 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
 
                     <a
                         href="<?php echo esc_url($kontakt_url); ?>"
-                        class="btn btn-primary home-community-button"
+                        class="btn btn-primary
+                        home-community-button"
                     >
                         <?php
                         esc_html_e(
@@ -961,7 +1158,6 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                     </p>
 
                 </div>
-
             </div>
 
         </div>

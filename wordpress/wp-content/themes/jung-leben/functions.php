@@ -94,3 +94,13 @@ function jung_leben_enqueue_assets(): void
     }
 }
 add_action('wp_enqueue_scripts', 'jung_leben_enqueue_assets');
+
+/**
+ * ACF-Felder laden.
+ */
+$acf_homepage_file = get_template_directory()
+    . '/inc/acf-homepage.php';
+
+if (file_exists($acf_homepage_file)) {
+    require_once $acf_homepage_file;
+}
