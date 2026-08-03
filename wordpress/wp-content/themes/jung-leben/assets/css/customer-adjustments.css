@@ -1,0 +1,166 @@
+/* =========================================================
+   Kundenanpassungen 2026: Header und Hero
+   ========================================================= */
+   /* =========================================================
+   Kundenanpassungen 2026: Header und Hero
+   ========================================================= */
+
+/* Header */
+
+.site-header {
+  position: relative;
+  top: auto;
+  width: 100%;
+  background: #ffffff;
+  border-bottom: 1px solid #edf0ec;
+  box-shadow: none;
+}
+
+.header-content {
+  min-height: 88px;
+}
+
+.logo {
+  color: #073f19;
+}
+
+.logo:hover {
+  color: #073f19;
+}
+
+.logo-icon {
+  background: #073f19;
+  color: #ffffff;
+}
+
+.logo-text {
+  color: #073f19;
+}
+
+.main-nav-list {
+  gap: 3px;
+}
+
+.main-nav-list a {
+  display: block;
+  padding: 8px 14px;
+  background: #073f19;
+  color: #ffffff;
+  border-radius: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.main-nav-list a:hover,
+.main-nav .current-menu-item > a,
+.main-nav .current_page_item > a {
+  background: #0d5a26;
+  color: #ffffff;
+}
+
+/* Neuer Hero */
+
+.jl-home-hero {
+  width: 100%;
+  padding: clamp(5rem, 10vw, 9rem) 0 clamp(6rem, 12vw, 11rem);
+  background: #ffffff;
+}
+
+.jl-home-hero__panel {
+  width: min(100%, 720px);
+  padding: clamp(2rem, 5vw, 4rem);
+  background: #063f19;
+  color: #ffffff;
+}
+
+.jl-home-hero__title {
+  max-width: 650px;
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(2.8rem, 6vw, 5.7rem);
+  font-weight: 750;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+}
+
+.jl-home-hero__text {
+  max-width: 650px;
+  margin: 1.75rem 0 0;
+  color: #ffffff;
+  font-size: clamp(1rem, 1.6vw, 1.15rem);
+  line-height: 1.55;
+}
+
+.jl-home-hero__action {
+  display: flex;
+  justify-content: center;
+  width: min(100%, 720px);
+  margin-top: 1.6rem;
+}
+
+.jl-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  padding: 0.8rem 1.7rem;
+  border: 0;
+  border-radius: 8px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
+}
+
+.jl-button--gold {
+  background: #f5cf68;
+  color: #073f19;
+  box-shadow: 0 12px 30px rgba(84, 69, 20, 0.12);
+}
+
+.jl-button--gold:hover {
+  background: #f8d979;
+  color: #073f19;
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(84, 69, 20, 0.17);
+}
+
+@media (max-width: 760px) {
+  .header-content {
+    min-height: 72px;
+  }
+
+  .main-nav {
+    background: #ffffff;
+  }
+
+  .main-nav-list {
+    gap: 4px;
+  }
+
+  .main-nav-list a {
+    padding: 12px 16px;
+  }
+
+  .jl-home-hero {
+    padding: 3.5rem 0 5rem;
+  }
+
+  .jl-home-hero__panel {
+    padding: 2rem 1.4rem;
+  }
+
+  .jl-home-hero__title {
+    font-size: clamp(2.6rem, 13vw, 4rem);
+  }
+
+  .jl-home-hero__action {
+    justify-content: flex-start;
+  }
+}
