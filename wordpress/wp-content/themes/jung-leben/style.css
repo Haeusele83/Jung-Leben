@@ -1,0 +1,127 @@
+/*
+Theme Name: Jung Leben
+Theme URI: https://jung-leben.ch
+Author: Thomas Häuselmann
+Description: Individuelles WordPress-Theme für die Affiliate-Plattform Jung Leben.
+Version: 0.1.0
+Requires at least: 6.5
+Requires PHP: 8.1
+Text Domain: jung-leben
+*/
+
+:root {
+  --jl-background: #f8f7f2;
+  --jl-surface: #ffffff;
+  --jl-text: #243029;
+  --jl-muted: #647067;
+  --jl-primary: #56745f;
+  --jl-border: #dfe4df;
+  --jl-content-width: 1200px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--jl-background);
+  color: var(--jl-text);
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.6;
+}
+
+a {
+  color: var(--jl-primary);
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.site-container {
+  width: min(100% - 2rem, var(--jl-content-width));
+  margin-inline: auto;
+}
+
+.site-header {
+  background: var(--jl-surface);
+  border-bottom: 1px solid var(--jl-border);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 80px;
+  gap: 2rem;
+}
+
+.site-branding a {
+  color: var(--jl-text);
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.primary-navigation ul {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.primary-navigation a {
+  color: var(--jl-text);
+  text-decoration: none;
+}
+
+.primary-navigation a:hover,
+.primary-navigation .current-menu-item > a {
+  color: var(--jl-primary);
+}
+
+.site-main {
+  min-height: 60vh;
+  padding-block: 4rem;
+}
+
+.page-content,
+.post-content {
+  max-width: 850px;
+}
+
+.site-footer {
+  margin-top: 4rem;
+  padding-block: 2rem;
+  background: var(--jl-text);
+  color: #ffffff;
+}
+
+.site-footer a {
+  color: #ffffff;
+}
+
+@media (max-width: 760px) {
+  .site-header__inner {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-block: 1rem;
+  }
+
+  .primary-navigation ul {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
