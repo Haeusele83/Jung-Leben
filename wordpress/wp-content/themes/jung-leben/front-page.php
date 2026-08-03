@@ -284,6 +284,68 @@ if ($about_image_url !== '') {
         esc_url_raw($about_image_url)
     );
 }
+/**
+ * Inhalte des Orientierungsbereichs laden.
+ */
+$orientation_eyebrow = $get_home_text(
+    'jl_home_orientation_eyebrow',
+    'Wie funktioniert Jung Leben'
+);
+
+$orientation_title = $get_home_text(
+    'jl_home_orientation_title',
+    'Ein Ort der Orientierung'
+);
+
+$orientation_intro = $get_home_text(
+    'jl_home_orientation_intro',
+    'Es gibt keinen vorgeschriebenen Einstiegspunkt. Du kannst Jung Leben über persönliche Erfahrungen, konkrete Empfehlungen, einzelne Produkte oder mögliche Routinen entdecken.'
+);
+
+$orientation_text = $get_home_text(
+    'jl_home_orientation_text',
+    'Alle Wege führen zu einem gemeinsamen Ziel: Informationen besser einzuordnen und bewusste Entscheidungen für dein persönliches Wohlbefinden zu treffen.'
+);
+
+$orientation_center_title = $get_home_text(
+    'jl_home_orientation_center_title',
+    'Jung Leben'
+);
+
+$orientation_center_subtitle = $get_home_text(
+    'jl_home_orientation_center_subtitle',
+    'Orientierung'
+);
+
+$orientation_node_one = $get_home_text(
+    'jl_home_orientation_node_one',
+    'Erfahrungen'
+);
+
+$orientation_node_two = $get_home_text(
+    'jl_home_orientation_node_two',
+    'Empfehlungen'
+);
+
+$orientation_node_three = $get_home_text(
+    'jl_home_orientation_node_three',
+    'Produkte'
+);
+
+$orientation_node_four = $get_home_text(
+    'jl_home_orientation_node_four',
+    'Routinen'
+);
+
+$orientation_node_five = $get_home_text(
+    'jl_home_orientation_node_five',
+    'Wissen'
+);
+
+$orientation_node_six = $get_home_text(
+    'jl_home_orientation_node_six',
+    'Austausch'
+);
 ?>
 
 <main id="main-content">
@@ -430,7 +492,7 @@ if ($about_image_url !== '') {
         </div>
     </section>
 
-    <!-- Ein Ort der Orientierung -->
+        <!-- Ein Ort der Orientierung -->
     <section
         class="home-orientation-section"
         aria-labelledby="orientation-title"
@@ -439,41 +501,35 @@ if ($about_image_url !== '') {
 
             <div class="home-orientation-copy">
 
-                <p class="eyebrow">
-                    <?php
-                    esc_html_e(
-                        'Wie funktioniert Jung Leben',
-                        'jung-leben'
-                    );
-                    ?>
-                </p>
+                <?php if ($orientation_eyebrow !== '') : ?>
+                    <p class="eyebrow">
+                        <?php echo esc_html(
+                            $orientation_eyebrow
+                        ); ?>
+                    </p>
+                <?php endif; ?>
 
                 <h2 id="orientation-title">
-                    <?php
-                    esc_html_e(
-                        'Ein Ort der Orientierung',
-                        'jung-leben'
-                    );
-                    ?>
+                    <?php echo esc_html(
+                        $orientation_title
+                    ); ?>
                 </h2>
 
-                <p class="home-orientation-intro">
-                    <?php
-                    esc_html_e(
-                        'Es gibt keinen vorgeschriebenen Einstiegspunkt. Du kannst Jung Leben über persönliche Erfahrungen, konkrete Empfehlungen, einzelne Produkte oder mögliche Routinen entdecken.',
-                        'jung-leben'
-                    );
-                    ?>
-                </p>
+                <?php if ($orientation_intro !== '') : ?>
+                    <p class="home-orientation-intro">
+                        <?php echo esc_html(
+                            $orientation_intro
+                        ); ?>
+                    </p>
+                <?php endif; ?>
 
-                <p>
-                    <?php
-                    esc_html_e(
-                        'Alle Wege führen zu einem gemeinsamen Ziel: Informationen besser einzuordnen und bewusste Entscheidungen für dein persönliches Wohlbefinden zu treffen.',
-                        'jung-leben'
-                    );
-                    ?>
-                </p>
+                <?php if ($orientation_text !== '') : ?>
+                    <p>
+                        <?php echo esc_html(
+                            $orientation_text
+                        ); ?>
+                    </p>
+                <?php endif; ?>
 
             </div>
 
@@ -484,7 +540,6 @@ if ($about_image_url !== '') {
                     'jung-leben'
                 ); ?>"
             >
-
                 <svg
                     class="orientation-map__lines"
                     viewBox="0 0 600 520"
@@ -492,66 +547,25 @@ if ($about_image_url !== '') {
                     aria-hidden="true"
                     focusable="false"
                 >
-                    <line
-                        x1="300"
-                        y1="260"
-                        x2="300"
-                        y2="65"
-                    ></line>
-
-                    <line
-                        x1="300"
-                        y1="260"
-                        x2="510"
-                        y2="155"
-                    ></line>
-
-                    <line
-                        x1="300"
-                        y1="260"
-                        x2="510"
-                        y2="390"
-                    ></line>
-
-                    <line
-                        x1="300"
-                        y1="260"
-                        x2="300"
-                        y2="465"
-                    ></line>
-
-                    <line
-                        x1="300"
-                        y1="260"
-                        x2="90"
-                        y2="390"
-                    ></line>
-
-                    <line
-                        x1="300"
-                        y1="260"
-                        x2="90"
-                        y2="155"
-                    ></line>
+                    <line x1="300" y1="260" x2="300" y2="65"></line>
+                    <line x1="300" y1="260" x2="510" y2="155"></line>
+                    <line x1="300" y1="260" x2="510" y2="390"></line>
+                    <line x1="300" y1="260" x2="300" y2="465"></line>
+                    <line x1="300" y1="260" x2="90" y2="390"></line>
+                    <line x1="300" y1="260" x2="90" y2="155"></line>
                 </svg>
 
                 <div class="orientation-map__center">
                     <span class="orientation-map__brand">
-                        <?php
-                        esc_html_e(
-                            'Jung Leben',
-                            'jung-leben'
-                        );
-                        ?>
+                        <?php echo esc_html(
+                            $orientation_center_title
+                        ); ?>
                     </span>
 
                     <span class="orientation-map__purpose">
-                        <?php
-                        esc_html_e(
-                            'Orientierung',
-                            'jung-leben'
-                        );
-                        ?>
+                        <?php echo esc_html(
+                            $orientation_center_subtitle
+                        ); ?>
                     </span>
                 </div>
 
@@ -561,12 +575,9 @@ if ($about_image_url !== '') {
                 >
                     <span aria-hidden="true">✨</span>
 
-                    <?php
-                    esc_html_e(
-                        'Erfahrungen',
-                        'jung-leben'
-                    );
-                    ?>
+                    <?php echo esc_html(
+                        $orientation_node_one
+                    ); ?>
                 </div>
 
                 <div
@@ -575,12 +586,9 @@ if ($about_image_url !== '') {
                 >
                     <span aria-hidden="true">✓</span>
 
-                    <?php
-                    esc_html_e(
-                        'Empfehlungen',
-                        'jung-leben'
-                    );
-                    ?>
+                    <?php echo esc_html(
+                        $orientation_node_two
+                    ); ?>
                 </div>
 
                 <div
@@ -589,12 +597,9 @@ if ($about_image_url !== '') {
                 >
                     <span aria-hidden="true">🌿</span>
 
-                    <?php
-                    esc_html_e(
-                        'Produkte',
-                        'jung-leben'
-                    );
-                    ?>
+                    <?php echo esc_html(
+                        $orientation_node_three
+                    ); ?>
                 </div>
 
                 <div
@@ -603,12 +608,9 @@ if ($about_image_url !== '') {
                 >
                     <span aria-hidden="true">☀</span>
 
-                    <?php
-                    esc_html_e(
-                        'Routinen',
-                        'jung-leben'
-                    );
-                    ?>
+                    <?php echo esc_html(
+                        $orientation_node_four
+                    ); ?>
                 </div>
 
                 <div
@@ -617,12 +619,9 @@ if ($about_image_url !== '') {
                 >
                     <span aria-hidden="true">💡</span>
 
-                    <?php
-                    esc_html_e(
-                        'Wissen',
-                        'jung-leben'
-                    );
-                    ?>
+                    <?php echo esc_html(
+                        $orientation_node_five
+                    ); ?>
                 </div>
 
                 <div
@@ -631,18 +630,14 @@ if ($about_image_url !== '') {
                 >
                     <span aria-hidden="true">↔</span>
 
-                    <?php
-                    esc_html_e(
-                        'Austausch',
-                        'jung-leben'
-                    );
-                    ?>
+                    <?php echo esc_html(
+                        $orientation_node_six
+                    ); ?>
                 </div>
 
             </div>
         </div>
     </section>
-
     <!-- Robertos Reise und Erfahrungen -->
     <section
         class="home-journey-section"
