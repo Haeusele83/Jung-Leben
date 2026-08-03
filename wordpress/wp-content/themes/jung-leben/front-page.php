@@ -39,6 +39,7 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
 
 <main id="main-content">
 
+    <!-- Hero-Bereich -->
     <section class="hero home-hero">
         <div class="hero-overlay"></div>
 
@@ -101,6 +102,7 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                 </div>
 
                 <div class="hero-benefits">
+
                     <span>
                         🌿
                         <?php
@@ -130,12 +132,14 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                         );
                         ?>
                     </span>
+
                 </div>
 
             </div>
         </div>
     </section>
 
+    <!-- Über Jung Leben -->
     <section class="home-curator-section">
         <div class="container home-curator-grid">
 
@@ -149,7 +153,7 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                 <p class="eyebrow">
                     <?php
                     esc_html_e(
-                        'Über Roberto',
+                        'Über Jung Leben',
                         'jung-leben'
                     );
                     ?>
@@ -158,7 +162,7 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                 <h2>
                     <?php
                     esc_html_e(
-                        'Erfahrung statt leere Produktversprechen.',
+                        'Praktische Erfahrung statt Produkt-Blabla.',
                         'jung-leben'
                     );
                     ?>
@@ -167,7 +171,7 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                 <p>
                     <?php
                     esc_html_e(
-                        'Jung Leben ist aus Robertos persönlichem Weg entstanden: aus Selbstreflexion, Körperbewusstsein und dem Wunsch, Gesundheit ganzheitlicher zu betrachten.',
+                        'Jung Leben ist aus Robertos persönlicher Auseinandersetzung mit Gesundheit, Vitalität und Langlebigkeit entstanden. Im Mittelpunkt stehen Erfahrungen aus dem Alltag – ehrlich, nachvollziehbar und ohne leere Versprechen.',
                         'jung-leben'
                     );
                     ?>
@@ -176,7 +180,7 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
                 <p>
                     <?php
                     esc_html_e(
-                        'Als Longevity Curator verbindet er persönliche Beobachtungen mit kuratierten Produkten aus den Bereichen Vitalität, Pflanzenkraft, Mundpflege, Hygiene, Beauty und Balance.',
+                        'Die Plattform verbindet persönliche Beobachtungen mit sorgfältig ausgewählten Produkten, Routinen und fundierten Informationen. Ziel ist nicht, die eine perfekte Lösung zu präsentieren, sondern Orientierung für bewusste Entscheidungen zu geben.',
                         'jung-leben'
                     );
                     ?>
@@ -198,6 +202,7 @@ $ueber_mich_url = $ueber_mich_page instanceof WP_Post
         </div>
     </section>
 
+    <!-- Inhalte aus dem WordPress-Editor -->
     <?php while (have_posts()) : ?>
         <?php the_post(); ?>
 
