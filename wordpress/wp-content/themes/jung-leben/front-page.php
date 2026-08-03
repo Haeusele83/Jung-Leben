@@ -114,7 +114,28 @@ $get_home_url = static function (
         ? $value
         : $fallback;
 };
+/**
+ * ACF-Ja-/Nein-Feld laden.
+ */
+$get_home_bool = static function (
+    string $field_name,
+    bool $fallback = true
+) use ($front_page_id): bool {
+    if (! function_exists('get_field')) {
+        return $fallback;
+    }
 
+    $value = get_field(
+        $field_name,
+        $front_page_id
+    );
+
+    if ($value === null || $value === '') {
+        return $fallback;
+    }
+
+    return (bool) $value;
+};
 /**
  * Inhalte des Hero-Bereichs laden.
  */
@@ -346,6 +367,117 @@ $orientation_node_six = $get_home_text(
     'jl_home_orientation_node_six',
     'Austausch'
 );
+/**
+ * Inhalte von «Robertos Reise und Erfahrungen» laden.
+ */
+$journey_eyebrow = $get_home_text(
+    'jl_home_journey_eyebrow',
+    'Erfahrungen und Empfehlungen'
+);
+
+$journey_title = $get_home_text(
+    'jl_home_journey_title',
+    'Robertos Reise und Erfahrungen'
+);
+
+$journey_intro = $get_home_text(
+    'jl_home_journey_intro',
+    'Persönliche Beobachtungen, bewusste Routinen und ehrliche Einordnungen bilden die Grundlage von Jung Leben.'
+);
+
+$journey_button_text = $get_home_text(
+    'jl_home_journey_button_text',
+    'Erfahrungen entdecken'
+);
+
+$journey_button_url = $get_home_url(
+    'jl_home_journey_button_url',
+    $ratgeber_url
+);
+
+/**
+ * Drei feste Slides definieren.
+ *
+ * Mit ACF Free können die Inhalte bearbeitet und einzelne
+ * Slides deaktiviert werden.
+ */
+$journey_slides = [
+    [
+        'enabled' => $get_home_bool(
+            'jl_home_journey_slide_one_enabled'
+        ),
+        'label' => $get_home_text(
+            'jl_home_journey_slide_one_label',
+            'Der Ausgangspunkt'
+        ),
+        'title' => $get_home_text(
+            'jl_home_journey_slide_one_title',
+            'Gesundheit bewusster betrachten.'
+        ),
+        'text' => $get_home_text(
+            'jl_home_journey_slide_one_text',
+            'Jung Leben entstand aus der persönlichen Auseinandersetzung mit Vitalität, Wohlbefinden und der Frage, welche Entscheidungen langfristig wirklich guttun.'
+        ),
+        'tag' => $get_home_text(
+            'jl_home_journey_slide_one_tag',
+            'Bewusstsein'
+        ),
+    ],
+    [
+        'enabled' => $get_home_bool(
+            'jl_home_journey_slide_two_enabled'
+        ),
+        'label' => $get_home_text(
+            'jl_home_journey_slide_two_label',
+            'Beobachten und ausprobieren'
+        ),
+        'title' => $get_home_text(
+            'jl_home_journey_slide_two_title',
+            'Erfahrungen entstehen im Alltag.'
+        ),
+        'text' => $get_home_text(
+            'jl_home_journey_slide_two_text',
+            'Produkte und Routinen werden nicht isoliert betrachtet. Entscheidend ist, wie verständlich sie sind, wie sie sich in den Alltag integrieren lassen und ob sie zur persönlichen Situation passen.'
+        ),
+        'tag' => $get_home_text(
+            'jl_home_journey_slide_two_tag',
+            'Alltagserfahrung'
+        ),
+    ],
+    [
+        'enabled' => $get_home_bool(
+            'jl_home_journey_slide_three_enabled'
+        ),
+        'label' => $get_home_text(
+            'jl_home_journey_slide_three_label',
+            'Einordnen und weitergeben'
+        ),
+        'title' => $get_home_text(
+            'jl_home_journey_slide_three_title',
+            'Orientierung statt allgemeiner Versprechen.'
+        ),
+        'text' => $get_home_text(
+            'jl_home_journey_slide_three_text',
+            'Erfahrungen werden offen eingeordnet und mit ergänzenden Informationen verbunden. Jung Leben möchte Möglichkeiten aufzeigen, ohne die eine richtige Lösung vorzuschreiben.'
+        ),
+        'tag' => $get_home_text(
+            'jl_home_journey_slide_three_tag',
+            'Orientierung'
+        ),
+    ],
+];
+
+$journey_slides = array_values(
+    array_filter(
+        $journey_slides,
+        static function (array $slide): bool {
+            return $slide['enabled']
+                && trim($slide['title']) !== '';
+        }
+    )
+);
+
+$journey_slide_count = count($journey_slides);
 ?>
 
 <main id="main-content">
@@ -638,299 +770,239 @@ $orientation_node_six = $get_home_text(
             </div>
         </div>
     </section>
-    <!-- Robertos Reise und Erfahrungen -->
-    <section
-        class="home-journey-section"
-        aria-labelledby="journey-title"
-    >
-        <div class="container home-journey-layout">
+      <?php if ($journey_slide_count > 0) : ?>
 
-            <header class="home-journey-heading">
+        <!-- Robertos Reise und Erfahrungen -->
+        <section
+            class="home-journey-section"
+            aria-labelledby="journey-title"
+        >
+            <div class="container home-journey-layout">
 
-                <p class="eyebrow">
-                    <?php
-                    esc_html_e(
-                        'Erfahrungen und Empfehlungen',
+                <header class="home-journey-heading">
+
+                    <?php if ($journey_eyebrow !== '') : ?>
+                        <p class="eyebrow">
+                            <?php echo esc_html(
+                                $journey_eyebrow
+                            ); ?>
+                        </p>
+                    <?php endif; ?>
+
+                    <h2 id="journey-title">
+                        <?php echo esc_html(
+                            $journey_title
+                        ); ?>
+                    </h2>
+
+                    <?php if ($journey_intro !== '') : ?>
+                        <p class="home-journey-heading__text">
+                            <?php echo esc_html(
+                                $journey_intro
+                            ); ?>
+                        </p>
+                    <?php endif; ?>
+
+                    <?php if ($journey_button_text !== '') : ?>
+                        <a
+                            href="<?php echo esc_url(
+                                $journey_button_url
+                            ); ?>"
+                            class="btn btn-primary"
+                        >
+                            <?php echo esc_html(
+                                $journey_button_text
+                            ); ?>
+                        </a>
+                    <?php endif; ?>
+
+                </header>
+
+                <div
+                    class="journey-slider"
+                    data-journey-slider
+                    tabindex="0"
+                    aria-roledescription="<?php esc_attr_e(
+                        'Karussell',
                         'jung-leben'
-                    );
-                    ?>
-                </p>
-
-                <h2 id="journey-title">
-                    <?php
-                    esc_html_e(
-                        'Robertos Reise und Erfahrungen',
-                        'jung-leben'
-                    );
-                    ?>
-                </h2>
-
-                <p class="home-journey-heading__text">
-                    <?php
-                    esc_html_e(
-                        'Persönliche Beobachtungen, bewusste Routinen und ehrliche Einordnungen bilden die Grundlage von Jung Leben.',
-                        'jung-leben'
-                    );
-                    ?>
-                </p>
-
-                <a
-                    href="<?php echo esc_url($ratgeber_url); ?>"
-                    class="btn btn-primary"
+                    ); ?>"
+                    aria-label="<?php echo esc_attr(
+                        $journey_title
+                    ); ?>"
                 >
-                    <?php
-                    esc_html_e(
-                        'Erfahrungen entdecken',
-                        'jung-leben'
-                    );
-                    ?>
-                </a>
+                    <div class="journey-slider__viewport">
 
-            </header>
+                        <?php
+                        foreach (
+                            $journey_slides as $index => $slide
+                        ) :
+                            $is_active = $index === 0;
+                            ?>
 
-            <div
-                class="journey-slider"
-                data-journey-slider
-                tabindex="0"
-                aria-roledescription="<?php esc_attr_e(
-                    'Karussell',
-                    'jung-leben'
-                ); ?>"
-                aria-label="<?php esc_attr_e(
-                    'Robertos Reise und Erfahrungen',
-                    'jung-leben'
-                ); ?>"
-            >
-                <div class="journey-slider__viewport">
-
-                    <!-- Slide 1 -->
-                    <article
-                        class="journey-slide is-active"
-                        data-journey-slide
-                        aria-hidden="false"
-                    >
-                        <div class="journey-slide__content">
-
-                            <p class="journey-slide__label">
-                                <?php
-                                esc_html_e(
-                                    'Der Ausgangspunkt',
-                                    'jung-leben'
-                                );
-                                ?>
-                            </p>
-
-                            <h3>
-                                <?php
-                                esc_html_e(
-                                    'Gesundheit bewusster betrachten.',
-                                    'jung-leben'
-                                );
-                                ?>
-                            </h3>
-
-                            <p class="journey-slide__text">
-                                <?php
-                                esc_html_e(
-                                    'Jung Leben entstand aus der persönlichen Auseinandersetzung mit Vitalität, Wohlbefinden und der Frage, welche Entscheidungen langfristig wirklich guttun.',
-                                    'jung-leben'
-                                );
-                                ?>
-                            </p>
-
-                            <span class="journey-slide__tag">
-                                <?php
-                                esc_html_e(
-                                    'Bewusstsein',
-                                    'jung-leben'
-                                );
-                                ?>
-                            </span>
-
-                        </div>
-                    </article>
-
-                    <!-- Slide 2 -->
-                    <article
-                        class="journey-slide"
-                        data-journey-slide
-                        aria-hidden="true"
-                    >
-                        <div class="journey-slide__content">
-
-                            <p class="journey-slide__label">
-                                <?php
-                                esc_html_e(
-                                    'Beobachten und ausprobieren',
-                                    'jung-leben'
-                                );
-                                ?>
-                            </p>
-
-                            <h3>
-                                <?php
-                                esc_html_e(
-                                    'Erfahrungen entstehen im Alltag.',
-                                    'jung-leben'
-                                );
-                                ?>
-                            </h3>
-
-                            <p class="journey-slide__text">
-                                <?php
-                                esc_html_e(
-                                    'Produkte und Routinen werden nicht isoliert betrachtet. Entscheidend ist, wie verständlich sie sind, wie sie sich in den Alltag integrieren lassen und ob sie zur persönlichen Situation passen.',
-                                    'jung-leben'
-                                );
-                                ?>
-                            </p>
-
-                            <span class="journey-slide__tag">
-                                <?php
-                                esc_html_e(
-                                    'Alltagserfahrung',
-                                    'jung-leben'
-                                );
-                                ?>
-                            </span>
-
-                        </div>
-                    </article>
-
-                    <!-- Slide 3 -->
-                    <article
-                        class="journey-slide"
-                        data-journey-slide
-                        aria-hidden="true"
-                    >
-                        <div class="journey-slide__content">
-
-                            <p class="journey-slide__label">
-                                <?php
-                                esc_html_e(
-                                    'Einordnen und weitergeben',
-                                    'jung-leben'
-                                );
-                                ?>
-                            </p>
-
-                            <h3>
-                                <?php
-                                esc_html_e(
-                                    'Orientierung statt allgemeiner Versprechen.',
-                                    'jung-leben'
-                                );
-                                ?>
-                            </h3>
-
-                            <p class="journey-slide__text">
-                                <?php
-                                esc_html_e(
-                                    'Erfahrungen werden offen eingeordnet und mit ergänzenden Informationen verbunden. Jung Leben möchte Möglichkeiten aufzeigen, ohne die eine richtige Lösung vorzuschreiben.',
-                                    'jung-leben'
-                                );
-                                ?>
-                            </p>
-
-                            <span class="journey-slide__tag">
-                                <?php
-                                esc_html_e(
-                                    'Orientierung',
-                                    'jung-leben'
-                                );
-                                ?>
-                            </span>
-
-                        </div>
-                    </article>
-
-                </div>
-
-                <div class="journey-slider__footer">
-
-                    <div class="journey-slider__controls">
-
-                        <button
-                            class="journey-slider__arrow"
-                            type="button"
-                            data-journey-prev
-                            aria-label="<?php esc_attr_e(
-                                'Vorherige Erfahrung anzeigen',
-                                'jung-leben'
-                            ); ?>"
-                        >
-                            <span aria-hidden="true">←</span>
-                        </button>
-
-                        <div
-                            class="journey-slider__dots"
-                            aria-label="<?php esc_attr_e(
-                                'Erfahrung auswählen',
-                                'jung-leben'
-                            ); ?>"
-                        >
-                            <button
-                                class="journey-slider__dot is-active"
-                                type="button"
-                                data-journey-dot
-                                aria-label="<?php esc_attr_e(
-                                    'Erfahrung 1 anzeigen',
-                                    'jung-leben'
+                            <article
+                                class="journey-slide<?php
+                                echo $is_active
+                                    ? ' is-active'
+                                    : '';
+                                ?>"
+                                data-journey-slide
+                                aria-hidden="<?php
+                                echo $is_active
+                                    ? 'false'
+                                    : 'true';
+                                ?>"
+                                aria-label="<?php echo esc_attr(
+                                    sprintf(
+                                        __(
+                                            'Erfahrung %1$d von %2$d',
+                                            'jung-leben'
+                                        ),
+                                        $index + 1,
+                                        $journey_slide_count
+                                    )
                                 ); ?>"
-                                aria-current="true"
-                            ></button>
+                            >
+                                <div class="journey-slide__content">
 
-                            <button
-                                class="journey-slider__dot"
-                                type="button"
-                                data-journey-dot
-                                aria-label="<?php esc_attr_e(
-                                    'Erfahrung 2 anzeigen',
-                                    'jung-leben'
-                                ); ?>"
-                                aria-current="false"
-                            ></button>
+                                    <?php
+                                    if ($slide['label'] !== '') :
+                                        ?>
+                                        <p class="journey-slide__label">
+                                            <?php echo esc_html(
+                                                $slide['label']
+                                            ); ?>
+                                        </p>
+                                    <?php endif; ?>
 
-                            <button
-                                class="journey-slider__dot"
-                                type="button"
-                                data-journey-dot
-                                aria-label="<?php esc_attr_e(
-                                    'Erfahrung 3 anzeigen',
-                                    'jung-leben'
-                                ); ?>"
-                                aria-current="false"
-                            ></button>
-                        </div>
+                                    <h3>
+                                        <?php echo esc_html(
+                                            $slide['title']
+                                        ); ?>
+                                    </h3>
 
-                        <button
-                            class="journey-slider__arrow"
-                            type="button"
-                            data-journey-next
-                            aria-label="<?php esc_attr_e(
-                                'Nächste Erfahrung anzeigen',
-                                'jung-leben'
-                            ); ?>"
-                        >
-                            <span aria-hidden="true">→</span>
-                        </button>
+                                    <?php
+                                    if ($slide['text'] !== '') :
+                                        ?>
+                                        <p class="journey-slide__text">
+                                            <?php echo esc_html(
+                                                $slide['text']
+                                            ); ?>
+                                        </p>
+                                    <?php endif; ?>
+
+                                    <?php
+                                    if ($slide['tag'] !== '') :
+                                        ?>
+                                        <span class="journey-slide__tag">
+                                            <?php echo esc_html(
+                                                $slide['tag']
+                                            ); ?>
+                                        </span>
+                                    <?php endif; ?>
+
+                                </div>
+                            </article>
+
+                        <?php endforeach; ?>
 
                     </div>
 
-                    <p
-                        class="journey-slider__status"
-                        aria-live="polite"
-                    >
-                        <span data-journey-current>1</span>
-                        <span aria-hidden="true"> / </span>
-                        <span>3</span>
-                    </p>
+                    <?php if ($journey_slide_count > 1) : ?>
+
+                        <div class="journey-slider__footer">
+
+                            <div class="journey-slider__controls">
+
+                                <button
+                                    class="journey-slider__arrow"
+                                    type="button"
+                                    data-journey-prev
+                                    aria-label="<?php esc_attr_e(
+                                        'Vorherige Erfahrung anzeigen',
+                                        'jung-leben'
+                                    ); ?>"
+                                >
+                                    <span aria-hidden="true">←</span>
+                                </button>
+
+                                <div
+                                    class="journey-slider__dots"
+                                    aria-label="<?php esc_attr_e(
+                                        'Erfahrung auswählen',
+                                        'jung-leben'
+                                    ); ?>"
+                                >
+                                    <?php
+                                    foreach (
+                                        $journey_slides as $index => $slide
+                                    ) :
+                                        $is_active = $index === 0;
+                                        ?>
+
+                                        <button
+                                            class="journey-slider__dot<?php
+                                            echo $is_active
+                                                ? ' is-active'
+                                                : '';
+                                            ?>"
+                                            type="button"
+                                            data-journey-dot
+                                            aria-label="<?php echo esc_attr(
+                                                sprintf(
+                                                    __(
+                                                        'Erfahrung %d anzeigen',
+                                                        'jung-leben'
+                                                    ),
+                                                    $index + 1
+                                                )
+                                            ); ?>"
+                                            aria-current="<?php
+                                            echo $is_active
+                                                ? 'true'
+                                                : 'false';
+                                            ?>"
+                                        ></button>
+
+                                    <?php endforeach; ?>
+                                </div>
+
+                                <button
+                                    class="journey-slider__arrow"
+                                    type="button"
+                                    data-journey-next
+                                    aria-label="<?php esc_attr_e(
+                                        'Nächste Erfahrung anzeigen',
+                                        'jung-leben'
+                                    ); ?>"
+                                >
+                                    <span aria-hidden="true">→</span>
+                                </button>
+
+                            </div>
+
+                            <p
+                                class="journey-slider__status"
+                                aria-live="polite"
+                            >
+                                <span data-journey-current>1</span>
+                                <span aria-hidden="true"> / </span>
+                                <span>
+                                    <?php echo esc_html(
+                                        (string) $journey_slide_count
+                                    ); ?>
+                                </span>
+                            </p>
+
+                        </div>
+
+                    <?php endif; ?>
 
                 </div>
-            </div>
 
-        </div>
-    </section>
+            </div>
+        </section>
+
+    <?php endif; ?>
 
     <!-- Mögliche Tagesroutinen -->
     <section

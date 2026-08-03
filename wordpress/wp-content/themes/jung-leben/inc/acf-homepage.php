@@ -362,6 +362,239 @@ function jung_leben_register_homepage_fields(): void
                 'default_value' => 'Austausch',
                 'maxlength'     => 50,
             ],
+                        [
+                'key'       => 'field_jl_home_journey_tab',
+                'label'     => __('Erfahrungen', 'jung-leben'),
+                'name'      => '',
+                'type'      => 'tab',
+                'placement' => 'top',
+            ],
+            [
+                'key'           => 'field_jl_home_journey_eyebrow',
+                'label'         => __('Kurze Einleitung', 'jung-leben'),
+                'name'          => 'jl_home_journey_eyebrow',
+                'type'          => 'text',
+                'default_value' => 'Erfahrungen und Empfehlungen',
+                'maxlength'     => 100,
+            ],
+            [
+                'key'           => 'field_jl_home_journey_title',
+                'label'         => __('Überschrift', 'jung-leben'),
+                'name'          => 'jl_home_journey_title',
+                'type'          => 'textarea',
+                'default_value' => 'Robertos Reise und Erfahrungen',
+                'rows'          => 2,
+                'new_lines'     => '',
+                'required'      => 1,
+            ],
+            [
+                'key'           => 'field_jl_home_journey_intro',
+                'label'         => __('Einleitungstext', 'jung-leben'),
+                'name'          => 'jl_home_journey_intro',
+                'type'          => 'textarea',
+                'default_value' =>
+                    'Persönliche Beobachtungen, bewusste Routinen und ehrliche Einordnungen bilden die Grundlage von Jung Leben.',
+                'rows'          => 4,
+                'new_lines'     => '',
+            ],
+            [
+                'key'           => 'field_jl_home_journey_button_text',
+                'label'         => __('Button-Text', 'jung-leben'),
+                'name'          => 'jl_home_journey_button_text',
+                'type'          => 'text',
+                'default_value' => 'Erfahrungen entdecken',
+                'maxlength'     => 60,
+            ],
+            [
+                'key'          => 'field_jl_home_journey_button_url',
+                'label'        => __('Button-Ziel', 'jung-leben'),
+                'name'         => 'jl_home_journey_button_url',
+                'type'         => 'url',
+                'instructions' => __(
+                    'Leer lassen, um automatisch auf die Ratgeberseite zu verlinken.',
+                    'jung-leben'
+                ),
+            ],
+
+            /*
+             * Erfahrung 1
+             */
+            [
+                'key'     => 'field_jl_home_journey_slide_one_heading',
+                'label'   => __('Erfahrung 1', 'jung-leben'),
+                'name'    => '',
+                'type'    => 'message',
+                'message' => __(
+                    'Inhalte des ersten Eintrags im Erfahrungs-Slider.',
+                    'jung-leben'
+                ),
+            ],
+            [
+                'key'           => 'field_jl_home_journey_slide_one_enabled',
+                'label'         => __('Erfahrung anzeigen', 'jung-leben'),
+                'name'          => 'jl_home_journey_slide_one_enabled',
+                'type'          => 'true_false',
+                'default_value' => 1,
+                'ui'            => 1,
+                'ui_on_text'    => __('Ja', 'jung-leben'),
+                'ui_off_text'   => __('Nein', 'jung-leben'),
+            ],
+            [
+                'key'           => 'field_jl_home_journey_slide_one_label',
+                'label'         => __('Kurze Einleitung', 'jung-leben'),
+                'name'          => 'jl_home_journey_slide_one_label',
+                'type'          => 'text',
+                'default_value' => 'Der Ausgangspunkt',
+                'maxlength'     => 100,
+            ],
+            [
+                'key'           => 'field_jl_home_journey_slide_one_title',
+                'label'         => __('Titel', 'jung-leben'),
+                'name'          => 'jl_home_journey_slide_one_title',
+                'type'          => 'textarea',
+                'default_value' =>
+                    'Gesundheit bewusster betrachten.',
+                'rows'          => 2,
+                'new_lines'     => '',
+            ],
+            [
+                'key'           => 'field_jl_home_journey_slide_one_text',
+                'label'         => __('Text', 'jung-leben'),
+                'name'          => 'jl_home_journey_slide_one_text',
+                'type'          => 'textarea',
+                'default_value' =>
+                    'Jung Leben entstand aus der persönlichen Auseinandersetzung mit Vitalität, Wohlbefinden und der Frage, welche Entscheidungen langfristig wirklich guttun.',
+                'rows'          => 5,
+                'new_lines'     => '',
+            ],
+            [
+                'key'           => 'field_jl_home_journey_slide_one_tag',
+                'label'         => __('Schlagwort', 'jung-leben'),
+                'name'          => 'jl_home_journey_slide_one_tag',
+                'type'          => 'text',
+                'default_value' => 'Bewusstsein',
+                'maxlength'     => 60,
+            ],
+
+            /*
+             * Erfahrung 2
+             */
+            [
+                'key'     => 'field_jl_home_journey_slide_two_heading',
+                'label'   => __('Erfahrung 2', 'jung-leben'),
+                'name'    => '',
+                'type'    => 'message',
+                'message' => __(
+                    'Inhalte des zweiten Eintrags im Erfahrungs-Slider.',
+                    'jung-leben'
+                ),
+            ],
+            [
+                'key'           => 'field_jl_home_journey_slide_two_enabled',
+                'label'         => __('Erfahrung anzeigen', 'jung-leben'),
+                'name'          => 'jl_home_journey_slide_two_enabled',
+                'type'          => 'true_false',
+                'default_value' => 1,
+                'ui'            => 1,
+                'ui_on_text'    => __('Ja', 'jung-leben'),
+                'ui_off_text'   => __('Nein', 'jung-leben'),
+            ],
+            [
+                'key'           => 'field_jl_home_journey_slide_two_label',
+                'label'         => __('Kurze Einleitung', 'jung-leben'),
+                'name'          => 'jl_home_journey_slide_two_label',
+                'type'          => 'text',
+                'default_value' => 'Beobachten und ausprobieren',
+                'maxlength'     => 100,
+            ],
+            [
+                'key'           => 'field_jl_home_journey_slide_two_title',
+                'label'         => __('Titel', 'jung-leben'),
+                'name'          => 'jl_home_journey_slide_two_title',
+                'type'          => 'textarea',
+                'default_value' =>
+                    'Erfahrungen entstehen im Alltag.',
+                'rows'          => 2,
+                'new_lines'     => '',
+            ],
+            [
+                'key'           => 'field_jl_home_journey_slide_two_text',
+                'label'         => __('Text', 'jung-leben'),
+                'name'          => 'jl_home_journey_slide_two_text',
+                'type'          => 'textarea',
+                'default_value' =>
+                    'Produkte und Routinen werden nicht isoliert betrachtet. Entscheidend ist, wie verständlich sie sind, wie sie sich in den Alltag integrieren lassen und ob sie zur persönlichen Situation passen.',
+                'rows'          => 5,
+                'new_lines'     => '',
+            ],
+            [
+                'key'           => 'field_jl_home_journey_slide_two_tag',
+                'label'         => __('Schlagwort', 'jung-leben'),
+                'name'          => 'jl_home_journey_slide_two_tag',
+                'type'          => 'text',
+                'default_value' => 'Alltagserfahrung',
+                'maxlength'     => 60,
+            ],
+
+            /*
+             * Erfahrung 3
+             */
+            [
+                'key'     => 'field_jl_home_journey_slide_three_heading',
+                'label'   => __('Erfahrung 3', 'jung-leben'),
+                'name'    => '',
+                'type'    => 'message',
+                'message' => __(
+                    'Inhalte des dritten Eintrags im Erfahrungs-Slider.',
+                    'jung-leben'
+                ),
+            ],
+            [
+                'key'           => 'field_jl_home_journey_slide_three_enabled',
+                'label'         => __('Erfahrung anzeigen', 'jung-leben'),
+                'name'          => 'jl_home_journey_slide_three_enabled',
+                'type'          => 'true_false',
+                'default_value' => 1,
+                'ui'            => 1,
+                'ui_on_text'    => __('Ja', 'jung-leben'),
+                'ui_off_text'   => __('Nein', 'jung-leben'),
+            ],
+            [
+                'key'           => 'field_jl_home_journey_slide_three_label',
+                'label'         => __('Kurze Einleitung', 'jung-leben'),
+                'name'          => 'jl_home_journey_slide_three_label',
+                'type'          => 'text',
+                'default_value' => 'Einordnen und weitergeben',
+                'maxlength'     => 100,
+            ],
+            [
+                'key'           => 'field_jl_home_journey_slide_three_title',
+                'label'         => __('Titel', 'jung-leben'),
+                'name'          => 'jl_home_journey_slide_three_title',
+                'type'          => 'textarea',
+                'default_value' =>
+                    'Orientierung statt allgemeiner Versprechen.',
+                'rows'          => 2,
+                'new_lines'     => '',
+            ],
+            [
+                'key'           => 'field_jl_home_journey_slide_three_text',
+                'label'         => __('Text', 'jung-leben'),
+                'name'          => 'jl_home_journey_slide_three_text',
+                'type'          => 'textarea',
+                'default_value' =>
+                    'Erfahrungen werden offen eingeordnet und mit ergänzenden Informationen verbunden. Jung Leben möchte Möglichkeiten aufzeigen, ohne die eine richtige Lösung vorzuschreiben.',
+                'rows'          => 5,
+                'new_lines'     => '',
+            ],
+            [
+                'key'           => 'field_jl_home_journey_slide_three_tag',
+                'label'         => __('Schlagwort', 'jung-leben'),
+                'name'          => 'jl_home_journey_slide_three_tag',
+                'type'          => 'text',
+                'default_value' => 'Orientierung',
+                'maxlength'     => 60,
+            ],
         ],
 
         'location' => [
