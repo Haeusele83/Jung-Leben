@@ -1,0 +1,902 @@
+/**
+ * Jung Leben
+ * Routinen
+ */
+
+
+/* =========================================================
+   BASIS
+   ========================================================= */
+
+.routines-page {
+    color: #173c32;
+    background: #ffffff;
+}
+
+
+/* =========================================================
+   INTRO
+   ========================================================= */
+
+.routines-intro {
+    padding:
+        clamp(82px, 9vw, 115px)
+        0
+        clamp(54px, 6vw, 72px);
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #fbfcfa 100%
+        );
+}
+
+
+.routines-intro__inner {
+    max-width: 1040px;
+}
+
+
+.routines-intro h1 {
+    max-width: 830px;
+
+    margin: 12px 0 0;
+
+    color: #173c32;
+
+    font-size:
+        clamp(
+            3.6rem,
+            7vw,
+            6.4rem
+        );
+
+    font-weight: 720;
+
+    line-height: 0.94;
+
+    letter-spacing: -0.058em;
+}
+
+
+.routines-intro__lead {
+    max-width: 680px;
+
+    margin: 27px 0 0;
+
+    color: #65756d;
+
+    font-size:
+        clamp(
+            1rem,
+            1.25vw,
+            1.1rem
+        );
+
+    line-height: 1.72;
+}
+
+
+/* =========================================================
+   ROUTINEN
+   ========================================================= */
+
+.routine-section {
+    position: relative;
+
+    padding:
+        clamp(58px, 7vw, 82px)
+        0;
+
+    border-top:
+        1px solid
+        rgba(
+            23,
+            60,
+            50,
+            0.075
+        );
+}
+
+
+.routine-section--morning {
+    background:
+        linear-gradient(
+            180deg,
+            #f9fbf7 0%,
+            #f5f8f3 100%
+        );
+}
+
+
+.routine-section--midday {
+    background:
+        linear-gradient(
+            180deg,
+            #fbfbf7 0%,
+            #f8f8f3 100%
+        );
+}
+
+
+.routine-section--evening {
+    background:
+        linear-gradient(
+            180deg,
+            #f8faf9 0%,
+            #f1f6f3 100%
+        );
+}
+
+
+/* =========================================================
+   ROUTINEN-HEADER
+   ========================================================= */
+
+.routine-section__header {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1.15fr)
+        minmax(280px, 0.85fr);
+
+    gap:
+        clamp(
+            45px,
+            8vw,
+            110px
+        );
+
+    align-items: start;
+
+    margin-bottom:
+        clamp(
+            30px,
+            4vw,
+            42px
+        );
+}
+
+
+/* =========================================================
+   IDENTITÄT
+   ========================================================= */
+
+.routine-section__identity {
+    display: grid;
+
+    grid-template-columns:
+        48px
+        minmax(0, 1fr);
+
+    gap: 18px;
+
+    align-items: start;
+}
+
+
+.routine-section__symbol {
+    width: 46px;
+    height: 46px;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 auto;
+
+    color: #315b49;
+
+    border-radius: 50%;
+
+    font-size: 1rem;
+}
+
+
+.routine-section--morning
+.routine-section__symbol {
+    background: #e6eddc;
+}
+
+
+.routine-section--midday
+.routine-section__symbol {
+    color: #7b6524;
+
+    background: #f1ead4;
+}
+
+
+.routine-section--evening
+.routine-section__symbol {
+    color: #426370;
+
+    background: #e5edef;
+}
+
+
+/* =========================================================
+   EYEBROW
+   ========================================================= */
+
+.routine-section__eyebrow {
+    margin: 2px 0 8px;
+
+    color: #dd9e2b;
+
+    font-size: 0.62rem;
+    font-weight: 780;
+
+    line-height: 1.3;
+
+    letter-spacing: 0.13em;
+
+    text-transform: uppercase;
+}
+
+
+/* =========================================================
+   ROUTINEN-TITEL
+   ========================================================= */
+
+.routine-section__identity h2 {
+    max-width: 570px;
+
+    margin: 0;
+
+    color: #173c32;
+
+    font-size:
+        clamp(
+            2rem,
+            3.5vw,
+            3.2rem
+        );
+
+    font-weight: 720;
+
+    line-height: 1;
+
+    letter-spacing: -0.045em;
+}
+
+
+/* =========================================================
+   EINLEITUNG
+   ========================================================= */
+
+.routine-section__intro {
+    padding-top: 5px;
+}
+
+
+.routine-section__intro p {
+    max-width: 470px;
+
+    margin: 0;
+
+    color: #64756d;
+
+    font-size: 0.79rem;
+
+    line-height: 1.7;
+}
+
+
+/* =========================================================
+   ALLE EMPFEHLUNGEN
+   ========================================================= */
+
+.routine-section__all-link {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    margin-top: 16px;
+
+    color: #315b49;
+
+    font-size: 0.69rem;
+    font-weight: 740;
+
+    text-decoration: none;
+}
+
+
+.routine-section__all-arrow {
+    transition:
+        transform
+        180ms
+        ease;
+}
+
+
+.routine-section__all-link:hover
+.routine-section__all-arrow {
+    transform:
+        translateX(3px);
+}
+
+
+/* =========================================================
+   PRODUKT-GRID
+   ========================================================= */
+
+.routine-products {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(0, 1fr)
+        );
+
+    gap: 15px;
+
+    max-width: 930px;
+
+    margin-left: 64px;
+}
+
+
+/* =========================================================
+   KOMPAKTE PRODUKTKARTE
+   ========================================================= */
+
+.routine-product {
+    min-width: 0;
+}
+
+
+.routine-product__card {
+    position: relative;
+
+    min-height: 142px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    padding:
+        21px
+        22px
+        18px;
+
+    color: inherit;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.82
+        );
+
+    border:
+        1px solid
+        rgba(
+            23,
+            60,
+            50,
+            0.085
+        );
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 7px 22px
+        rgba(
+            23,
+            60,
+            50,
+            0.025
+        );
+
+    transition:
+        transform 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease,
+        background 180ms ease;
+}
+
+
+.routine-product__card:hover,
+.routine-product__card:focus-within {
+    transform:
+        translateY(-2px);
+
+    background: #ffffff;
+
+    border-color:
+        rgba(
+            49,
+            91,
+            73,
+            0.17
+        );
+
+    box-shadow:
+        0 14px 30px
+        rgba(
+            23,
+            60,
+            50,
+            0.055
+        );
+}
+
+
+/* =========================================================
+   TOP-ZEILE
+   ========================================================= */
+
+.routine-product__top {
+    min-height: 24px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+}
+
+
+/* =========================================================
+   MARKE
+   ========================================================= */
+
+.routine-product__brand {
+    min-width: 0;
+
+    display: flex;
+
+    align-items: center;
+}
+
+
+/* =========================================================
+   ZENTRALE MARKENAUSGABE
+   ========================================================= */
+
+.routine-product
+.jl-brand {
+    min-width: 0;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    color: #74847c;
+
+    font-size: 0.57rem;
+    font-weight: 770;
+
+    line-height: 1.3;
+
+    letter-spacing: 0.095em;
+
+    text-decoration: none;
+
+    text-transform: uppercase;
+
+    transition:
+        color
+        180ms
+        ease;
+}
+
+
+.routine-product
+a.jl-brand:hover {
+    color: #315b49;
+}
+
+
+.routine-product
+.jl-brand__identity {
+    min-width: 0;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+}
+
+
+.routine-product
+.jl-brand__name {
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+
+.routine-product
+.jl-brand__logo-image {
+    width: auto;
+    height: 15px;
+
+    max-width: 58px;
+
+    display: block;
+
+    object-fit: contain;
+}
+
+
+.routine-product
+.jl-brand__external {
+    flex: 0 0 auto;
+
+    opacity: 0.62;
+
+    font-size: 0.68rem;
+
+    line-height: 1;
+
+    transition:
+        opacity 180ms ease,
+        transform 180ms ease;
+}
+
+
+.routine-product
+a.jl-brand:hover
+.jl-brand__external {
+    opacity: 1;
+
+    transform:
+        translate(
+            1px,
+            -1px
+        );
+}
+
+
+/* =========================================================
+   BADGE
+   ========================================================= */
+
+.routine-product__badge {
+    flex: 0 0 auto;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    min-height: 21px;
+
+    padding: 0 8px;
+
+    color: #5e693d;
+
+    background: #edf2dc;
+
+    border-radius: 999px;
+
+    font-size: 0.52rem;
+    font-weight: 720;
+}
+
+
+/* =========================================================
+   PRODUKTNAME
+   ========================================================= */
+
+.routine-product__title {
+    margin: 18px 0 0;
+
+    color: #173c32;
+
+    font-size:
+        clamp(
+            1.15rem,
+            1.7vw,
+            1.45rem
+        );
+
+    font-weight: 720;
+
+    line-height: 1.12;
+
+    letter-spacing: -0.03em;
+}
+
+
+.routine-product__title-link {
+    color: inherit;
+
+    text-decoration: none;
+
+    transition:
+        color
+        180ms
+        ease;
+}
+
+
+.routine-product__title-link:hover {
+    color: #456b57;
+}
+
+
+/* =========================================================
+   CARD-FOOTER
+   ========================================================= */
+
+.routine-product__footer {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 14px;
+
+    margin-top: auto;
+
+    padding-top: 19px;
+
+    color: #50685d;
+
+    font-size: 0.62rem;
+    font-weight: 710;
+
+    text-decoration: none;
+}
+
+
+/* =========================================================
+   PFEIL
+   ========================================================= */
+
+.routine-product__arrow {
+    color: #315b49;
+
+    font-size: 0.82rem;
+
+    transition:
+        transform
+        180ms
+        ease;
+}
+
+
+.routine-product__footer:hover
+.routine-product__arrow {
+    transform:
+        translateX(3px);
+}
+
+
+/* =========================================================
+   LEERZUSTAND
+   ========================================================= */
+
+.routine-empty {
+    max-width: 930px;
+
+    margin-left: 64px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding:
+        15px
+        18px;
+
+    color: #75847c;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.5
+        );
+
+    border:
+        1px solid
+        rgba(
+            23,
+            60,
+            50,
+            0.075
+        );
+
+    border-radius: 12px;
+}
+
+
+.routine-empty__mark {
+    width: 30px;
+    height: 30px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 auto;
+
+    color: #668057;
+
+    background: #e8efdf;
+
+    border-radius: 50%;
+
+    font-size: 0.8rem;
+}
+
+
+.routine-empty strong {
+    display: block;
+
+    margin-bottom: 2px;
+
+    color: #4d665a;
+
+    font-size: 0.68rem;
+}
+
+
+.routine-empty span:not(
+    .routine-empty__mark
+) {
+    font-size: 0.62rem;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .routine-section__header {
+        grid-template-columns: 1fr;
+
+        gap: 25px;
+    }
+
+
+    .routine-section__intro {
+        padding-left: 64px;
+
+        padding-top: 0;
+    }
+
+
+    .routine-products,
+    .routine-empty {
+        margin-left: 64px;
+    }
+
+
+    .routine-products {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 620px) {
+
+    .routines-intro {
+        padding:
+            70px
+            0
+            48px;
+    }
+
+
+    .routines-intro h1 {
+        font-size:
+            clamp(
+                3rem,
+                15vw,
+                4.5rem
+            );
+    }
+
+
+    .routine-section {
+        padding:
+            48px
+            0;
+    }
+
+
+    .routine-section__identity {
+        grid-template-columns:
+            40px
+            minmax(0, 1fr);
+
+        gap: 14px;
+    }
+
+
+    .routine-section__symbol {
+        width: 40px;
+        height: 40px;
+    }
+
+
+    .routine-section__identity h2 {
+        font-size:
+            clamp(
+                2rem,
+                10vw,
+                2.75rem
+            );
+    }
+
+
+    .routine-section__intro {
+        padding-left: 54px;
+    }
+
+
+    .routine-products,
+    .routine-empty {
+        margin-left: 0;
+    }
+
+
+    .routine-products {
+        grid-template-columns: 1fr;
+
+        gap: 10px;
+    }
+
+
+    .routine-product__card {
+        min-height: 126px;
+
+        padding:
+            18px
+            19px
+            16px;
+    }
+
+
+    .routine-product__title {
+        margin-top: 14px;
+
+        font-size: 1.25rem;
+    }
+
+
+    .routine-product__footer {
+        padding-top: 16px;
+    }
+
+
+    .routine-product
+    .jl-brand__logo-image {
+        height: 14px;
+
+        max-width: 52px;
+    }
+}

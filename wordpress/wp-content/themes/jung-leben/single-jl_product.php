@@ -1,0 +1,1946 @@
+<?php
+/**
+ * Einzelansicht eines Jung-Leben-Produkts.
+ *
+ * Die Darstellung passt sich automatisch an den
+ * vorhandenen Datenumfang an.
+ *
+ * @package Jung_Leben
+ */
+
+declare(strict_types=1);
+
+if (! defined('ABSPATH')) {
+    exit;
+}
+
+
+/* =========================================================
+   PRODUKTDETAIL-CSS
+   ========================================================= */
+
+$product_detail_css_path =
+    get_template_directory()
+    . '/assets/css/product-detail.css';
+
+
+add_action(
+    'wp_enqueue_scripts',
+    static function () use (
+        $product_detail_css_path
+    ): void {
+        if (
+            ! file_exists(
+                $product_detail_css_path
+            )
+        ) {
+            return;
+        }
+
+
+        wp_enqueue_style(
+            'jung-leben-product-detail',
+            get_template_directory_uri()
+                . '/assets/css/product-detail.css',
+            [
+                'jung-leben-site',
+            ],
+            (string)
+            filemtime(
+                $product_detail_css_path
+            )
+        );
+    },
+    30
+);
+
+
+get_header();
+
+
+/* =========================================================
+   HILFSFUNKTIONEN
+   ========================================================= */
+
+/**
+ * ACF-Feld sicher laden.
+ */
+$get_product_field =
+    static function (
+        string $field_name,
+        int $post_id,
+        mixed $fallback = ''
+    ): mixed {
+        if (
+            ! function_exists(
+                'get_field'
+            )
+        ) {
+            return $fallback;
+        }
+
+
+        $value =
+            get_field(
+                $field_name,
+                $post_id
+            );
+
+
+        if (
+            $value === null
+            || $value === ''
+        ) {
+            return $fallback;
+        }
+
+
+        return $value;
+    };
+
+
+/**
+ * Textfeld in Listenpunkte umwandeln.
+ */
+$text_to_items =
+    static function (
+        string $value
+    ): array {
+        $value =
+            trim(
+                wp_strip_all_tags(
+                    $value
+                )
+            );
+
+
+        if (
+            $value === ''
+        ) {
+            return [];
+        }
+
+
+        $parts =
+            preg_split(
+                '/(?:\r\n|\r|\n)+/u',
+                $value
+            );
+
+
+        if (
+            ! is_array(
+                $parts
+            )
+        ) {
+            return [];
+        }
+
+
+        $items = [];
+
+
+        foreach (
+            $parts
+            as $part
+        ) {
+            $part =
+                preg_replace(
+                    '/^[\s\-\–\—•●▪✓]+/u',
+                    '',
+                    trim(
+                        $part
+                    )
+                );
+
+
+            if (
+                is_string(
+                    $part
+                )
+                && $part !== ''
+            ) {
+                $items[] =
+                    $part;
+            }
+        }
+
+
+        return $items;
+    };
+
+
+/**
+ * Kompaktes Produkt-Monogramm.
+ */
+$get_product_mark =
+    static function (
+        string $title
+    ): string {
+        $clean =
+            preg_replace(
+                '/[^\p{L}\p{N}\s]+/u',
+                ' ',
+                $title
+            );
+
+
+        if (
+            ! is_string(
+                $clean
+            )
+        ) {
+            $clean =
+                $title;
+        }
+
+
+        $parts =
+            preg_split(
+                '/\s+/u',
+                trim(
+                    $clean
+                )
+            );
+
+
+        if (
+            ! is_array(
+                $parts
+            )
+            || empty(
+                $parts
+            )
+        ) {
+            return 'JL';
+        }
+
+
+        $parts =
+            array_values(
+                array_filter(
+                    $parts,
+                    static function (
+                        string $part
+                    ): bool {
+                        return
+                            trim(
+                                $part
+                            ) !== '';
+                    }
+                )
+            );
+
+
+        if (
+            empty(
+                $parts
+            )
+        ) {
+            return 'JL';
+        }
+
+
+        if (
+            count(
+                $parts
+            ) >= 2
+        ) {
+            return
+                mb_strtoupper(
+                    mb_substr(
+                        $parts[0],
+                        0,
+                        1
+                    )
+                    .
+                    mb_substr(
+                        $parts[1],
+                        0,
+                        1
+                    )
+                );
+        }
+
+
+        return
+            mb_strtoupper(
+                mb_substr(
+                    $parts[0],
+                    0,
+                    2
+                )
+            );
+    };
+
+
+/* =========================================================
+   LABELS
+   ========================================================= */
+
+$recommendation_labels = [
+
+    'interesting' =>
+        __(
+            'Interessante Option',
+            'jung-leben'
+        ),
+
+    'recommended' =>
+        __(
+            'Empfohlen',
+            'jung-leben'
+        ),
+
+    'favorite' =>
+        __(
+            'Persönlicher Favorit',
+            'jung-leben'
+        ),
+];
+
+
+$routine_labels = [
+
+    'morning' =>
+        __(
+            'Morgens',
+            'jung-leben'
+        ),
+
+    'midday' =>
+        __(
+            'Mittags',
+            'jung-leben'
+        ),
+
+    'evening' =>
+        __(
+            'Abends',
+            'jung-leben'
+        ),
+
+    'flexible' =>
+        __(
+            'Flexibel',
+            'jung-leben'
+        ),
+];
+
+
+/* =========================================================
+   EMPFEHLUNGEN-SEITE
+   ========================================================= */
+
+$recommendations_page =
+    get_page_by_path(
+        'empfehlungen'
+    );
+
+
+$recommendations_url =
+    $recommendations_page
+    instanceof WP_Post
+        ? get_permalink(
+            $recommendations_page
+        )
+        : home_url(
+            '/empfehlungen/'
+        );
+
+
+if (
+    ! is_string(
+        $recommendations_url
+    )
+) {
+    $recommendations_url =
+        home_url(
+            '/empfehlungen/'
+        );
+}
+
+
+/* =========================================================
+   LOOP
+   ========================================================= */
+
+if (
+    have_posts()
+) :
+
+    while (
+        have_posts()
+    ) :
+
+        the_post();
+
+
+        $product_id =
+            get_the_ID();
+
+
+        /* =====================================================
+           GRUNDDATEN
+           ===================================================== */
+
+        $has_image =
+            has_post_thumbnail(
+                $product_id
+            );
+
+
+        $product_mark =
+            $get_product_mark(
+                get_the_title()
+            );
+
+
+        $recommendation_status =
+            sanitize_key(
+                (string)
+                $get_product_field(
+                    'jl_product_recommendation_status',
+                    $product_id,
+                    'neutral'
+                )
+            );
+
+
+        $personally_tested =
+            (bool)
+            $get_product_field(
+                'jl_product_personally_tested',
+                $product_id,
+                false
+            );
+
+
+        $featured =
+            (bool)
+            $get_product_field(
+                'jl_product_featured',
+                $product_id,
+                false
+            );
+
+
+        /* =====================================================
+           REDAKTIONELLE INFORMATIONEN
+           ===================================================== */
+
+        $purpose =
+            trim(
+                (string)
+                $get_product_field(
+                    'jl_product_purpose',
+                    $product_id,
+                    ''
+                )
+            );
+
+
+        $personal_experience =
+            trim(
+                (string)
+                $get_product_field(
+                    'jl_product_personal_experience',
+                    $product_id,
+                    ''
+                )
+            );
+
+
+        $benefits =
+            trim(
+                (string)
+                $get_product_field(
+                    'jl_product_benefits',
+                    $product_id,
+                    ''
+                )
+            );
+
+
+        $limitations =
+            trim(
+                (string)
+                $get_product_field(
+                    'jl_product_limitations',
+                    $product_id,
+                    ''
+                )
+            );
+
+
+        /* =====================================================
+           ROUTINEN
+           ===================================================== */
+
+        $routine_times =
+            $get_product_field(
+                'jl_product_routine_time',
+                $product_id,
+                []
+            );
+
+
+        if (
+            is_string(
+                $routine_times
+            )
+        ) {
+            $routine_times = [
+                $routine_times,
+            ];
+        }
+
+
+        if (
+            ! is_array(
+                $routine_times
+            )
+        ) {
+            $routine_times = [];
+        }
+
+
+        $routine_names = [];
+
+
+        foreach (
+            $routine_times
+            as $routine_time
+        ) {
+            $routine_time =
+                sanitize_key(
+                    (string)
+                    $routine_time
+                );
+
+
+            if (
+                isset(
+                    $routine_labels[
+                        $routine_time
+                    ]
+                )
+            ) {
+                $routine_names[] =
+                    $routine_labels[
+                        $routine_time
+                    ];
+            }
+        }
+
+
+        /* =====================================================
+           KAUFDATEN
+           ===================================================== */
+
+        $partner_name =
+            trim(
+                (string)
+                $get_product_field(
+                    'jl_product_partner_name',
+                    $product_id,
+                    ''
+                )
+            );
+
+
+        $original_url =
+            trim(
+                (string)
+                $get_product_field(
+                    'jl_product_original_url',
+                    $product_id,
+                    ''
+                )
+            );
+
+
+        $affiliate_url =
+            trim(
+                (string)
+                $get_product_field(
+                    'jl_product_affiliate_url',
+                    $product_id,
+                    ''
+                )
+            );
+
+
+        $price_display =
+            trim(
+                (string)
+                $get_product_field(
+                    'jl_product_price_display',
+                    $product_id,
+                    ''
+                )
+            );
+
+
+        $discount_code =
+            trim(
+                (string)
+                $get_product_field(
+                    'jl_product_discount_code',
+                    $product_id,
+                    ''
+                )
+            );
+
+
+        $button_text =
+            trim(
+                (string)
+                $get_product_field(
+                    'jl_product_button_text',
+                    $product_id,
+                    __(
+                        'Produkt beim Partner ansehen',
+                        'jung-leben'
+                    )
+                )
+            );
+
+
+        $link_new_tab =
+            (bool)
+            $get_product_field(
+                'jl_product_link_new_tab',
+                $product_id,
+                true
+            );
+
+
+        $affiliate_notice =
+            trim(
+                (string)
+                $get_product_field(
+                    'jl_product_affiliate_notice',
+                    $product_id,
+                    ''
+                )
+            );
+
+
+        $health_notice =
+            trim(
+                (string)
+                $get_product_field(
+                    'jl_product_health_notice',
+                    $product_id,
+                    ''
+                )
+            );
+
+
+        /**
+         * Affiliate-Link hat Vorrang.
+         */
+        $purchase_url =
+            $affiliate_url !== ''
+                ? $affiliate_url
+                : $original_url;
+
+
+        $is_affiliate_link =
+            $affiliate_url !== '';
+
+
+        /**
+         * WICHTIG:
+         *
+         * Eine reine Import-Information wie
+         * «Bezugsquelle: Aggarwal» reicht NICHT mehr,
+         * um eine Kaufkarte darzustellen.
+         *
+         * Erst echte kaufrelevante Informationen
+         * erzeugen die Box.
+         */
+        $show_purchase_card =
+            $purchase_url !== ''
+            || $price_display !== ''
+            || $discount_code !== '';
+
+
+        /* =====================================================
+           MARKE
+           ===================================================== */
+
+        $brands =
+            get_the_terms(
+                $product_id,
+                'jl_product_brand'
+            );
+
+
+        if (
+            ! is_array(
+                $brands
+            )
+            || is_wp_error(
+                $brands
+            )
+        ) {
+            $brands = [];
+        }
+
+
+        $primary_brand =
+            ! empty(
+                $brands
+            )
+            && $brands[0]
+            instanceof WP_Term
+                ? $brands[0]
+                : null;
+
+
+        $brand_markup = '';
+
+
+        if (
+            $primary_brand
+            instanceof WP_Term
+        ) {
+            if (
+                class_exists(
+                    'Jung_Leben_Core_Brand_Fields'
+                )
+            ) {
+                $brand_markup =
+                    Jung_Leben_Core_Brand_Fields
+                        ::render_frontend_brand(
+                            $primary_brand,
+                            'product'
+                        );
+            } else {
+                $brand_markup =
+                    '<span class="jl-brand jl-brand--product">'
+                    . '<span class="jl-brand__name">'
+                    . esc_html(
+                        $primary_brand
+                            ->name
+                    )
+                    . '</span>'
+                    . '</span>';
+            }
+        }
+
+
+        /* =====================================================
+           KATEGORIEN
+           ===================================================== */
+
+        $categories =
+            get_the_terms(
+                $product_id,
+                'jl_product_category'
+            );
+
+
+        if (
+            ! is_array(
+                $categories
+            )
+            || is_wp_error(
+                $categories
+            )
+        ) {
+            $categories = [];
+        }
+
+
+        /* =====================================================
+           LISTEN
+           ===================================================== */
+
+        $benefit_items =
+            $text_to_items(
+                $benefits
+            );
+
+
+        $limitation_items =
+            $text_to_items(
+                $limitations
+            );
+
+
+        /* =====================================================
+           LEAD
+           ===================================================== */
+
+        $excerpt =
+            trim(
+                (string)
+                get_the_excerpt()
+            );
+
+
+        $lead =
+            $excerpt !== ''
+                ? $excerpt
+                : $purpose;
+
+
+        /* =====================================================
+           HAUPTINHALT
+           ===================================================== */
+
+        $editor_content =
+            trim(
+                (string)
+                get_post_field(
+                    'post_content',
+                    $product_id
+                )
+            );
+
+
+        /**
+         * WordPress-Inhalt bereits jetzt filtern.
+         *
+         * Jung Leben Core kann hier zusätzlich
+         * einen verknüpften Erfahrungsartikel
+         * anhängen.
+         */
+        $rendered_content =
+            apply_filters(
+                'the_content',
+                $editor_content
+            );
+
+
+        $has_rendered_content =
+            trim(
+                wp_strip_all_tags(
+                    $rendered_content
+                )
+            ) !== '';
+
+
+        /* =====================================================
+           DETAILBEREICHE
+           ===================================================== */
+
+        $has_purpose_section =
+            $purpose !== ''
+            && trim(
+                $purpose
+            )
+            !== trim(
+                $lead
+            );
+
+
+        $has_experience_section =
+            $personal_experience !== '';
+
+
+        $has_pros_cons =
+            ! empty(
+                $benefit_items
+            )
+            || ! empty(
+                $limitation_items
+            );
+
+
+        /**
+         * Gibt es überhaupt einen ausführlichen
+         * Hauptinhalt?
+         */
+        $has_main_details =
+            $has_purpose_section
+            || $has_rendered_content
+            || $has_experience_section
+            || $has_pros_cons;
+
+
+        /**
+         * Sidebar nur anzeigen, wenn gleichzeitig
+         * echter Hauptinhalt vorhanden ist.
+         *
+         * Marke, Kategorien und Routine stehen
+         * bereits im Hero und müssen bei einer
+         * sehr kurzen Seite nicht nochmals
+         * wiederholt werden.
+         */
+        $show_detail_area =
+            $has_main_details;
+
+
+        /**
+         * Seitenzustand.
+         */
+        $single_classes = [
+            'product-single',
+        ];
+
+
+        if (
+            ! $has_main_details
+        ) {
+            $single_classes[] =
+                'product-single--compact';
+        }
+
+
+        if (
+            ! $has_image
+        ) {
+            $single_classes[] =
+                'product-single--no-image';
+        }
+        ?>
+
+        <main
+            id="main-content"
+            class="<?php
+            echo esc_attr(
+                implode(
+                    ' ',
+                    $single_classes
+                )
+            );
+            ?>"
+        >
+
+            <!-- =================================================
+                 BREADCRUMB
+                 ================================================= -->
+
+            <div class="container">
+
+                <nav
+                    class="product-breadcrumb"
+                    aria-label="<?php
+                    esc_attr_e(
+                        'Breadcrumb',
+                        'jung-leben'
+                    );
+                    ?>"
+                >
+
+                    <a
+                        href="<?php
+                        echo esc_url(
+                            $recommendations_url
+                        );
+                        ?>"
+                    >
+                        <?php
+                        esc_html_e(
+                            'Empfehlungen',
+                            'jung-leben'
+                        );
+                        ?>
+                    </a>
+
+
+                    <span aria-hidden="true">
+                        /
+                    </span>
+
+
+                    <span>
+                        <?php
+                        the_title();
+                        ?>
+                    </span>
+
+                </nav>
+
+            </div>
+
+
+            <!-- =================================================
+                 HERO
+                 ================================================= -->
+
+            <section
+                class="
+                    product-hero
+                    <?php
+                    echo $has_image
+                        ? 'product-hero--with-image'
+                        : 'product-hero--no-image';
+                    ?>
+                "
+            >
+
+                <div class="container product-hero__grid">
+
+                    <!-- =========================================
+                         PRODUKTBILD / MONOGRAMM
+                         ========================================= -->
+
+                    <div class="product-hero__media">
+
+                        <?php
+                        if (
+                            $has_image
+                        ) :
+                            ?>
+
+                            <?php
+                            echo wp_kses_post(
+                                get_the_post_thumbnail(
+                                    $product_id,
+                                    'large',
+                                    [
+                                        'class' =>
+                                            'product-hero__image',
+
+                                        'loading' =>
+                                            'eager',
+                                    ]
+                                )
+                            );
+                            ?>
+
+                        <?php else : ?>
+
+                            <div
+                                class="product-detail-placeholder"
+                                aria-hidden="true"
+                            >
+
+                                <span class="product-detail-placeholder__mark">
+                                    <?php
+                                    echo esc_html(
+                                        $product_mark
+                                    );
+                                    ?>
+                                </span>
+
+                            </div>
+
+                        <?php endif; ?>
+
+                    </div>
+
+
+                    <!-- =========================================
+                         PRODUKTINFO
+                         ========================================= -->
+
+                    <div class="product-hero__content">
+
+                        <!-- Badges -->
+                        <?php
+                        if (
+                            $featured
+                            || isset(
+                                $recommendation_labels[
+                                    $recommendation_status
+                                ]
+                            )
+                            || $personally_tested
+                        ) :
+                            ?>
+
+                            <div class="product-hero__meta">
+
+                                <?php
+                                if (
+                                    $featured
+                                ) :
+                                    ?>
+
+                                    <span
+                                        class="
+                                            product-badge
+                                            product-badge--highlight
+                                        "
+                                    >
+                                        <?php
+                                        esc_html_e(
+                                            'Highlight',
+                                            'jung-leben'
+                                        );
+                                        ?>
+                                    </span>
+
+                                <?php endif; ?>
+
+
+                                <?php
+                                if (
+                                    isset(
+                                        $recommendation_labels[
+                                            $recommendation_status
+                                        ]
+                                    )
+                                ) :
+                                    ?>
+
+                                    <span
+                                        class="
+                                            product-badge
+                                            product-badge--<?php
+                                            echo esc_attr(
+                                                $recommendation_status
+                                            );
+                                            ?>
+                                        "
+                                    >
+                                        <?php
+                                        echo esc_html(
+                                            $recommendation_labels[
+                                                $recommendation_status
+                                            ]
+                                        );
+                                        ?>
+                                    </span>
+
+                                <?php endif; ?>
+
+
+                                <?php
+                                if (
+                                    $personally_tested
+                                ) :
+                                    ?>
+
+                                    <span
+                                        class="
+                                            product-badge
+                                            product-badge--tested
+                                        "
+                                    >
+                                        <?php
+                                        esc_html_e(
+                                            'Persönlich getestet',
+                                            'jung-leben'
+                                        );
+                                        ?>
+                                    </span>
+
+                                <?php endif; ?>
+
+                            </div>
+
+                        <?php endif; ?>
+
+
+                        <!-- Marke -->
+                        <?php
+                        if (
+                            $brand_markup !== ''
+                        ) :
+                            ?>
+
+                            <div class="product-hero__brand">
+
+                                <?php
+                                echo wp_kses_post(
+                                    $brand_markup
+                                );
+                                ?>
+
+                            </div>
+
+                        <?php endif; ?>
+
+
+                        <!-- Titel -->
+                        <h1 class="product-hero__title">
+                            <?php
+                            the_title();
+                            ?>
+                        </h1>
+
+
+                        <!-- Lead -->
+                        <?php
+                        if (
+                            $lead !== ''
+                        ) :
+                            ?>
+
+                            <p class="product-hero__excerpt">
+                                <?php
+                                echo esc_html(
+                                    $lead
+                                );
+                                ?>
+                            </p>
+
+                        <?php endif; ?>
+
+
+                        <!-- Schnellinformationen -->
+                        <?php
+                        if (
+                            ! empty(
+                                $categories
+                            )
+                            || ! empty(
+                                $routine_names
+                            )
+                        ) :
+                            ?>
+
+                            <div class="product-hero__quickfacts">
+
+                                <?php
+                                foreach (
+                                    $categories
+                                    as $category
+                                ) :
+                                    ?>
+
+                                    <span>
+                                        <?php
+                                        echo esc_html(
+                                            $category->name
+                                        );
+                                        ?>
+                                    </span>
+
+                                <?php endforeach; ?>
+
+
+                                <?php
+                                foreach (
+                                    $routine_names
+                                    as $routine_name
+                                ) :
+                                    ?>
+
+                                    <span
+                                        class="product-hero__quickfact--routine"
+                                    >
+                                        <?php
+                                        echo esc_html(
+                                            $routine_name
+                                        );
+                                        ?>
+                                    </span>
+
+                                <?php endforeach; ?>
+
+                            </div>
+
+                        <?php endif; ?>
+
+
+                        <!-- =====================================
+                             BEZUGSINFORMATION
+                             ===================================== -->
+
+                        <?php
+                        if (
+                            $show_purchase_card
+                        ) :
+                            ?>
+
+                            <aside class="product-purchase-card">
+
+                                <div class="product-purchase-card__header">
+
+                                    <span class="product-purchase-card__eyebrow">
+                                        <?php
+                                        esc_html_e(
+                                            'Bezugsinformation',
+                                            'jung-leben'
+                                        );
+                                        ?>
+                                    </span>
+
+
+                                    <?php
+                                    if (
+                                        $price_display !== ''
+                                    ) :
+                                        ?>
+
+                                        <p class="product-purchase-card__price">
+                                            <?php
+                                            echo esc_html(
+                                                $price_display
+                                            );
+                                            ?>
+                                        </p>
+
+                                    <?php endif; ?>
+
+                                </div>
+
+
+                                <?php
+                                if (
+                                    $partner_name !== ''
+                                    && $purchase_url !== ''
+                                ) :
+                                    ?>
+
+                                    <p class="product-purchase-card__partner">
+
+                                        <?php
+                                        esc_html_e(
+                                            'Erhältlich bei',
+                                            'jung-leben'
+                                        );
+                                        ?>:
+
+                                        <strong>
+                                            <?php
+                                            echo esc_html(
+                                                $partner_name
+                                            );
+                                            ?>
+                                        </strong>
+
+                                    </p>
+
+                                <?php endif; ?>
+
+
+                                <?php
+                                if (
+                                    $discount_code !== ''
+                                ) :
+                                    ?>
+
+                                    <div class="product-purchase-card__discount">
+
+                                        <span>
+                                            <?php
+                                            esc_html_e(
+                                                'Rabattcode',
+                                                'jung-leben'
+                                            );
+                                            ?>
+                                        </span>
+
+
+                                        <strong>
+                                            <?php
+                                            echo esc_html(
+                                                $discount_code
+                                            );
+                                            ?>
+                                        </strong>
+
+                                    </div>
+
+                                <?php endif; ?>
+
+
+                                <?php
+                                if (
+                                    $purchase_url !== ''
+                                ) :
+                                    ?>
+
+                                    <a
+                                        href="<?php
+                                        echo esc_url(
+                                            $purchase_url
+                                        );
+                                        ?>"
+                                        class="
+                                            btn
+                                            btn-primary
+                                            product-purchase-card__button
+                                        "
+                                        <?php
+                                        if (
+                                            $link_new_tab
+                                        ) :
+                                            ?>
+                                            target="_blank"
+                                        <?php endif; ?>
+
+                                        rel="<?php
+                                        echo esc_attr(
+                                            $is_affiliate_link
+                                                ? 'sponsored noopener noreferrer'
+                                                : 'noopener noreferrer'
+                                        );
+                                        ?>"
+                                    >
+
+                                        <span>
+                                            <?php
+                                            echo esc_html(
+                                                $button_text !== ''
+                                                    ? $button_text
+                                                    : __(
+                                                        'Produkt ansehen',
+                                                        'jung-leben'
+                                                    )
+                                            );
+                                            ?>
+                                        </span>
+
+
+                                        <span aria-hidden="true">
+                                            ↗
+                                        </span>
+
+                                    </a>
+
+                                <?php endif; ?>
+
+                            </aside>
+
+                        <?php endif; ?>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 AUSFÜHRLICHER DETAILBEREICH
+                 ================================================= -->
+
+            <?php
+            if (
+                $show_detail_area
+            ) :
+                ?>
+
+                <section class="product-details">
+
+                    <div class="container product-details__grid">
+
+                        <!-- =====================================
+                             HAUPTINHALT
+                             ===================================== -->
+
+                        <div class="product-details__main">
+
+                            <!-- Einordnung -->
+                            <?php
+                            if (
+                                $has_purpose_section
+                            ) :
+                                ?>
+
+                                <section class="product-section">
+
+                                    <p class="eyebrow">
+                                        <?php
+                                        esc_html_e(
+                                            'Einordnung',
+                                            'jung-leben'
+                                        );
+                                        ?>
+                                    </p>
+
+
+                                    <h2>
+                                        <?php
+                                        esc_html_e(
+                                            'Wofür Jung Leben dieses Produkt einordnet.',
+                                            'jung-leben'
+                                        );
+                                        ?>
+                                    </h2>
+
+
+                                    <div class="product-rich-text">
+
+                                        <?php
+                                        echo wpautop(
+                                            wp_kses_post(
+                                                $purpose
+                                            )
+                                        );
+                                        ?>
+
+                                    </div>
+
+                                </section>
+
+                            <?php endif; ?>
+
+
+                            <!-- Produkt / verknüpfte Erfahrung -->
+                            <?php
+                            if (
+                                $has_rendered_content
+                            ) :
+                                ?>
+
+                                <section class="product-section">
+
+                                    <?php
+                                    if (
+                                        $editor_content !== ''
+                                    ) :
+                                        ?>
+
+                                        <p class="eyebrow">
+                                            <?php
+                                            esc_html_e(
+                                                'Produkt',
+                                                'jung-leben'
+                                            );
+                                            ?>
+                                        </p>
+
+
+                                        <h2>
+                                            <?php
+                                            esc_html_e(
+                                                'Produkt im Überblick.',
+                                                'jung-leben'
+                                            );
+                                            ?>
+                                        </h2>
+
+                                    <?php endif; ?>
+
+
+                                    <div class="product-rich-text">
+                                        <?php
+                                        echo wp_kses_post(
+                                            $rendered_content
+                                        );
+                                        ?>
+                                    </div>
+
+                                </section>
+
+                            <?php endif; ?>
+
+
+                            <!-- Persönliche Erfahrung -->
+                            <?php
+                            if (
+                                $has_experience_section
+                            ) :
+                                ?>
+
+                                <section class="product-experience">
+
+                                    <p class="eyebrow">
+                                        <?php
+                                        esc_html_e(
+                                            'Persönliche Einordnung',
+                                            'jung-leben'
+                                        );
+                                        ?>
+                                    </p>
+
+
+                                    <h2>
+                                        <?php
+                                        esc_html_e(
+                                            'Robertos Erfahrung.',
+                                            'jung-leben'
+                                        );
+                                        ?>
+                                    </h2>
+
+
+                                    <div class="product-experience__text">
+
+                                        <?php
+                                        echo wpautop(
+                                            wp_kses_post(
+                                                $personal_experience
+                                            )
+                                        );
+                                        ?>
+
+                                    </div>
+
+                                </section>
+
+                            <?php endif; ?>
+
+
+                            <!-- Vorteile / Hinweise -->
+                            <?php
+                            if (
+                                $has_pros_cons
+                            ) :
+                                ?>
+
+                                <section class="product-pros-cons">
+
+                                    <?php
+                                    if (
+                                        ! empty(
+                                            $benefit_items
+                                        )
+                                    ) :
+                                        ?>
+
+                                        <div
+                                            class="
+                                                product-pros-cons__card
+                                                product-pros-cons__card--positive
+                                            "
+                                        >
+
+                                            <h3>
+                                                <?php
+                                                esc_html_e(
+                                                    'Was dafür spricht',
+                                                    'jung-leben'
+                                                );
+                                                ?>
+                                            </h3>
+
+
+                                            <ul>
+
+                                                <?php
+                                                foreach (
+                                                    $benefit_items
+                                                    as $item
+                                                ) :
+                                                    ?>
+
+                                                    <li>
+                                                        <?php
+                                                        echo esc_html(
+                                                            $item
+                                                        );
+                                                        ?>
+                                                    </li>
+
+                                                <?php endforeach; ?>
+
+                                            </ul>
+
+                                        </div>
+
+                                    <?php endif; ?>
+
+
+                                    <?php
+                                    if (
+                                        ! empty(
+                                            $limitation_items
+                                        )
+                                    ) :
+                                        ?>
+
+                                        <div class="product-pros-cons__card">
+
+                                            <h3>
+                                                <?php
+                                                esc_html_e(
+                                                    'Was zu beachten ist',
+                                                    'jung-leben'
+                                                );
+                                                ?>
+                                            </h3>
+
+
+                                            <ul class="product-pros-cons__list--neutral">
+
+                                                <?php
+                                                foreach (
+                                                    $limitation_items
+                                                    as $item
+                                                ) :
+                                                    ?>
+
+                                                    <li>
+                                                        <?php
+                                                        echo esc_html(
+                                                            $item
+                                                        );
+                                                        ?>
+                                                    </li>
+
+                                                <?php endforeach; ?>
+
+                                            </ul>
+
+                                        </div>
+
+                                    <?php endif; ?>
+
+                                </section>
+
+                            <?php endif; ?>
+
+                        </div>
+
+
+                        <!-- =====================================
+                             SIDEBAR
+                             ===================================== -->
+
+                        <aside class="product-details__sidebar">
+
+                            <!-- Marke -->
+                            <?php
+                            if (
+                                $brand_markup !== ''
+                            ) :
+                                ?>
+
+                                <div class="product-info-card">
+
+                                    <p class="product-info-card__label">
+                                        <?php
+                                        esc_html_e(
+                                            'Marke',
+                                            'jung-leben'
+                                        );
+                                        ?>
+                                    </p>
+
+
+                                    <div class="product-info-card__brand">
+                                        <?php
+                                        echo wp_kses_post(
+                                            $brand_markup
+                                        );
+                                        ?>
+                                    </div>
+
+                                </div>
+
+                            <?php endif; ?>
+
+
+                            <!-- Routine -->
+                            <?php
+                            if (
+                                ! empty(
+                                    $routine_names
+                                )
+                            ) :
+                                ?>
+
+                                <div class="product-info-card">
+
+                                    <p class="product-info-card__label">
+                                        <?php
+                                        esc_html_e(
+                                            'Tagesroutine',
+                                            'jung-leben'
+                                        );
+                                        ?>
+                                    </p>
+
+
+                                    <div class="product-info-card__tags">
+
+                                        <?php
+                                        foreach (
+                                            $routine_names
+                                            as $routine_name
+                                        ) :
+                                            ?>
+
+                                            <span>
+                                                <?php
+                                                echo esc_html(
+                                                    $routine_name
+                                                );
+                                                ?>
+                                            </span>
+
+                                        <?php endforeach; ?>
+
+                                    </div>
+
+                                </div>
+
+                            <?php endif; ?>
+
+
+                            <!-- Kategorien -->
+                            <?php
+                            if (
+                                ! empty(
+                                    $categories
+                                )
+                            ) :
+                                ?>
+
+                                <div class="product-info-card">
+
+                                    <p class="product-info-card__label">
+                                        <?php
+                                        esc_html_e(
+                                            'Einordnung',
+                                            'jung-leben'
+                                        );
+                                        ?>
+                                    </p>
+
+
+                                    <div class="product-info-card__tags">
+
+                                        <?php
+                                        foreach (
+                                            $categories
+                                            as $category
+                                        ) :
+                                            ?>
+
+                                            <span>
+                                                <?php
+                                                echo esc_html(
+                                                    $category->name
+                                                );
+                                                ?>
+                                            </span>
+
+                                        <?php endforeach; ?>
+
+                                    </div>
+
+                                </div>
+
+                            <?php endif; ?>
+
+
+                            <!-- Hinweis -->
+                            <?php
+                            if (
+                                $health_notice !== ''
+                            ) :
+                                ?>
+
+                                <div
+                                    class="
+                                        product-info-card
+                                        product-info-card--notice
+                                    "
+                                >
+
+                                    <span
+                                        class="product-info-card__notice-icon"
+                                        aria-hidden="true"
+                                    >
+                                        i
+                                    </span>
+
+
+                                    <p>
+                                        <?php
+                                        echo esc_html(
+                                            $health_notice
+                                        );
+                                        ?>
+                                    </p>
+
+                                </div>
+
+                            <?php endif; ?>
+
+                        </aside>
+
+                    </div>
+
+                </section>
+
+            <?php endif; ?>
+
+
+            <!-- =================================================
+                 KOMPAKTER HINWEIS BEI KURZER PRODUKTSEITE
+                 ================================================= -->
+
+            <?php
+            if (
+                ! $show_detail_area
+                && $health_notice !== ''
+            ) :
+                ?>
+
+                <section class="product-compact-footer">
+
+                    <div class="container">
+
+                        <div class="product-compact-note">
+
+                            <span
+                                class="product-compact-note__mark"
+                                aria-hidden="true"
+                            >
+                                i
+                            </span>
+
+
+                            <div>
+
+                                <span class="product-compact-note__label">
+                                    <?php
+                                    esc_html_e(
+                                        'Hinweis',
+                                        'jung-leben'
+                                    );
+                                    ?>
+                                </span>
+
+
+                                <p>
+                                    <?php
+                                    echo esc_html(
+                                        $health_notice
+                                    );
+                                    ?>
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            <?php endif; ?>
+
+
+            <!-- =================================================
+                 AFFILIATE-HINWEIS
+                 ================================================= -->
+
+            <?php
+            if (
+                $affiliate_notice !== ''
+            ) :
+                ?>
+
+                <aside class="product-affiliate-notice">
+
+                    <div class="container">
+
+                        <p>
+                            <?php
+                            echo esc_html(
+                                $affiliate_notice
+                            );
+                            ?>
+                        </p>
+
+                    </div>
+
+                </aside>
+
+            <?php endif; ?>
+
+        </main>
+
+        <?php
+
+    endwhile;
+
+endif;
+
+
+get_footer();

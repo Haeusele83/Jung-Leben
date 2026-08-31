@@ -1,0 +1,1158 @@
+/**
+ * Coming Soon – Jung Leben
+ *
+ * Desktop, Tablet und Mobile
+ */
+
+
+/* =========================================================
+   RESET / BASIS
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+body.jung-leben-coming-soon {
+    min-width: 320px;
+    min-height: 100%;
+
+    color: #ffffff;
+    background: #173c32;
+
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.coming-soon-header {
+    position: relative;
+    z-index: 30;
+
+    width: 100%;
+
+    background: #ffffff;
+
+    border-bottom:
+        1px solid
+        rgba(20, 55, 45, 0.08);
+
+    box-shadow:
+        0 3px 18px
+        rgba(20, 55, 45, 0.05);
+}
+
+.coming-soon-header__inner {
+    width: min(
+        calc(100% - 80px),
+        1320px
+    );
+
+    min-height: 88px;
+
+    margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 30px;
+}
+
+.coming-soon-header__brand {
+    display: flex;
+    align-items: center;
+}
+
+.coming-soon-header__logo {
+    display: block;
+
+    width: 160px;
+    height: auto;
+    max-height: 62px;
+
+    object-fit: contain;
+    object-position: left center;
+}
+
+.coming-soon-header__status {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 9px;
+
+    padding:
+        10px
+        16px;
+
+    color: #21483d;
+    background: #f3f6ef;
+
+    border:
+        1px solid
+        rgba(33, 72, 61, 0.10);
+
+    border-radius: 999px;
+
+    font-size: 0.82rem;
+    font-weight: 700;
+
+    line-height: 1;
+
+    letter-spacing: 0.015em;
+}
+
+.coming-soon-header__status-dot {
+    width: 8px;
+    height: 8px;
+
+    flex: 0 0 auto;
+
+    background: #9fbe5d;
+
+    border-radius: 50%;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(159, 190, 93, 0.16);
+}
+
+
+/* =========================================================
+   HERO / COMING SOON
+   ========================================================= */
+
+.coming-soon {
+    position: relative;
+
+    min-height:
+        calc(100vh - 88px);
+
+    min-height:
+        calc(100svh - 88px);
+
+    overflow: hidden;
+
+    isolation: isolate;
+}
+
+
+/* =========================================================
+   HINTERGRUND
+   ========================================================= */
+
+.coming-soon__background {
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+
+    background:
+        url("../images/jungle-hero.png")
+        center center / cover
+        no-repeat;
+
+    transform: scale(1.015);
+}
+
+.coming-soon__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(12, 52, 42, 0.97) 0%,
+            rgba(12, 52, 42, 0.94) 31%,
+            rgba(12, 52, 42, 0.82) 55%,
+            rgba(12, 52, 42, 0.58) 100%
+        );
+}
+
+.coming-soon__overlay::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(5, 28, 22, 0.02) 0%,
+            rgba(5, 28, 22, 0.20) 100%
+        );
+}
+
+
+/* =========================================================
+   SEITENRAHMEN
+   ========================================================= */
+
+.coming-soon__shell {
+    width: min(
+        calc(100% - 80px),
+        1320px
+    );
+
+    min-height:
+        calc(100vh - 88px);
+
+    min-height:
+        calc(100svh - 88px);
+
+    margin: 0 auto;
+
+    display: grid;
+
+    grid-template-rows:
+        1fr
+        auto;
+
+    padding:
+        36px
+        0
+        26px;
+}
+
+
+/* =========================================================
+   HAUPTINHALT
+   ========================================================= */
+
+.coming-soon__content {
+    width: min(
+        100%,
+        900px
+    );
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: flex-start;
+    justify-content: center;
+
+    padding:
+        64px
+        0
+        70px;
+}
+
+
+/* =========================================================
+   EYEBROW – COMING SOON
+   ========================================================= */
+
+.coming-soon__eyebrow {
+    margin:
+        0
+        0
+        26px;
+
+    color: #d7e9ad;
+
+    font-size: 0.88rem;
+    font-weight: 750;
+
+    line-height: 1.2;
+
+    letter-spacing: 0.18em;
+
+    text-transform: uppercase;
+}
+
+
+/* =========================================================
+   KEY MESSAGE
+   ========================================================= */
+
+.coming-soon__title {
+    width: 100%;
+    max-width: 880px;
+
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size:
+        clamp(
+            4.7rem,
+            7.3vw,
+            7.7rem
+        );
+
+    font-weight: 720;
+
+    line-height: 0.91;
+
+    letter-spacing: -0.058em;
+}
+
+.coming-soon__title span {
+    display: block;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.73
+        );
+}
+
+
+/* =========================================================
+   COUNTDOWN
+   ========================================================= */
+
+.coming-soon__countdown {
+    width: min(
+        100%,
+        650px
+    );
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    margin-top: 42px;
+
+    padding:
+        20px
+        24px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.075
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.14
+        );
+
+    border-radius: 18px;
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.coming-soon__countdown-item {
+    position: relative;
+
+    min-width: 0;
+
+    padding:
+        0
+        20px;
+
+    text-align: left;
+}
+
+.coming-soon__countdown-item:first-child {
+    padding-left: 0;
+}
+
+.coming-soon__countdown-item:last-child {
+    padding-right: 0;
+}
+
+.coming-soon__countdown-item:not(:last-child)::after {
+    content: "";
+
+    position: absolute;
+
+    top: 4px;
+    right: 0;
+
+    width: 1px;
+    height: 48px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.17
+        );
+}
+
+.coming-soon__countdown-item strong {
+    display: block;
+
+    margin: 0;
+
+    color: #ffffff;
+
+    font-size:
+        clamp(
+            2rem,
+            3vw,
+            2.9rem
+        );
+
+    font-weight: 650;
+
+    line-height: 1;
+
+    letter-spacing: -0.035em;
+
+    font-variant-numeric:
+        tabular-nums;
+}
+
+.coming-soon__countdown-item span {
+    display: block;
+
+    margin-top: 8px;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.58
+        );
+
+    font-size: 0.65rem;
+    font-weight: 650;
+
+    line-height: 1.2;
+
+    letter-spacing: 0.09em;
+
+    text-transform: uppercase;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   BESCHREIBUNG
+   ========================================================= */
+
+.coming-soon__lead {
+    width: 100%;
+    max-width: 650px;
+
+    margin:
+        34px
+        0
+        0;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.80
+        );
+
+    font-size:
+        clamp(
+            1.04rem,
+            1.35vw,
+            1.20rem
+        );
+
+    font-weight: 400;
+
+    line-height: 1.68;
+}
+
+
+/* =========================================================
+   KONTAKT
+   ========================================================= */
+
+.coming-soon__contact {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 13px;
+
+    margin-top: 28px;
+
+    padding-bottom: 5px;
+
+    color: #ffffff;
+
+    border-bottom:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.40
+        );
+
+    font-size: 0.94rem;
+    font-weight: 650;
+
+    line-height: 1.3;
+
+    text-decoration: none;
+
+    transition:
+        gap 180ms ease,
+        border-color 180ms ease,
+        opacity 180ms ease;
+}
+
+.coming-soon__contact:hover,
+.coming-soon__contact:focus-visible {
+    gap: 18px;
+
+    border-color:
+        rgba(
+            255,
+            255,
+            255,
+            0.95
+        );
+}
+
+.coming-soon__contact:focus-visible {
+    outline:
+        2px solid
+        rgba(
+            215,
+            233,
+            177,
+            0.90
+        );
+
+    outline-offset: 6px;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.coming-soon__footer {
+    padding-top: 18px;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.45
+        );
+
+    font-size: 0.76rem;
+    font-weight: 400;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   KLEINERE DESKTOPS / NOTEBOOKS
+   ========================================================= */
+
+@media (max-width: 1200px) {
+
+    .coming-soon__content {
+        width: min(
+            100%,
+            820px
+        );
+    }
+
+    .coming-soon__title {
+        font-size:
+            clamp(
+                4.5rem,
+                8vw,
+                7rem
+            );
+    }
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    /*
+     * Header
+     */
+    .coming-soon-header__inner {
+        width:
+            calc(100% - 48px);
+
+        min-height: 80px;
+    }
+
+    .coming-soon-header__logo {
+        width: 142px;
+        max-height: 56px;
+    }
+
+    /*
+     * Hero
+     */
+    .coming-soon {
+        min-height:
+            calc(100svh - 80px);
+    }
+
+    .coming-soon__shell {
+        width:
+            calc(100% - 48px);
+
+        min-height:
+            calc(100svh - 80px);
+
+        padding:
+            30px
+            0
+            24px;
+    }
+
+    /*
+     * Hintergrund auf Tablet ruhiger
+     */
+    .coming-soon__background {
+        background-position:
+            58% center;
+    }
+
+    .coming-soon__overlay {
+        background:
+            linear-gradient(
+                90deg,
+                rgba(12, 52, 42, 0.95) 0%,
+                rgba(12, 52, 42, 0.90) 58%,
+                rgba(12, 52, 42, 0.72) 100%
+            );
+    }
+
+    /*
+     * Inhalt
+     */
+    .coming-soon__content {
+        width: min(
+            100%,
+            760px
+        );
+
+        padding:
+            58px
+            0
+            64px;
+    }
+
+    .coming-soon__title {
+        max-width: 760px;
+
+        font-size:
+            clamp(
+                4.2rem,
+                11vw,
+                6.4rem
+            );
+    }
+
+    /*
+     * Countdown
+     */
+    .coming-soon__countdown {
+        width:
+            min(
+                100%,
+                610px
+            );
+
+        margin-top: 36px;
+    }
+
+    .coming-soon__countdown-item {
+        padding:
+            0
+            16px;
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 620px) {
+
+    /*
+     * Header
+     */
+    .coming-soon-header__inner {
+        width:
+            calc(100% - 32px);
+
+        min-height: 72px;
+
+        gap: 14px;
+    }
+
+    .coming-soon-header__logo {
+        width: 116px;
+        max-height: 46px;
+    }
+
+    .coming-soon-header__status {
+        gap: 6px;
+
+        padding:
+            8px
+            10px;
+
+        font-size: 0.69rem;
+
+        white-space: nowrap;
+    }
+
+    .coming-soon-header__status-dot {
+        width: 7px;
+        height: 7px;
+
+        box-shadow:
+            0 0 0 3px
+            rgba(159, 190, 93, 0.16);
+    }
+
+    /*
+     * Hero
+     */
+    .coming-soon {
+        min-height:
+            calc(100svh - 72px);
+    }
+
+    /*
+     * Hintergrund
+     */
+    .coming-soon__background {
+        background-position:
+            63% center;
+    }
+
+    .coming-soon__overlay {
+        background:
+            linear-gradient(
+                180deg,
+                rgba(12, 52, 42, 0.88) 0%,
+                rgba(12, 52, 42, 0.91) 58%,
+                rgba(12, 52, 42, 0.96) 100%
+            );
+    }
+
+    /*
+     * Seitenrahmen
+     */
+    .coming-soon__shell {
+        width:
+            calc(100% - 36px);
+
+        min-height:
+            calc(100svh - 72px);
+
+        padding:
+            18px
+            0
+            18px;
+    }
+
+    /*
+     * Inhalt
+     */
+    .coming-soon__content {
+        width: 100%;
+
+        padding:
+            42px
+            0
+            48px;
+    }
+
+    /*
+     * Coming Soon
+     */
+    .coming-soon__eyebrow {
+        margin-bottom: 19px;
+
+        font-size: 0.73rem;
+
+        letter-spacing: 0.15em;
+    }
+
+    /*
+     * Hauptbotschaft
+     */
+    .coming-soon__title {
+        width: 100%;
+        max-width: 100%;
+
+        font-size:
+            clamp(
+                3.2rem,
+                15.3vw,
+                4.7rem
+            );
+
+        line-height: 0.93;
+
+        letter-spacing: -0.052em;
+    }
+
+    /*
+     * Countdown
+     */
+    .coming-soon__countdown {
+        width: 100%;
+
+        grid-template-columns:
+            repeat(4, 1fr);
+
+        margin-top: 30px;
+
+        padding:
+            16px
+            14px;
+
+        border-radius: 15px;
+    }
+
+    .coming-soon__countdown-item {
+        padding:
+            0
+            9px;
+    }
+
+    .coming-soon__countdown-item:first-child {
+        padding-left: 0;
+    }
+
+    .coming-soon__countdown-item:last-child {
+        padding-right: 0;
+    }
+
+    .coming-soon__countdown-item:not(:last-child)::after {
+        top: 2px;
+
+        height: 39px;
+    }
+
+    .coming-soon__countdown-item strong {
+        font-size:
+            clamp(
+                1.55rem,
+                7.3vw,
+                2.25rem
+            );
+    }
+
+    .coming-soon__countdown-item span {
+        margin-top: 7px;
+
+        font-size: 0.50rem;
+
+        letter-spacing: 0.05em;
+    }
+
+    /*
+     * Beschreibung
+     */
+    .coming-soon__lead {
+        max-width: 100%;
+
+        margin-top: 28px;
+
+        font-size: 0.98rem;
+
+        line-height: 1.62;
+    }
+
+    /*
+     * Kontakt
+     */
+    .coming-soon__contact {
+        margin-top: 24px;
+
+        font-size: 0.90rem;
+    }
+
+    /*
+     * Footer
+     */
+    .coming-soon__footer {
+        padding-top: 14px;
+
+        font-size: 0.69rem;
+    }
+}
+
+
+/* =========================================================
+   SEHR KLEINE SMARTPHONES
+   ========================================================= */
+
+@media (max-width: 390px) {
+
+    /*
+     * Header
+     */
+    .coming-soon-header__inner {
+        width:
+            calc(100% - 26px);
+
+        min-height: 68px;
+    }
+
+    .coming-soon-header__logo {
+        width: 104px;
+        max-height: 43px;
+    }
+
+    .coming-soon-header__status {
+        max-width: 118px;
+
+        padding:
+            7px
+            9px;
+
+        font-size: 0.63rem;
+
+        white-space: normal;
+
+        line-height: 1.15;
+    }
+
+    /*
+     * Hero
+     */
+    .coming-soon {
+        min-height:
+            calc(100svh - 68px);
+    }
+
+    .coming-soon__shell {
+        width:
+            calc(100% - 28px);
+
+        min-height:
+            calc(100svh - 68px);
+    }
+
+    .coming-soon__content {
+        padding:
+            38px
+            0
+            44px;
+    }
+
+    /*
+     * Titel
+     */
+    .coming-soon__title {
+        font-size:
+            clamp(
+                2.95rem,
+                15.2vw,
+                3.9rem
+            );
+    }
+
+    /*
+     * Countdown
+     */
+    .coming-soon__countdown {
+        margin-top: 27px;
+
+        padding:
+            14px
+            10px;
+    }
+
+    .coming-soon__countdown-item {
+        padding:
+            0
+            6px;
+    }
+
+    .coming-soon__countdown-item strong {
+        font-size:
+            clamp(
+                1.40rem,
+                7vw,
+                1.95rem
+            );
+    }
+
+    .coming-soon__countdown-item span {
+        font-size: 0.44rem;
+
+        letter-spacing: 0.025em;
+    }
+
+    .coming-soon__countdown-item:not(:last-child)::after {
+        height: 35px;
+    }
+
+    /*
+     * Beschreibung
+     */
+    .coming-soon__lead {
+        margin-top: 25px;
+
+        font-size: 0.92rem;
+
+        line-height: 1.58;
+    }
+
+    /*
+     * Kontakt
+     */
+    .coming-soon__contact {
+        margin-top: 22px;
+
+        font-size: 0.84rem;
+    }
+}
+
+
+/* =========================================================
+   LANDSCAPE / GERINGE BILDSCHIRMHÖHE
+   ========================================================= */
+
+@media (
+    max-height: 700px
+)
+and (
+    min-width: 621px
+) {
+
+    .coming-soon__content {
+        padding:
+            36px
+            0
+            42px;
+    }
+
+    .coming-soon__eyebrow {
+        margin-bottom: 18px;
+    }
+
+    .coming-soon__title {
+        font-size:
+            clamp(
+                4rem,
+                7vw,
+                6.2rem
+            );
+    }
+
+    .coming-soon__countdown {
+        margin-top: 26px;
+
+        padding:
+            15px
+            20px;
+    }
+
+    .coming-soon__lead {
+        margin-top: 25px;
+    }
+
+    .coming-soon__contact {
+        margin-top: 20px;
+    }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: no-preference) {
+
+    .coming-soon__content {
+        animation:
+            jung-leben-coming-soon-enter
+            600ms
+            ease-out
+            both;
+    }
+
+    @keyframes jung-leben-coming-soon-enter {
+
+        from {
+            opacity: 0;
+
+            transform:
+                translateY(12px);
+        }
+
+        to {
+            opacity: 1;
+
+            transform:
+                translateY(0);
+        }
+    }
+}
+
+
+/* =========================================================
+   FALLBACK OHNE BACKDROP-FILTER
+   ========================================================= */
+
+@supports not (
+    backdrop-filter: blur(10px)
+) {
+
+    .coming-soon__countdown {
+        background:
+            rgba(
+                28,
+                72,
+                59,
+                0.92
+            );
+    }
+}
