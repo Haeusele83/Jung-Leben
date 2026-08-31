@@ -5,6 +5,9 @@
  * Die Darstellung passt sich automatisch an den
  * vorhandenen Datenumfang an.
  *
+ * Kauf- und Partnerdaten werden zentral über
+ * Jung Leben Core ermittelt.
+ *
  * @package Jung_Leben
  */
 
@@ -535,139 +538,6 @@ if (
 
 
         /* =====================================================
-           KAUFDATEN
-           ===================================================== */
-
-        $partner_name =
-            trim(
-                (string)
-                $get_product_field(
-                    'jl_product_partner_name',
-                    $product_id,
-                    ''
-                )
-            );
-
-
-        $original_url =
-            trim(
-                (string)
-                $get_product_field(
-                    'jl_product_original_url',
-                    $product_id,
-                    ''
-                )
-            );
-
-
-        $affiliate_url =
-            trim(
-                (string)
-                $get_product_field(
-                    'jl_product_affiliate_url',
-                    $product_id,
-                    ''
-                )
-            );
-
-
-        $price_display =
-            trim(
-                (string)
-                $get_product_field(
-                    'jl_product_price_display',
-                    $product_id,
-                    ''
-                )
-            );
-
-
-        $discount_code =
-            trim(
-                (string)
-                $get_product_field(
-                    'jl_product_discount_code',
-                    $product_id,
-                    ''
-                )
-            );
-
-
-        $button_text =
-            trim(
-                (string)
-                $get_product_field(
-                    'jl_product_button_text',
-                    $product_id,
-                    __(
-                        'Produkt beim Partner ansehen',
-                        'jung-leben'
-                    )
-                )
-            );
-
-
-        $link_new_tab =
-            (bool)
-            $get_product_field(
-                'jl_product_link_new_tab',
-                $product_id,
-                true
-            );
-
-
-        $affiliate_notice =
-            trim(
-                (string)
-                $get_product_field(
-                    'jl_product_affiliate_notice',
-                    $product_id,
-                    ''
-                )
-            );
-
-
-        $health_notice =
-            trim(
-                (string)
-                $get_product_field(
-                    'jl_product_health_notice',
-                    $product_id,
-                    ''
-                )
-            );
-
-
-        /**
-         * Affiliate-Link hat Vorrang.
-         */
-        $purchase_url =
-            $affiliate_url !== ''
-                ? $affiliate_url
-                : $original_url;
-
-
-        $is_affiliate_link =
-            $affiliate_url !== '';
-
-
-        /**
-         * WICHTIG:
-         *
-         * Eine reine Import-Information wie
-         * «Bezugsquelle: Aggarwal» reicht NICHT mehr,
-         * um eine Kaufkarte darzustellen.
-         *
-         * Erst echte kaufrelevante Informationen
-         * erzeugen die Box.
-         */
-        $show_purchase_card =
-            $purchase_url !== ''
-            || $price_display !== ''
-            || $discount_code !== '';
-
-
-        /* =====================================================
            MARKE
            ===================================================== */
 
@@ -730,6 +600,303 @@ if (
                     . '</span>';
             }
         }
+
+
+        /* =====================================================
+           KAUF- UND PARTNERDATEN
+           ===================================================== */
+
+        /**
+         * Die zentrale Partnerlogik befindet sich
+         * im Jung-Leben-Core-Plugin.
+         *
+         * Priorität dort:
+         *
+         * 1. produktspezifischer Affiliate-Link
+         * 2. direkte Produktseite bei Rabattcode-Modell
+         * 3. allgemeiner persönlicher Partnerlink
+         * 4. direkte Produktseite
+         * 5. Markenwebsite
+         */
+        $purchase_data = [];
+
+
+        if (
+            class_exists(
+                'Jung_Leben_Core_Product_Fields'
+            )
+            && method_exists(
+                'Jung_Leben_Core_Product_Fields',
+                'get_purchase_data'
+            )
+        ) {
+            $purchase_data =
+                Jung_Leben_Core_Product_Fields
+                    ::get_purchase_data(
+                        $product_id
+                    );
+        }
+
+
+        /**
+         * Sichere Fallbacks.
+         */
+        $purchase_url =
+            isset(
+                $purchase_data[
+                    'url'
+                ]
+            )
+                ? trim(
+                    (string)
+                    $purchase_data[
+                        'url'
+                    ]
+                )
+                : '';
+
+
+        $button_text =
+            isset(
+                $purchase_data[
+                    'button_text'
+                ]
+            )
+                ? trim(
+                    (string)
+                    $purchase_data[
+                        'button_text'
+                    ]
+                )
+                : '';
+
+
+        if (
+            $button_text === ''
+        ) {
+            $button_text =
+                __(
+                    'Produkt ansehen',
+                    'jung-leben'
+                );
+        }
+
+
+        $link_new_tab =
+            isset(
+                $purchase_data[
+                    'new_tab'
+                ]
+            )
+                ? (bool)
+                    $purchase_data[
+                        'new_tab'
+                    ]
+                : true;
+
+
+        $purchase_rel =
+            isset(
+                $purchase_data[
+                    'rel'
+                ]
+            )
+                ? trim(
+                    (string)
+                    $purchase_data[
+                        'rel'
+                    ]
+                )
+                : 'noopener noreferrer external';
+
+
+        $price_display =
+            isset(
+                $purchase_data[
+                    'price_display'
+                ]
+            )
+                ? trim(
+                    (string)
+                    $purchase_data[
+                        'price_display'
+                    ]
+                )
+                : '';
+
+
+        $partner_id =
+            isset(
+                $purchase_data[
+                    'partner_id'
+                ]
+            )
+                ? absint(
+                    $purchase_data[
+                        'partner_id'
+                    ]
+                )
+                : 0;
+
+
+        $partner_active =
+            isset(
+                $purchase_data[
+                    'partner_active'
+                ]
+            )
+            && (bool)
+                $purchase_data[
+                    'partner_active'
+                ];
+
+
+        $partner_data =
+            isset(
+                $purchase_data[
+                    'partner'
+                ]
+            )
+            && is_array(
+                $purchase_data[
+                    'partner'
+                ]
+            )
+                ? $purchase_data[
+                    'partner'
+                ]
+                : [];
+
+
+        $partner_name =
+            isset(
+                $partner_data[
+                    'name'
+                ]
+            )
+                ? trim(
+                    (string)
+                    $partner_data[
+                        'name'
+                    ]
+                )
+                : '';
+
+
+        $show_offer =
+            isset(
+                $purchase_data[
+                    'show_offer'
+                ]
+            )
+            && (bool)
+                $purchase_data[
+                    'show_offer'
+                ];
+
+
+        $offer_title =
+            isset(
+                $purchase_data[
+                    'offer_title'
+                ]
+            )
+                ? trim(
+                    (string)
+                    $purchase_data[
+                        'offer_title'
+                    ]
+                )
+                : '';
+
+
+        $discount_text =
+            isset(
+                $purchase_data[
+                    'discount_text'
+                ]
+            )
+                ? trim(
+                    (string)
+                    $purchase_data[
+                        'discount_text'
+                    ]
+                )
+                : '';
+
+
+        $discount_code =
+            isset(
+                $purchase_data[
+                    'discount_code'
+                ]
+            )
+                ? trim(
+                    (string)
+                    $purchase_data[
+                        'discount_code'
+                    ]
+                )
+                : '';
+
+
+        $public_note =
+            isset(
+                $purchase_data[
+                    'public_note'
+                ]
+            )
+                ? trim(
+                    (string)
+                    $purchase_data[
+                        'public_note'
+                    ]
+                )
+                : '';
+
+
+        /**
+         * Kaufkarte nur anzeigen, wenn tatsächlich
+         * sinnvolle Bezugsinformationen vorhanden sind.
+         */
+        $show_purchase_card =
+            $purchase_url !== ''
+            || $price_display !== ''
+            || (
+                $show_offer
+                && (
+                    $offer_title !== ''
+                    || $discount_text !== ''
+                    || $discount_code !== ''
+                    || $public_note !== ''
+                )
+            );
+
+
+        /* =====================================================
+           TRANSPARENZ
+           ===================================================== */
+
+        $affiliate_notice =
+            trim(
+                (string)
+                $get_product_field(
+                    'jl_product_affiliate_notice',
+                    $product_id,
+                    ''
+                )
+            );
+
+
+        $health_notice =
+            trim(
+                (string)
+                $get_product_field(
+                    'jl_product_health_notice',
+                    $product_id,
+                    ''
+                )
+            );
 
 
         /* =====================================================
@@ -802,13 +969,6 @@ if (
             );
 
 
-        /**
-         * WordPress-Inhalt bereits jetzt filtern.
-         *
-         * Jung Leben Core kann hier zusätzlich
-         * einen verknüpften Erfahrungsartikel
-         * anhängen.
-         */
         $rendered_content =
             apply_filters(
                 'the_content',
@@ -851,10 +1011,6 @@ if (
             );
 
 
-        /**
-         * Gibt es überhaupt einen ausführlichen
-         * Hauptinhalt?
-         */
         $has_main_details =
             $has_purpose_section
             || $has_rendered_content
@@ -862,22 +1018,10 @@ if (
             || $has_pros_cons;
 
 
-        /**
-         * Sidebar nur anzeigen, wenn gleichzeitig
-         * echter Hauptinhalt vorhanden ist.
-         *
-         * Marke, Kategorien und Routine stehen
-         * bereits im Hero und müssen bei einer
-         * sehr kurzen Seite nicht nochmals
-         * wiederholt werden.
-         */
         $show_detail_area =
             $has_main_details;
 
 
-        /**
-         * Seitenzustand.
-         */
         $single_classes = [
             'product-single',
         ];
@@ -1246,13 +1390,41 @@ if (
                                 <div class="product-purchase-card__header">
 
                                     <span class="product-purchase-card__eyebrow">
+
                                         <?php
-                                        esc_html_e(
-                                            'Bezugsinformation',
-                                            'jung-leben'
+                                        echo esc_html(
+                                            $show_offer
+                                                ? __(
+                                                    'Dein Vorteil',
+                                                    'jung-leben'
+                                                )
+                                                : __(
+                                                    'Bezugsinformation',
+                                                    'jung-leben'
+                                                )
                                         );
                                         ?>
+
                                     </span>
+
+
+                                    <?php
+                                    if (
+                                        $partner_name !== ''
+                                    ) :
+                                        ?>
+
+                                        <p class="product-purchase-card__partner">
+
+                                            <?php
+                                            echo esc_html(
+                                                $partner_name
+                                            );
+                                            ?>
+
+                                        </p>
+
+                                    <?php endif; ?>
 
 
                                     <?php
@@ -1274,65 +1446,102 @@ if (
                                 </div>
 
 
-                                <?php
-                                if (
-                                    $partner_name !== ''
-                                    && $purchase_url !== ''
-                                ) :
-                                    ?>
-
-                                    <p class="product-purchase-card__partner">
-
-                                        <?php
-                                        esc_html_e(
-                                            'Erhältlich bei',
-                                            'jung-leben'
-                                        );
-                                        ?>:
-
-                                        <strong>
-                                            <?php
-                                            echo esc_html(
-                                                $partner_name
-                                            );
-                                            ?>
-                                        </strong>
-
-                                    </p>
-
-                                <?php endif; ?>
-
+                                <!-- =================================
+                                     KUNDENVORTEIL
+                                     ================================= -->
 
                                 <?php
                                 if (
-                                    $discount_code !== ''
+                                    $show_offer
                                 ) :
                                     ?>
 
                                     <div class="product-purchase-card__discount">
 
-                                        <span>
-                                            <?php
-                                            esc_html_e(
-                                                'Rabattcode',
-                                                'jung-leben'
-                                            );
+                                        <?php
+                                        if (
+                                            $offer_title !== ''
+                                        ) :
                                             ?>
-                                        </span>
+
+                                            <span>
+                                                <?php
+                                                echo esc_html(
+                                                    $offer_title
+                                                );
+                                                ?>
+                                            </span>
+
+                                        <?php endif; ?>
 
 
-                                        <strong>
-                                            <?php
-                                            echo esc_html(
-                                                $discount_code
-                                            );
+                                        <?php
+                                        if (
+                                            $discount_text !== ''
+                                        ) :
                                             ?>
-                                        </strong>
+
+                                            <strong>
+                                                <?php
+                                                echo esc_html(
+                                                    $discount_text
+                                                );
+                                                ?>
+                                            </strong>
+
+                                        <?php endif; ?>
+
+
+                                        <?php
+                                        if (
+                                            $discount_code !== ''
+                                        ) :
+                                            ?>
+
+                                            <p>
+                                                <?php
+                                                esc_html_e(
+                                                    'Code',
+                                                    'jung-leben'
+                                                );
+                                                ?>:
+
+                                                <strong>
+                                                    <?php
+                                                    echo esc_html(
+                                                        $discount_code
+                                                    );
+                                                    ?>
+                                                </strong>
+                                            </p>
+
+                                        <?php endif; ?>
 
                                     </div>
 
+
+                                    <?php
+                                    if (
+                                        $public_note !== ''
+                                    ) :
+                                        ?>
+
+                                        <p class="product-purchase-card__note">
+                                            <?php
+                                            echo esc_html(
+                                                $public_note
+                                            );
+                                            ?>
+                                        </p>
+
+                                    <?php endif; ?>
+
                                 <?php endif; ?>
 
+
+                                <!-- =================================
+                                     KAUFBUTTON
+                                     ================================= -->
 
                                 <?php
                                 if (
@@ -1361,9 +1570,7 @@ if (
 
                                         rel="<?php
                                         echo esc_attr(
-                                            $is_affiliate_link
-                                                ? 'sponsored noopener noreferrer'
-                                                : 'noopener noreferrer'
+                                            $purchase_rel
                                         );
                                         ?>"
                                     >
@@ -1371,12 +1578,7 @@ if (
                                         <span>
                                             <?php
                                             echo esc_html(
-                                                $button_text !== ''
-                                                    ? $button_text
-                                                    : __(
-                                                        'Produkt ansehen',
-                                                        'jung-leben'
-                                                    )
+                                                $button_text
                                             );
                                             ?>
                                         </span>
