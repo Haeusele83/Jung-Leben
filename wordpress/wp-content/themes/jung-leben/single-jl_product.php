@@ -593,8 +593,7 @@ if (
                     '<span class="jl-brand jl-brand--product">'
                     . '<span class="jl-brand__name">'
                     . esc_html(
-                        $primary_brand
-                            ->name
+                        $primary_brand->name
                     )
                     . '</span>'
                     . '</span>';
@@ -606,18 +605,6 @@ if (
            KAUF- UND PARTNERDATEN
            ===================================================== */
 
-        /**
-         * Die zentrale Partnerlogik befindet sich
-         * im Jung-Leben-Core-Plugin.
-         *
-         * Priorität dort:
-         *
-         * 1. produktspezifischer Affiliate-Link
-         * 2. direkte Produktseite bei Rabattcode-Modell
-         * 3. allgemeiner persönlicher Partnerlink
-         * 4. direkte Produktseite
-         * 5. Markenwebsite
-         */
         $purchase_data = [];
 
 
@@ -638,9 +625,6 @@ if (
         }
 
 
-        /**
-         * Sichere Fallbacks.
-         */
         $purchase_url =
             isset(
                 $purchase_data[
@@ -725,32 +709,6 @@ if (
                 : '';
 
 
-        $partner_id =
-            isset(
-                $purchase_data[
-                    'partner_id'
-                ]
-            )
-                ? absint(
-                    $purchase_data[
-                        'partner_id'
-                    ]
-                )
-                : 0;
-
-
-        $partner_active =
-            isset(
-                $purchase_data[
-                    'partner_active'
-                ]
-            )
-            && (bool)
-                $purchase_data[
-                    'partner_active'
-                ];
-
-
         $partner_data =
             isset(
                 $purchase_data[
@@ -793,21 +751,6 @@ if (
                 $purchase_data[
                     'show_offer'
                 ];
-
-
-        $offer_title =
-            isset(
-                $purchase_data[
-                    'offer_title'
-                ]
-            )
-                ? trim(
-                    (string)
-                    $purchase_data[
-                        'offer_title'
-                    ]
-                )
-                : '';
 
 
         $discount_text =
@@ -856,8 +799,8 @@ if (
 
 
         /**
-         * Kaufkarte nur anzeigen, wenn tatsächlich
-         * sinnvolle Bezugsinformationen vorhanden sind.
+         * Die Kaufkarte erscheint nur, wenn tatsächlich
+         * kaufrelevante Informationen vorhanden sind.
          */
         $show_purchase_card =
             $purchase_url !== ''
@@ -865,8 +808,7 @@ if (
             || (
                 $show_offer
                 && (
-                    $offer_title !== ''
-                    || $discount_text !== ''
+                    $discount_text !== ''
                     || $discount_code !== ''
                     || $public_note !== ''
                 )
@@ -1415,13 +1357,11 @@ if (
                                         ?>
 
                                         <p class="product-purchase-card__partner">
-
                                             <?php
                                             echo esc_html(
                                                 $partner_name
                                             );
                                             ?>
-
                                         </p>
 
                                     <?php endif; ?>
@@ -1453,6 +1393,10 @@ if (
                                 <?php
                                 if (
                                     $show_offer
+                                    && (
+                                        $discount_text !== ''
+                                        || $discount_code !== ''
+                                    )
                                 ) :
                                     ?>
 
@@ -1460,28 +1404,11 @@ if (
 
                                         <?php
                                         if (
-                                            $offer_title !== ''
-                                        ) :
-                                            ?>
-
-                                            <span>
-                                                <?php
-                                                echo esc_html(
-                                                    $offer_title
-                                                );
-                                                ?>
-                                            </span>
-
-                                        <?php endif; ?>
-
-
-                                        <?php
-                                        if (
                                             $discount_text !== ''
                                         ) :
                                             ?>
 
-                                            <strong>
+                                            <strong class="product-purchase-card__discount-value">
                                                 <?php
                                                 echo esc_html(
                                                     $discount_text
@@ -1498,43 +1425,91 @@ if (
                                         ) :
                                             ?>
 
-                                            <p>
-                                                <?php
-                                                esc_html_e(
-                                                    'Code',
-                                                    'jung-leben'
-                                                );
-                                                ?>:
+                                            <div class="product-purchase-card__code">
 
-                                                <strong>
+                                                <span class="product-purchase-card__code-label">
                                                     <?php
-                                                    echo esc_html(
-                                                        $discount_code
+                                                    esc_html_e(
+                                                        'Code',
+                                                        'jung-leben'
                                                     );
                                                     ?>
-                                                </strong>
-                                            </p>
+                                                </span>
+
+
+                                                <button
+                                                    type="button"
+                                                    class="
+                                                        product-purchase-card__copy
+                                                        js-product-copy-code
+                                                    "
+                                                    data-copy-code="<?php
+                                                    echo esc_attr(
+                                                        $discount_code
+                                                    );
+                                                    ?>"
+                                                    aria-label="<?php
+                                                    echo esc_attr(
+                                                        sprintf(
+                                                            __(
+                                                                'Rabattcode %s kopieren',
+                                                                'jung-leben'
+                                                            ),
+                                                            $discount_code
+                                                        )
+                                                    );
+                                                    ?>"
+                                                >
+
+                                                    <span class="product-purchase-card__code-value">
+                                                        <?php
+                                                        echo esc_html(
+                                                            $discount_code
+                                                        );
+                                                        ?>
+                                                    </span>
+
+
+                                                    <span class="product-purchase-card__copy-label">
+                                                        <?php
+                                                        esc_html_e(
+                                                            'Kopieren',
+                                                            'jung-leben'
+                                                        );
+                                                        ?>
+                                                    </span>
+
+                                                </button>
+
+
+                                                <span
+                                                    class="product-purchase-card__copy-status"
+                                                    aria-live="polite"
+                                                ></span>
+
+                                            </div>
 
                                         <?php endif; ?>
 
                                     </div>
 
+                                <?php endif; ?>
 
-                                    <?php
-                                    if (
-                                        $public_note !== ''
-                                    ) :
+
+                                <?php
+                                if (
+                                    $show_offer
+                                    && $public_note !== ''
+                                ) :
+                                    ?>
+
+                                    <p class="product-purchase-card__note">
+                                        <?php
+                                        echo esc_html(
+                                            $public_note
+                                        );
                                         ?>
-
-                                        <p class="product-purchase-card__note">
-                                            <?php
-                                            echo esc_html(
-                                                $public_note
-                                            );
-                                            ?>
-                                        </p>
-
-                                    <?php endif; ?>
+                                    </p>
 
                                 <?php endif; ?>
 
@@ -1669,7 +1644,7 @@ if (
                             <?php endif; ?>
 
 
-                            <!-- Produkt / verknüpfte Erfahrung -->
+                            <!-- Produkt -->
                             <?php
                             if (
                                 $has_rendered_content
@@ -1883,7 +1858,6 @@ if (
 
                         <aside class="product-details__sidebar">
 
-                            <!-- Marke -->
                             <?php
                             if (
                                 $brand_markup !== ''
@@ -1915,7 +1889,6 @@ if (
                             <?php endif; ?>
 
 
-                            <!-- Routine -->
                             <?php
                             if (
                                 ! empty(
@@ -1962,7 +1935,6 @@ if (
                             <?php endif; ?>
 
 
-                            <!-- Kategorien -->
                             <?php
                             if (
                                 ! empty(
@@ -2009,7 +1981,6 @@ if (
                             <?php endif; ?>
 
 
-                            <!-- Hinweis -->
                             <?php
                             if (
                                 $health_notice !== ''
@@ -2053,7 +2024,7 @@ if (
 
 
             <!-- =================================================
-                 KOMPAKTER HINWEIS BEI KURZER PRODUKTSEITE
+                 KOMPAKTER HINWEIS
                  ================================================= -->
 
             <?php
@@ -2143,6 +2114,146 @@ if (
     endwhile;
 
 endif;
+?>
 
 
+<script>
+document.addEventListener(
+    'click',
+    async function (event) {
+        const button =
+            event.target.closest(
+                '.js-product-copy-code'
+            );
+
+        if (! button) {
+            return;
+        }
+
+
+        const code =
+            button.dataset.copyCode || '';
+
+        if (! code) {
+            return;
+        }
+
+
+        const label =
+            button.querySelector(
+                '.product-purchase-card__copy-label'
+            );
+
+
+        const status =
+            button.parentElement
+                ? button.parentElement.querySelector(
+                    '.product-purchase-card__copy-status'
+                )
+                : null;
+
+
+        const originalLabel =
+            label
+                ? label.textContent
+                : 'Kopieren';
+
+
+        const fallbackCopy =
+            function () {
+                const textarea =
+                    document.createElement(
+                        'textarea'
+                    );
+
+                textarea.value =
+                    code;
+
+                textarea.setAttribute(
+                    'readonly',
+                    ''
+                );
+
+                textarea.style.position =
+                    'fixed';
+
+                textarea.style.opacity =
+                    '0';
+
+                document.body.appendChild(
+                    textarea
+                );
+
+                textarea.select();
+
+                document.execCommand(
+                    'copy'
+                );
+
+                textarea.remove();
+            };
+
+
+        try {
+            if (
+                navigator.clipboard
+                && window.isSecureContext
+            ) {
+                await navigator.clipboard.writeText(
+                    code
+                );
+            } else {
+                fallbackCopy();
+            }
+
+
+            button.classList.add(
+                'is-copied'
+            );
+
+
+            if (label) {
+                label.textContent =
+                    'Kopiert ✓';
+            }
+
+
+            if (status) {
+                status.textContent =
+                    'Rabattcode wurde kopiert.';
+            }
+
+
+            window.setTimeout(
+                function () {
+                    button.classList.remove(
+                        'is-copied'
+                    );
+
+
+                    if (label) {
+                        label.textContent =
+                            originalLabel;
+                    }
+
+
+                    if (status) {
+                        status.textContent =
+                            '';
+                    }
+                },
+                2200
+            );
+        } catch (error) {
+            if (status) {
+                status.textContent =
+                    'Code konnte nicht automatisch kopiert werden.';
+            }
+        }
+    }
+);
+</script>
+
+
+<?php
 get_footer();
