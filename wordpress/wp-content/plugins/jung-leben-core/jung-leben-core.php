@@ -3,7 +3,7 @@
  * Plugin Name: Jung Leben Core
  * Plugin URI: https://jung-leben.ch
  * Description: Zentrale Produkt-, Content- und Affiliate-Funktionen für Jung Leben.
- * Version: 0.6.1
+ * Version: 0.6.3
  * Author: Jung Leben
  * Text Domain: jung-leben-core
  * Domain Path: /languages

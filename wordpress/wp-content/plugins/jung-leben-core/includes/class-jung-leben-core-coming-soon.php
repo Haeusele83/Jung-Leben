@@ -2,11 +2,14 @@
 /**
  * Coming-Soon-Modus für Jung Leben.
  *
- * Zeigt Besucherinnen und Besuchern bis zum Launch
- * eine reduzierte Coming-Soon-Seite mit Countdown.
+ * Zeigt normalen Besucherinnen und Besuchern
+ * eine reduzierte Coming-Soon-Seite.
  *
- * Angemeldete Administratoren können die eigentliche
- * Website weiterhin normal aufrufen und bearbeiten.
+ * Angemeldete Benutzerinnen und Benutzer mit
+ * Bearbeitungsrechten können die eigentliche
+ * Website weiterhin vollständig aufrufen.
+ *
+ * Der öffentliche Launch erfolgt bewusst manuell.
  *
  * @package Jung_Leben_Core
  */
@@ -24,13 +27,12 @@ if (! defined('ABSPATH')) {
 final class Jung_Leben_Core_Coming_Soon
 {
     /**
-     * Geplanter Launch.
+     * Coming-Soon-Modus.
      *
-     * Dienstag, 8. September 2026
-     * um 20:00 Uhr Schweizer Zeit.
+     * true  = Coming-Soon-Seite anzeigen
+     * false = Website öffentlich freigeben
      */
-    private const LAUNCH_DATE =
-        '2026-09-08 20:00:00';
+    private const ENABLED = true;
 
 
     /* =========================================================
@@ -64,6 +66,14 @@ final class Jung_Leben_Core_Coming_Soon
     public static function maybe_render_coming_soon(): void
     {
         /*
+         * Coming-Soon-Modus manuell deaktiviert.
+         */
+        if (! self::ENABLED) {
+            return;
+        }
+
+
+        /*
          * WordPress-Backend niemals blockieren.
          */
         if (is_admin()) {
@@ -72,12 +82,32 @@ final class Jung_Leben_Core_Coming_Soon
 
 
         /*
-         * AJAX, REST und Cron nicht blockieren.
+         * AJAX nicht blockieren.
          */
         if (
-            wp_doing_ajax()
-            || wp_doing_cron()
-            || defined('REST_REQUEST')
+            function_exists('wp_doing_ajax')
+            && wp_doing_ajax()
+        ) {
+            return;
+        }
+
+
+        /*
+         * Cron nicht blockieren.
+         */
+        if (
+            function_exists('wp_doing_cron')
+            && wp_doing_cron()
+        ) {
+            return;
+        }
+
+
+        /*
+         * REST API nicht blockieren.
+         */
+        if (
+            defined('REST_REQUEST')
             && REST_REQUEST
         ) {
             return;
@@ -90,18 +120,17 @@ final class Jung_Leben_Core_Coming_Soon
          */
         if (
             is_user_logged_in()
-            && current_user_can(
-                'edit_pages'
-            )
+            && current_user_can('edit_pages')
         ) {
             return;
         }
 
 
         /*
-         * Login-Seite nicht blockieren.
+         * WordPress-Login niemals blockieren.
          */
         global $pagenow;
+
 
         if (
             isset($pagenow)
@@ -111,65 +140,9 @@ final class Jung_Leben_Core_Coming_Soon
         }
 
 
-        /*
-         * Nach Erreichen des Launch-Termins wird die
-         * Website automatisch öffentlich zugänglich.
-         */
-        if (self::launch_has_started()) {
-            return;
-        }
-
-
         self::render_page();
 
         exit;
-    }
-
-
-    /* =========================================================
-       LAUNCH-ZEIT
-       ========================================================= */
-
-    /**
-     * Launch-Zeitpunkt als DateTime laden.
-     */
-    private static function get_launch_datetime(): DateTimeImmutable
-    {
-        $timezone =
-            new DateTimeZone(
-                'Europe/Zurich'
-            );
-
-
-        return
-            new DateTimeImmutable(
-                self::LAUNCH_DATE,
-                $timezone
-            );
-    }
-
-
-    /**
-     * Prüfen, ob der Launch bereits erreicht wurde.
-     */
-    private static function launch_has_started(): bool
-    {
-        $timezone =
-            new DateTimeZone(
-                'Europe/Zurich'
-            );
-
-
-        $now =
-            new DateTimeImmutable(
-                'now',
-                $timezone
-            );
-
-
-        return
-            $now >=
-            self::get_launch_datetime();
     }
 
 
@@ -183,7 +156,7 @@ final class Jung_Leben_Core_Coming_Soon
     private static function get_logo_url(): string
     {
         /*
-         * Customizer-Logo bevorzugen.
+         * WordPress-Customizer-Logo bevorzugen.
          */
         $custom_logo_id =
             (int)
@@ -200,14 +173,17 @@ final class Jung_Leben_Core_Coming_Soon
                 );
 
 
-            if (is_string($logo_url)) {
+            if (
+                is_string($logo_url)
+                && $logo_url !== ''
+            ) {
                 return $logo_url;
             }
         }
 
 
         /*
-         * Fallback auf das Jung-Leben-Theme-Logo.
+         * Fallback auf das Logo im Jung-Leben-Theme.
          */
         return
             get_template_directory_uri()
@@ -224,20 +200,6 @@ final class Jung_Leben_Core_Coming_Soon
      */
     private static function render_page(): void
     {
-        $launch =
-            self::get_launch_datetime();
-
-
-        /*
-         * ISO-Datum mit korrektem Schweizer Offset
-         * für JavaScript.
-         */
-        $launch_iso =
-            $launch->format(
-                DATE_ATOM
-            );
-
-
         $logo_url =
             self::get_logo_url();
 
@@ -247,9 +209,8 @@ final class Jung_Leben_Core_Coming_Soon
         nocache_headers();
         ?>
         <!DOCTYPE html>
-        <html
-            <?php language_attributes(); ?>
-        >
+
+        <html <?php language_attributes(); ?>>
 
         <head>
 
@@ -275,6 +236,7 @@ final class Jung_Leben_Core_Coming_Soon
             </title>
 
             <?php wp_head(); ?>
+
 
             <style>
 
@@ -305,6 +267,9 @@ final class Jung_Leben_Core_Coming_Soon
 
                     -webkit-font-smoothing:
                         antialiased;
+
+                    text-rendering:
+                        optimizeLegibility;
                 }
 
 
@@ -340,10 +305,11 @@ final class Jung_Leben_Core_Coming_Soon
 
 
                 .jl-coming-header__inner {
-                    width: min(
-                        100%,
-                        1180px
-                    );
+                    width:
+                        min(
+                            100%,
+                            1180px
+                        );
 
                     margin:
                         0
@@ -388,20 +354,23 @@ final class Jung_Leben_Core_Coming_Soon
                     overflow: hidden;
 
                     padding:
-                        70px
+                        80px
                         24px;
                 }
 
 
+                /*
+                 * Dezente organische Form oben rechts.
+                 */
                 .jl-coming-main::before {
                     content: "";
 
                     position: absolute;
 
-                    width: 520px;
-                    height: 520px;
+                    width: 540px;
+                    height: 540px;
 
-                    top: -250px;
+                    top: -280px;
                     right: -190px;
 
                     background:
@@ -409,23 +378,26 @@ final class Jung_Leben_Core_Coming_Soon
                             199,
                             221,
                             161,
-                            0.28
+                            0.29
                         );
 
                     border-radius: 50%;
                 }
 
 
+                /*
+                 * Dezente Form unten links.
+                 */
                 .jl-coming-main::after {
                     content: "";
 
                     position: absolute;
 
-                    width: 410px;
-                    height: 410px;
+                    width: 420px;
+                    height: 420px;
 
-                    bottom: -250px;
-                    left: -150px;
+                    bottom: -260px;
+                    left: -160px;
 
                     background:
                         rgba(
@@ -443,28 +415,31 @@ final class Jung_Leben_Core_Coming_Soon
                     position: relative;
                     z-index: 2;
 
-                    width: min(
-                        100%,
-                        820px
-                    );
+                    width:
+                        min(
+                            100%,
+                            850px
+                        );
 
-                    margin: 0 auto;
+                    margin:
+                        0
+                        auto;
 
                     text-align: center;
                 }
 
 
                 /* =============================================
-                   EYEBROW
+                   KURZE EINLEITUNG
                    ============================================= */
 
                 .jl-coming-eyebrow {
                     margin:
                         0
                         0
-                        20px;
+                        19px;
 
-                    color: #73815c;
+                    color: #71805b;
 
                     font-size: 0.74rem;
                     font-weight: 750;
@@ -476,7 +451,7 @@ final class Jung_Leben_Core_Coming_Soon
 
 
                 /* =============================================
-                   TITEL
+                   HAUPTTITEL
                    ============================================= */
 
                 .jl-coming-title {
@@ -491,8 +466,8 @@ final class Jung_Leben_Core_Coming_Soon
                     font-size:
                         clamp(
                             2.8rem,
-                            6vw,
-                            5rem
+                            5.8vw,
+                            4.8rem
                         );
 
                     font-weight: 700;
@@ -509,7 +484,7 @@ final class Jung_Leben_Core_Coming_Soon
 
                 .jl-coming-round {
                     margin:
-                        28px
+                        31px
                         auto
                         0;
 
@@ -528,11 +503,15 @@ final class Jung_Leben_Core_Coming_Soon
                 }
 
 
+                /* =============================================
+                   TEXT
+                   ============================================= */
+
                 .jl-coming-text {
-                    max-width: 630px;
+                    max-width: 650px;
 
                     margin:
-                        12px
+                        13px
                         auto
                         0;
 
@@ -545,49 +524,50 @@ final class Jung_Leben_Core_Coming_Soon
                             1.08rem
                         );
 
-                    line-height: 1.7;
+                    line-height: 1.72;
                 }
 
 
                 /* =============================================
-                   COUNTDOWN
+                   THEMEN
                    ============================================= */
 
-                .jl-countdown {
-                    max-width: 660px;
+                .jl-coming-topics {
+                    display: flex;
 
-                    display: grid;
+                    flex-wrap: wrap;
 
-                    grid-template-columns:
-                        repeat(
-                            4,
-                            minmax(
-                                0,
-                                1fr
-                            )
-                        );
+                    justify-content: center;
 
-                    gap: 12px;
+                    gap: 9px;
 
                     margin:
-                        42px
+                        34px
                         auto
                         0;
                 }
 
 
-                .jl-countdown__item {
+                .jl-coming-topic {
+                    min-height: 35px;
+
+                    display: inline-flex;
+
+                    align-items: center;
+                    justify-content: center;
+
                     padding:
-                        21px
-                        12px
-                        19px;
+                        0
+                        14px;
+
+                    color: #52685e;
 
                     background:
                         rgba(
                             255,
                             255,
                             255,
-                            0.76
+                            0.72
                         );
 
                     border:
@@ -599,70 +579,84 @@ final class Jung_Leben_Core_Coming_Soon
                             0.08
                         );
 
-                    border-radius: 15px;
+                    border-radius: 999px;
 
-                    box-shadow:
-                        0 12px 30px
-                        rgba(
-                            23,
-                            60,
-                            50,
-                            0.035
-                        );
-
-                    backdrop-filter:
-                        blur(8px);
-                }
-
-
-                .jl-countdown__number {
-                    display: block;
-
-                    color: #173c32;
-
-                    font-size:
-                        clamp(
-                            1.9rem,
-                            4vw,
-                            2.7rem
-                        );
-
-                    font-weight: 720;
-
-                    line-height: 1;
-                }
-
-
-                .jl-countdown__label {
-                    display: block;
-
-                    margin-top: 8px;
-
-                    color: #7a8880;
-
-                    font-size: 0.68rem;
-                    font-weight: 700;
-
-                    letter-spacing: 0.09em;
-
-                    text-transform: uppercase;
+                    font-size: 0.76rem;
+                    font-weight: 650;
                 }
 
 
                 /* =============================================
-                   DATUM
+                   STATUS
                    ============================================= */
 
-                .jl-coming-date {
+                .jl-coming-status {
+                    width:
+                        min(
+                            100%,
+                            580px
+                        );
+
+                    display: flex;
+
+                    align-items: center;
+                    justify-content: center;
+
+                    gap: 9px;
+
                     margin:
-                        25px
-                        0
+                        35px
+                        auto
                         0;
 
-                    color: #315b49;
+                    padding:
+                        15px
+                        18px;
 
-                    font-size: 0.85rem;
-                    font-weight: 650;
+                    color: #53675d;
+
+                    background:
+                        rgba(
+                            255,
+                            255,
+                            255,
+                            0.62
+                        );
+
+                    border:
+                        1px solid
+                        rgba(
+                            23,
+                            60,
+                            50,
+                            0.07
+                        );
+
+                    border-radius: 13px;
+
+                    font-size: 0.8rem;
+                    line-height: 1.5;
+                }
+
+
+                .jl-coming-status__dot {
+                    width: 8px;
+                    height: 8px;
+
+                    flex: 0 0 auto;
+
+                    background: #86a65d;
+
+                    border-radius: 50%;
+
+                    box-shadow:
+                        0 0 0 5px
+                        rgba(
+                            134,
+                            166,
+                            93,
+                            0.13
+                        );
                 }
 
 
@@ -671,7 +665,10 @@ final class Jung_Leben_Core_Coming_Soon
                    ============================================= */
 
                 .jl-coming-footer {
-                    margin-top: 38px;
+                    margin:
+                        36px
+                        0
+                        0;
 
                     color: #89938d;
 
@@ -704,7 +701,7 @@ final class Jung_Leben_Core_Coming_Soon
                             );
 
                         padding:
-                            55px
+                            58px
                             18px;
                     }
 
@@ -712,33 +709,51 @@ final class Jung_Leben_Core_Coming_Soon
                     .jl-coming-title {
                         font-size:
                             clamp(
-                                2.4rem,
-                                12vw,
-                                3.5rem
+                                2.35rem,
+                                11vw,
+                                3.4rem
                             );
                     }
 
 
-                    .jl-countdown {
-                        grid-template-columns:
-                            repeat(
-                                2,
-                                minmax(
-                                    0,
-                                    1fr
-                                )
-                            );
-
-                        max-width: 360px;
-
-                        margin-top: 34px;
+                    .jl-coming-round {
+                        margin-top: 26px;
                     }
 
 
-                    .jl-countdown__item {
+                    .jl-coming-topics {
+                        margin-top: 29px;
+
+                        gap: 7px;
+                    }
+
+
+                    .jl-coming-topic {
+                        min-height: 33px;
+
                         padding:
-                            18px
-                            10px;
+                            0
+                            12px;
+
+                        font-size: 0.72rem;
+                    }
+
+
+                    .jl-coming-status {
+                        align-items: flex-start;
+
+                        margin-top: 30px;
+
+                        padding:
+                            14px
+                            15px;
+
+                        text-align: left;
+                    }
+
+
+                    .jl-coming-status__dot {
+                        margin-top: 5px;
                     }
 
                 }
@@ -796,299 +811,71 @@ final class Jung_Leben_Core_Coming_Soon
 
 
                     <p class="jl-coming-round">
-                        Wir machen noch eine kleine Ehrenrunde.
+                        Wir drehen noch eine kleine Ehrenrunde.
                     </p>
 
 
                     <p class="jl-coming-text">
-                        Ein paar letzte Details fehlen noch –
-                        dann sind wir bereit.
-                        Jung Leben startet am
-                        8. September um 20:00 Uhr.
+                        Jung Leben bekommt gerade den letzten
+                        Feinschliff. Bald findest du hier
+                        persönliche Erfahrungen, ausgewählte
+                        Empfehlungen und alltagstaugliche Routinen
+                        rund um Longevity und Wohlbefinden.
                     </p>
 
 
-                    <!-- =====================================
-                         COUNTDOWN
-                         ===================================== -->
-
                     <div
-                        class="jl-countdown"
-                        id="jl-countdown"
-                        aria-label="Countdown bis zum Start von Jung Leben"
+                        class="jl-coming-topics"
+                        aria-label="Themen von Jung Leben"
                     >
 
-                        <div class="jl-countdown__item">
+                        <span class="jl-coming-topic">
+                            Erfahrungen
+                        </span>
 
-                            <span
-                                class="jl-countdown__number"
-                                id="jl-countdown-days"
-                            >
-                                00
-                            </span>
+                        <span class="jl-coming-topic">
+                            Empfehlungen
+                        </span>
 
-                            <span class="jl-countdown__label">
-                                Tage
-                            </span>
+                        <span class="jl-coming-topic">
+                            Routinen
+                        </span>
 
-                        </div>
-
-
-                        <div class="jl-countdown__item">
-
-                            <span
-                                class="jl-countdown__number"
-                                id="jl-countdown-hours"
-                            >
-                                00
-                            </span>
-
-                            <span class="jl-countdown__label">
-                                Stunden
-                            </span>
-
-                        </div>
-
-
-                        <div class="jl-countdown__item">
-
-                            <span
-                                class="jl-countdown__number"
-                                id="jl-countdown-minutes"
-                            >
-                                00
-                            </span>
-
-                            <span class="jl-countdown__label">
-                                Minuten
-                            </span>
-
-                        </div>
-
-
-                        <div class="jl-countdown__item">
-
-                            <span
-                                class="jl-countdown__number"
-                                id="jl-countdown-seconds"
-                            >
-                                00
-                            </span>
-
-                            <span class="jl-countdown__label">
-                                Sekunden
-                            </span>
-
-                        </div>
+                        <span class="jl-coming-topic">
+                            Longevity
+                        </span>
 
                     </div>
 
 
-                    <p class="jl-coming-date">
-                        08.09.2026 · 20:00 Uhr
-                    </p>
+                    <div class="jl-coming-status">
+
+                        <span
+                            class="jl-coming-status__dot"
+                            aria-hidden="true"
+                        ></span>
+
+                        <span>
+                            Wir arbeiten weiter an den letzten
+                            Details und melden uns, sobald alles
+                            bereit ist.
+                        </span>
+
+                    </div>
 
 
                     <p class="jl-coming-footer">
-                        © <?php echo esc_html(wp_date('Y')); ?>
+                        © <?php
+                        echo esc_html(
+                            wp_date('Y')
+                        );
+                        ?>
                         Jung Leben
                     </p>
 
                 </div>
 
             </main>
-
-
-            <!-- =============================================
-                 COUNTDOWN SCRIPT
-                 ============================================= -->
-
-            <script>
-                (() => {
-                    'use strict';
-
-                    const launchDate =
-                        new Date(
-                            <?php
-                            echo wp_json_encode(
-                                $launch_iso
-                            );
-                            ?>
-                        ).getTime();
-
-                    const daysElement =
-                        document.getElementById(
-                            'jl-countdown-days'
-                        );
-
-                    const hoursElement =
-                        document.getElementById(
-                            'jl-countdown-hours'
-                        );
-
-                    const minutesElement =
-                        document.getElementById(
-                            'jl-countdown-minutes'
-                        );
-
-                    const secondsElement =
-                        document.getElementById(
-                            'jl-countdown-seconds'
-                        );
-
-                    const countdown =
-                        document.getElementById(
-                            'jl-countdown'
-                        );
-
-
-                    if (
-                        ! daysElement
-                        || ! hoursElement
-                        || ! minutesElement
-                        || ! secondsElement
-                        || ! countdown
-                    ) {
-                        return;
-                    }
-
-
-                    const formatNumber =
-                        (number) =>
-                            String(number)
-                                .padStart(
-                                    2,
-                                    '0'
-                                );
-
-
-                    const updateCountdown = () => {
-                        const now =
-                            Date.now();
-
-                        const distance =
-                            launchDate
-                            - now;
-
-
-                        if (distance <= 0) {
-                            daysElement.textContent =
-                                '00';
-
-                            hoursElement.textContent =
-                                '00';
-
-                            minutesElement.textContent =
-                                '00';
-
-                            secondsElement.textContent =
-                                '00';
-
-
-                            window.location.reload();
-
-                            return;
-                        }
-
-
-                        const days =
-                            Math.floor(
-                                distance
-                                /
-                                (
-                                    1000
-                                    * 60
-                                    * 60
-                                    * 24
-                                )
-                            );
-
-
-                        const hours =
-                            Math.floor(
-                                (
-                                    distance
-                                    %
-                                    (
-                                        1000
-                                        * 60
-                                        * 60
-                                        * 24
-                                    )
-                                )
-                                /
-                                (
-                                    1000
-                                    * 60
-                                    * 60
-                                )
-                            );
-
-
-                        const minutes =
-                            Math.floor(
-                                (
-                                    distance
-                                    %
-                                    (
-                                        1000
-                                        * 60
-                                        * 60
-                                    )
-                                )
-                                /
-                                (
-                                    1000
-                                    * 60
-                                )
-                            );
-
-
-                        const seconds =
-                            Math.floor(
-                                (
-                                    distance
-                                    %
-                                    (
-                                        1000
-                                        * 60
-                                    )
-                                )
-                                /
-                                1000
-                            );
-
-
-                        daysElement.textContent =
-                            formatNumber(
-                                days
-                            );
-
-                        hoursElement.textContent =
-                            formatNumber(
-                                hours
-                            );
-
-                        minutesElement.textContent =
-                            formatNumber(
-                                minutes
-                            );
-
-                        secondsElement.textContent =
-                            formatNumber(
-                                seconds
-                            );
-                    };
-
-
-                    updateCountdown();
-
-                    window.setInterval(
-                        updateCountdown,
-                        1000
-                    );
-                })();
-            </script>
 
 
             <?php wp_footer(); ?>
