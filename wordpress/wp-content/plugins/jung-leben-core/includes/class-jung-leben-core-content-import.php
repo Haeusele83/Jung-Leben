@@ -23,6 +23,22 @@ final class Jung_Leben_Core_Content_Import
     private const MAX_FILE_SIZE = 10 * 1024 * 1024;
     private const AI_FONT_COLOR = '00B0F0';
 
+    /**
+     * Automatisch importierte Produktbilder.
+     */
+    private const IMAGE_SOURCE_META_KEY = '_jl_product_image_source_url';
+    private const IMAGE_PAGE_META_KEY = '_jl_product_image_page_url';
+    private const IMAGE_IMPORTED_AT_META_KEY = '_jl_product_image_imported_at';
+    private const EXCEL_IMAGE_META_KEY = '_jl_source_image_url';
+
+    /**
+     * Sicherheits- und Performance-Grenzen.
+     */
+    private const PRODUCT_PAGE_MAX_BYTES = 2 * 1024 * 1024;
+    private const PRODUCT_IMAGE_MAX_BYTES = 8 * 1024 * 1024;
+    private const PRODUCT_PAGE_TIMEOUT = 8;
+    private const PRODUCT_IMAGE_TIMEOUT = 15;
+
     public static function init(): void
     {
         add_action('admin_menu', [self::class, 'register_admin_page']);
@@ -56,6 +72,22 @@ final class Jung_Leben_Core_Content_Import
         $inactive = isset($_GET['inactive']) ? absint($_GET['inactive']) : 0;
         $errors = isset($_GET['errors']) ? absint($_GET['errors']) : 0;
         $ai = isset($_GET['ai']) ? absint($_GET['ai']) : 0;
+
+        $images = isset($_GET['images'])
+            ? absint($_GET['images'])
+            : 0;
+
+        $image_existing = isset($_GET['image_existing'])
+            ? absint($_GET['image_existing'])
+            : 0;
+
+        $image_unavailable = isset($_GET['image_unavailable'])
+            ? absint($_GET['image_unavailable'])
+            : 0;
+
+        $image_errors = isset($_GET['image_errors'])
+            ? absint($_GET['image_errors'])
+            : 0;
         ?>
         <div class="wrap">
             <h1><?php esc_html_e('Jung Leben – Excel-Import', 'jung-leben-core'); ?></h1>
@@ -75,7 +107,7 @@ final class Jung_Leben_Core_Content_Import
                         <?php
                         printf(
                             esc_html__(
-                                '%1$d Produkte und %2$d Beiträge wurden neu angelegt. %3$d bestehende Datensätze wurden synchronisiert. %4$d inaktive Produktzeilen wurden berücksichtigt. KI-markierte Beiträge: %5$d. Fehler: %6$d.',
+                                '%1$d Produkte und %2$d Beiträge wurden neu angelegt. %3$d bestehende Datensätze wurden synchronisiert. %4$d inaktive Produktzeilen wurden berücksichtigt. KI-markierte Beiträge: %5$d. Produktbilder: %6$d neu importiert, %7$d bereits vorhanden, %8$d nicht automatisch gefunden. Bildfehler: %9$d. Sonstige Fehler: %10$d.',
                                 'jung-leben-core'
                             ),
                             $products,
@@ -83,6 +115,10 @@ final class Jung_Leben_Core_Content_Import
                             $updated,
                             $inactive,
                             $ai,
+                            $images,
+                            $image_existing,
+                            $image_unavailable,
+                            $image_errors,
                             $errors
                         );
                         ?>
@@ -137,6 +173,13 @@ final class Jung_Leben_Core_Content_Import
                 <p>
                     <?php esc_html_e(
                         'Blau formatierte Blogtexte werden mit dem Prüfstatus «KI-generiert – muss geprüft werden» gekennzeichnet. Die Zeilen «Test» und «Blauer Text» werden ignoriert.',
+                        'jung-leben-core'
+                    ); ?>
+                </p>
+
+                <p>
+                    <?php esc_html_e(
+                        'Fehlt bei einem Produkt ein Beitragsbild, versucht der Import automatisch ein Produktbild zu übernehmen. Eine optionale Excel-Spalte «Bild-URL» hat Vorrang; sonst wird auf der Favoriten-Produktseite nach og:image bzw. twitter:image gesucht. Bereits vorhandene Beitragsbilder werden nie überschrieben.',
                         'jung-leben-core'
                     ); ?>
                 </p>
@@ -328,6 +371,10 @@ final class Jung_Leben_Core_Content_Import
             'ai' => self::count_ai_experiences(
                 $data['experiences']
             ),
+            'images' => 0,
+            'image_existing' => 0,
+            'image_unavailable' => 0,
+            'image_errors' => 0,
         ];
 
         /**
@@ -385,6 +432,14 @@ final class Jung_Leben_Core_Content_Import
                     );
 
                     $result['inactive']++;
+                } else {
+                    self::record_image_import_result(
+                        self::maybe_import_product_image(
+                            $existing_id,
+                            $product
+                        ),
+                        $result
+                    );
                 }
 
                 $result['updated']++;
@@ -410,6 +465,14 @@ final class Jung_Leben_Core_Content_Import
             }
 
             $product_map[$source_id] = $product_id;
+
+            self::record_image_import_result(
+                self::maybe_import_product_image(
+                    $product_id,
+                    $product
+                ),
+                $result
+            );
 
             $result['products']++;
         }
@@ -504,6 +567,10 @@ final class Jung_Leben_Core_Content_Import
                 'inactive' => $result['inactive'],
                 'errors' => $result['errors'],
                 'ai' => $result['ai'],
+                'images' => $result['images'],
+                'image_existing' => $result['image_existing'],
+                'image_unavailable' => $result['image_unavailable'],
+                'image_errors' => $result['image_errors'],
             ],
             admin_url('tools.php')
         );
@@ -1368,6 +1435,16 @@ final class Jung_Leben_Core_Content_Import
                         $columns['main_reference']
                     ),
 
+                'image_url' =>
+                    isset(
+                        $columns['image_url']
+                    )
+                        ? self::cell_effective_url(
+                            $row,
+                            $columns['image_url']
+                        )
+                        : '',
+
                 'remark' =>
                     self::cell_value(
                         $row,
@@ -1472,6 +1549,14 @@ final class Jung_Leben_Core_Content_Import
                 case 'roberto s favorit':
                 case 'robertos favorit':
                     $map['favorite'] = $column;
+                    break;
+
+                case 'bild url':
+                case 'bildurl':
+                case 'image url':
+                case 'image':
+                case 'bild':
+                    $map['image_url'] = $column;
                     break;
 
                 case 'alternative 1':
@@ -2449,6 +2534,17 @@ final class Jung_Leben_Core_Content_Import
 
         update_post_meta(
             $post_id,
+            self::EXCEL_IMAGE_META_KEY,
+            esc_url_raw(
+                (string) (
+                    $product['image_url']
+                    ?? ''
+                )
+            )
+        );
+
+        update_post_meta(
+            $post_id,
             '_jl_source_product_remark',
             sanitize_textarea_field(
                 (string) (
@@ -2640,6 +2736,1314 @@ final class Jung_Leben_Core_Content_Import
             'ID' => $post_id,
             'post_status' => 'draft',
         ]);
+    }
+
+
+    /* =========================================================
+       AUTOMATISCHER PRODUKTBILD-IMPORT
+       ========================================================= */
+
+    /**
+     * Ergebnis eines Bildimports in die Importstatistik übernehmen.
+     */
+    private static function record_image_import_result(
+        string $status,
+        array &$result
+    ): void {
+        switch ($status) {
+            case 'imported':
+                $result['images']++;
+                break;
+
+            case 'existing':
+                $result['image_existing']++;
+                break;
+
+            case 'unavailable':
+                $result['image_unavailable']++;
+                break;
+
+            case 'failed':
+                $result['image_errors']++;
+                break;
+        }
+    }
+
+    /**
+     * Fehlendes Produktbild automatisch importieren.
+     *
+     * Priorität:
+     *
+     * 1. Bereits vorhandenes Beitragsbild schützen.
+     * 2. Optionale Excel-Spalte «Bild-URL».
+     * 3. Produktbild aus strukturierter Produktseite ermitteln:
+     *    JSON-LD Product.image, og:image, twitter:image.
+     *
+     * Rückgabe:
+     *
+     * imported    = neues Bild importiert
+     * existing    = Beitragsbild bereits vorhanden / vorhandenes
+     *               importiertes Bild wiederverwendet
+     * unavailable = keine geeignete Bildquelle gefunden
+     * failed      = Bildquelle vorhanden, Import aber fehlgeschlagen
+     */
+    private static function maybe_import_product_image(
+        int $post_id,
+        array $product
+    ): string {
+        if (
+            $post_id <= 0
+            || get_post_type($post_id)
+                !== Jung_Leben_Core_Products::POST_TYPE
+        ) {
+            return 'failed';
+        }
+
+        /**
+         * Manuell oder früher gesetzte Beitragsbilder
+         * niemals überschreiben.
+         */
+        if (has_post_thumbnail($post_id)) {
+            return 'existing';
+        }
+
+        $had_error = false;
+
+        $page_url =
+            self::normalize_web_url(
+                (string) (
+                    $product['favorite_url']
+                    ?? ''
+                )
+            );
+
+        /**
+         * Bei älteren/manuell gepflegten Produkten kann die
+         * direkte Produktseite bereits in ACF vorhanden sein.
+         */
+        if ($page_url === '') {
+            $current_original_url =
+                function_exists('get_field')
+                    ? (string) get_field(
+                        'jl_product_original_url',
+                        $post_id
+                    )
+                    : (string) get_post_meta(
+                        $post_id,
+                        'jl_product_original_url',
+                        true
+                    );
+
+            $page_url =
+                self::normalize_web_url(
+                    $current_original_url
+                );
+        }
+
+        /* -----------------------------------------------------
+           1. Explizite Bild-URL aus Excel
+           ----------------------------------------------------- */
+
+        $explicit_image_url =
+            self::normalize_web_url(
+                (string) (
+                    $product['image_url']
+                    ?? ''
+                )
+            );
+
+        if ($explicit_image_url !== '') {
+            $result =
+                self::attach_product_image_from_url(
+                    $post_id,
+                    $explicit_image_url,
+                    $page_url
+                );
+
+            if (! is_wp_error($result)) {
+                $was_preexisting =
+                    get_post_meta(
+                        (int) $result,
+                        '_jl_source_image_preexisting',
+                        true
+                    ) === '1';
+
+                if ($was_preexisting) {
+                    delete_post_meta(
+                        (int) $result,
+                        '_jl_source_image_preexisting'
+                    );
+                }
+
+                return
+                    $was_preexisting
+                        ? 'existing'
+                        : 'imported';
+            }
+
+            $had_error = true;
+
+            self::log_image_import_error(
+                $post_id,
+                $explicit_image_url,
+                $result
+            );
+        }
+
+        /* -----------------------------------------------------
+           2. Bild aus der Produktseite ermitteln
+           ----------------------------------------------------- */
+
+        if ($page_url === '') {
+            return
+                $had_error
+                    ? 'failed'
+                    : 'unavailable';
+        }
+
+        $discovered_image_url =
+            self::discover_product_image_url(
+                $page_url
+            );
+
+        if (is_wp_error($discovered_image_url)) {
+            self::log_image_import_error(
+                $post_id,
+                $page_url,
+                $discovered_image_url
+            );
+
+            return 'failed';
+        }
+
+        if ($discovered_image_url === '') {
+            return
+                $had_error
+                    ? 'failed'
+                    : 'unavailable';
+        }
+
+        /**
+         * Wenn die explizite Bild-URL bereits fehlgeschlagen ist
+         * und die Produktseite exakt dieselbe URL liefert, nicht
+         * nochmals herunterladen.
+         */
+        if (
+            $explicit_image_url !== ''
+            && $discovered_image_url === $explicit_image_url
+            && $had_error
+        ) {
+            return 'failed';
+        }
+
+        $result =
+            self::attach_product_image_from_url(
+                $post_id,
+                $discovered_image_url,
+                $page_url
+            );
+
+        if (is_wp_error($result)) {
+            self::log_image_import_error(
+                $post_id,
+                $discovered_image_url,
+                $result
+            );
+
+            return 'failed';
+        }
+
+        $was_preexisting =
+            get_post_meta(
+                (int) $result,
+                '_jl_source_image_preexisting',
+                true
+            ) === '1';
+
+        if ($was_preexisting) {
+            delete_post_meta(
+                (int) $result,
+                '_jl_source_image_preexisting'
+            );
+        }
+
+        return
+            $was_preexisting
+                ? 'existing'
+                : 'imported';
+    }
+
+    /**
+     * Produktseite abrufen und beste Produktbild-URL ermitteln.
+     *
+     * JSON-LD eines Product-Objekts hat Vorrang, danach
+     * Open Graph und Twitter Cards.
+     *
+     * @return string|WP_Error
+     */
+    private static function discover_product_image_url(
+        string $page_url
+    ) {
+        $page_url =
+            self::normalize_web_url(
+                $page_url
+            );
+
+        if ($page_url === '') {
+            return '';
+        }
+
+        $response =
+            wp_safe_remote_get(
+                $page_url,
+                [
+                    'timeout' =>
+                        self::PRODUCT_PAGE_TIMEOUT,
+
+                    'redirection' =>
+                        3,
+
+                    'limit_response_size' =>
+                        self::PRODUCT_PAGE_MAX_BYTES,
+
+                    'headers' => [
+                        'Accept' =>
+                            'text/html,application/xhtml+xml;q=0.9,*/*;q=0.5',
+
+                        'Accept-Language' =>
+                            'de-CH,de;q=0.9,en;q=0.7',
+
+                        'User-Agent' =>
+                            'Jung-Leben-WordPress-Product-Import/1.0',
+                    ],
+                ]
+            );
+
+        if (is_wp_error($response)) {
+            return $response;
+        }
+
+        $status_code =
+            (int) wp_remote_retrieve_response_code(
+                $response
+            );
+
+        if (
+            $status_code < 200
+            || $status_code >= 400
+        ) {
+            return
+                new WP_Error(
+                    'jl_product_page_http',
+                    sprintf(
+                        'Produktseite lieferte HTTP-Status %d.',
+                        $status_code
+                    )
+                );
+        }
+
+        $body =
+            wp_remote_retrieve_body(
+                $response
+            );
+
+        if (
+            ! is_string($body)
+            || trim($body) === ''
+        ) {
+            return
+                new WP_Error(
+                    'jl_product_page_empty',
+                    'Die Produktseite enthält keinen lesbaren HTML-Inhalt.'
+                );
+        }
+
+        return
+            self::extract_product_image_url_from_html(
+                $body,
+                $page_url
+            );
+    }
+
+    /**
+     * Geeignete Produktbild-URL aus HTML extrahieren.
+     */
+    private static function extract_product_image_url_from_html(
+        string $html,
+        string $page_url
+    ): string {
+        $document =
+            new DOMDocument();
+
+        $previous =
+            libxml_use_internal_errors(
+                true
+            );
+
+        /**
+         * XML-Encoding-Hinweis hilft DOMDocument bei UTF-8-Seiten.
+         */
+        $loaded =
+            $document->loadHTML(
+                '<?xml encoding="utf-8" ?>'
+                . $html,
+                LIBXML_NONET
+                | LIBXML_NOERROR
+                | LIBXML_NOWARNING
+            );
+
+        libxml_clear_errors();
+
+        libxml_use_internal_errors(
+            $previous
+        );
+
+        if (! $loaded) {
+            return '';
+        }
+
+        $xpath =
+            new DOMXPath(
+                $document
+            );
+
+        /* -----------------------------------------------------
+           1. Schema.org / JSON-LD Product.image
+           ----------------------------------------------------- */
+
+        $scripts =
+            $xpath->query(
+                '//script[@type="application/ld+json"]'
+            );
+
+        if ($scripts) {
+            foreach ($scripts as $script) {
+                $json =
+                    trim(
+                        (string) $script->textContent
+                    );
+
+                if ($json === '') {
+                    continue;
+                }
+
+                $decoded =
+                    json_decode(
+                        $json,
+                        true
+                    );
+
+                if (
+                    json_last_error()
+                    !== JSON_ERROR_NONE
+                ) {
+                    continue;
+                }
+
+                $json_image =
+                    self::find_product_image_in_json_ld(
+                        $decoded
+                    );
+
+                if ($json_image !== '') {
+                    $resolved =
+                        self::resolve_web_url(
+                            $json_image,
+                            $page_url
+                        );
+
+                    if ($resolved !== '') {
+                        return $resolved;
+                    }
+                }
+            }
+        }
+
+        /* -----------------------------------------------------
+           2. Open Graph / Twitter
+           ----------------------------------------------------- */
+
+        $preferred_meta = [
+            'og:image:secure_url',
+            'og:image',
+            'twitter:image',
+            'twitter:image:src',
+        ];
+
+        $meta_values = [];
+
+        $meta_nodes =
+            $xpath->query(
+                '//meta[@content]'
+            );
+
+        if ($meta_nodes) {
+            foreach ($meta_nodes as $meta) {
+                if (! $meta instanceof DOMElement) {
+                    continue;
+                }
+
+                $key =
+                    strtolower(
+                        trim(
+                            $meta->getAttribute(
+                                'property'
+                            )
+                        )
+                    );
+
+                if ($key === '') {
+                    $key =
+                        strtolower(
+                            trim(
+                                $meta->getAttribute(
+                                    'name'
+                                )
+                            )
+                        );
+                }
+
+                if (
+                    $key === ''
+                    || isset($meta_values[$key])
+                ) {
+                    continue;
+                }
+
+                $content =
+                    trim(
+                        html_entity_decode(
+                            $meta->getAttribute(
+                                'content'
+                            ),
+                            ENT_QUOTES
+                            | ENT_HTML5,
+                            'UTF-8'
+                        )
+                    );
+
+                if ($content !== '') {
+                    $meta_values[$key] =
+                        $content;
+                }
+            }
+        }
+
+        foreach (
+            $preferred_meta
+            as $meta_key
+        ) {
+            if (
+                ! isset($meta_values[$meta_key])
+                || $meta_values[$meta_key] === ''
+            ) {
+                continue;
+            }
+
+            $resolved =
+                self::resolve_web_url(
+                    $meta_values[$meta_key],
+                    $page_url
+                );
+
+            if ($resolved !== '') {
+                return $resolved;
+            }
+        }
+
+        /* -----------------------------------------------------
+           3. Klassisches image_src als letzter Fallback
+           ----------------------------------------------------- */
+
+        $link_nodes =
+            $xpath->query(
+                '//link[@href]'
+            );
+
+        if ($link_nodes) {
+            foreach ($link_nodes as $link) {
+                if (! $link instanceof DOMElement) {
+                    continue;
+                }
+
+                $rel =
+                    strtolower(
+                        trim(
+                            $link->getAttribute(
+                                'rel'
+                            )
+                        )
+                    );
+
+                if ($rel !== 'image_src') {
+                    continue;
+                }
+
+                $resolved =
+                    self::resolve_web_url(
+                        $link->getAttribute(
+                            'href'
+                        ),
+                        $page_url
+                    );
+
+                if ($resolved !== '') {
+                    return $resolved;
+                }
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * In JSON-LD rekursiv nach einem Product-Objekt und dessen
+     * Bild suchen.
+     */
+    private static function find_product_image_in_json_ld(
+        mixed $data
+    ): string {
+        if (! is_array($data)) {
+            return '';
+        }
+
+        /**
+         * @graph zuerst durchsuchen.
+         */
+        if (
+            isset($data['@graph'])
+            && is_array($data['@graph'])
+        ) {
+            foreach ($data['@graph'] as $item) {
+                $image =
+                    self::find_product_image_in_json_ld(
+                        $item
+                    );
+
+                if ($image !== '') {
+                    return $image;
+                }
+            }
+        }
+
+        $type =
+            $data['@type']
+            ?? '';
+
+        $types =
+            is_array($type)
+                ? $type
+                : [
+                    $type,
+                ];
+
+        $is_product = false;
+
+        foreach ($types as $single_type) {
+            if (
+                strtolower(
+                    trim(
+                        (string) $single_type
+                    )
+                ) === 'product'
+            ) {
+                $is_product = true;
+                break;
+            }
+        }
+
+        if (
+            $is_product
+            && isset($data['image'])
+        ) {
+            $image =
+                self::extract_image_url_from_json_value(
+                    $data['image']
+                );
+
+            if ($image !== '') {
+                return $image;
+            }
+        }
+
+        /**
+         * Manche Seiten verschachteln Product unter anderen
+         * JSON-LD-Strukturen.
+         */
+        foreach ($data as $key => $value) {
+            if ($key === '@graph') {
+                continue;
+            }
+
+            if (! is_array($value)) {
+                continue;
+            }
+
+            $image =
+                self::find_product_image_in_json_ld(
+                    $value
+                );
+
+            if ($image !== '') {
+                return $image;
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * Schema.org "image" kann String, Liste oder ImageObject sein.
+     */
+    private static function extract_image_url_from_json_value(
+        mixed $value
+    ): string {
+        if (is_string($value)) {
+            return trim($value);
+        }
+
+        if (! is_array($value)) {
+            return '';
+        }
+
+        foreach (
+            [
+                'url',
+                'contentUrl',
+            ]
+            as $key
+        ) {
+            if (
+                isset($value[$key])
+                && is_string($value[$key])
+                && trim($value[$key]) !== ''
+            ) {
+                return trim(
+                    $value[$key]
+                );
+            }
+        }
+
+        foreach ($value as $item) {
+            $url =
+                self::extract_image_url_from_json_value(
+                    $item
+                );
+
+            if ($url !== '') {
+                return $url;
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * Relative URLs aus HTML in absolute Webadressen umwandeln.
+     */
+    private static function resolve_web_url(
+        string $value,
+        string $base_url
+    ): string {
+        $value =
+            trim(
+                html_entity_decode(
+                    $value,
+                    ENT_QUOTES
+                    | ENT_HTML5,
+                    'UTF-8'
+                )
+            );
+
+        if ($value === '') {
+            return '';
+        }
+
+        /**
+         * Bereits absolute URL.
+         */
+        $absolute =
+            self::normalize_web_url(
+                $value
+            );
+
+        if ($absolute !== '') {
+            return $absolute;
+        }
+
+        $base =
+            wp_parse_url(
+                $base_url
+            );
+
+        if (
+            ! is_array($base)
+            || empty($base['scheme'])
+            || empty($base['host'])
+        ) {
+            return '';
+        }
+
+        $scheme =
+            strtolower(
+                (string) $base['scheme']
+            );
+
+        if (
+            ! in_array(
+                $scheme,
+                [
+                    'http',
+                    'https',
+                ],
+                true
+            )
+        ) {
+            return '';
+        }
+
+        $origin =
+            $scheme
+            . '://'
+            . $base['host'];
+
+        if (isset($base['port'])) {
+            $origin .=
+                ':'
+                . (int) $base['port'];
+        }
+
+        /**
+         * Protocol-relative URL:
+         * //cdn.example.com/image.jpg
+         */
+        if (str_starts_with($value, '//')) {
+            return
+                self::normalize_web_url(
+                    $scheme
+                    . ':'
+                    . $value
+                );
+        }
+
+        /**
+         * Root-relative URL.
+         */
+        if (str_starts_with($value, '/')) {
+            return
+                self::normalize_web_url(
+                    $origin
+                    . self::normalize_url_path(
+                        $value
+                    )
+                );
+        }
+
+        /**
+         * Relativ zum Verzeichnis der Produktseite.
+         */
+        $base_path =
+            isset($base['path'])
+                ? (string) $base['path']
+                : '/';
+
+        $directory =
+            rtrim(
+                str_replace(
+                    '\\',
+                    '/',
+                    dirname(
+                        $base_path
+                    )
+                ),
+                '/'
+            );
+
+        if ($directory === '.') {
+            $directory = '';
+        }
+
+        $path =
+            '/'
+            . ltrim(
+                $directory
+                . '/'
+                . $value,
+                '/'
+            );
+
+        return
+            self::normalize_web_url(
+                $origin
+                . self::normalize_url_path(
+                    $path
+                )
+            );
+    }
+
+    /**
+     * ./ und ../ in URL-Pfaden auflösen.
+     */
+    private static function normalize_url_path(
+        string $path
+    ): string {
+        $parts =
+            explode(
+                '/',
+                str_replace(
+                    '\\',
+                    '/',
+                    $path
+                )
+            );
+
+        $normalized = [];
+
+        foreach ($parts as $part) {
+            if (
+                $part === ''
+                || $part === '.'
+            ) {
+                continue;
+            }
+
+            if ($part === '..') {
+                array_pop(
+                    $normalized
+                );
+
+                continue;
+            }
+
+            $normalized[] = $part;
+        }
+
+        return
+            '/'
+            . implode(
+                '/',
+                $normalized
+            );
+    }
+
+    /**
+     * Bild herunterladen, validieren, in die Mediathek übernehmen
+     * und als Beitragsbild setzen.
+     *
+     * @return int|WP_Error Attachment-ID oder Fehler.
+     */
+    private static function attach_product_image_from_url(
+        int $post_id,
+        string $image_url,
+        string $page_url = ''
+    ) {
+        $image_url =
+            self::normalize_web_url(
+                $image_url
+            );
+
+        if ($image_url === '') {
+            return
+                new WP_Error(
+                    'jl_image_invalid_url',
+                    'Die ermittelte Bildadresse ist ungültig.'
+                );
+        }
+
+        /**
+         * Bild wurde bereits früher importiert:
+         * vorhandenes Attachment wiederverwenden.
+         */
+        $existing_attachment =
+            self::find_existing_image_attachment(
+                $image_url
+            );
+
+        if ($existing_attachment > 0) {
+            set_post_thumbnail(
+                $post_id,
+                $existing_attachment
+            );
+
+            update_post_meta(
+                $post_id,
+                self::IMAGE_SOURCE_META_KEY,
+                $image_url
+            );
+
+            if ($page_url !== '') {
+                update_post_meta(
+                    $post_id,
+                    self::IMAGE_PAGE_META_KEY,
+                    esc_url_raw(
+                        $page_url
+                    )
+                );
+            }
+
+            /**
+             * Nur temporär zur Statusauswertung im aktuellen Lauf.
+             */
+            update_post_meta(
+                $existing_attachment,
+                '_jl_source_image_preexisting',
+                '1'
+            );
+
+            return $existing_attachment;
+        }
+
+        require_once
+            ABSPATH
+            . 'wp-admin/includes/file.php';
+
+        require_once
+            ABSPATH
+            . 'wp-admin/includes/media.php';
+
+        require_once
+            ABSPATH
+            . 'wp-admin/includes/image.php';
+
+        $temp_file =
+            download_url(
+                $image_url,
+                self::PRODUCT_IMAGE_TIMEOUT
+            );
+
+        if (is_wp_error($temp_file)) {
+            return $temp_file;
+        }
+
+        try {
+            $size =
+                @filesize(
+                    $temp_file
+                );
+
+            if (
+                is_int($size)
+                && $size > self::PRODUCT_IMAGE_MAX_BYTES
+            ) {
+                return
+                    new WP_Error(
+                        'jl_image_too_large',
+                        'Das Produktbild ist grösser als 8 MB.'
+                    );
+            }
+
+            $mime =
+                wp_get_image_mime(
+                    $temp_file
+                );
+
+            $extensions = [
+                'image/jpeg' => 'jpg',
+                'image/png' => 'png',
+                'image/webp' => 'webp',
+            ];
+
+            if (
+                ! is_string($mime)
+                || ! isset($extensions[$mime])
+            ) {
+                return
+                    new WP_Error(
+                        'jl_image_invalid_type',
+                        'Die Bilddatei ist kein unterstütztes JPG-, PNG- oder WebP-Bild.'
+                    );
+            }
+
+            /**
+             * Sehr kleine Logos/Icons möglichst nicht als
+             * Produktbild übernehmen.
+             */
+            $dimensions =
+                @getimagesize(
+                    $temp_file
+                );
+
+            if (
+                is_array($dimensions)
+                && (
+                    (int) ($dimensions[0] ?? 0) < 200
+                    || (int) ($dimensions[1] ?? 0) < 200
+                )
+            ) {
+                return
+                    new WP_Error(
+                        'jl_image_too_small',
+                        'Das gefundene Bild ist kleiner als 200 × 200 Pixel.'
+                    );
+            }
+
+            $extension =
+                $extensions[$mime];
+
+            $filename =
+                self::build_product_image_filename(
+                    $post_id,
+                    $image_url,
+                    $extension
+                );
+
+            $file_array = [
+                'name' =>
+                    $filename,
+
+                'tmp_name' =>
+                    $temp_file,
+            ];
+
+            $attachment_id =
+                media_handle_sideload(
+                    $file_array,
+                    $post_id
+                );
+
+            if (is_wp_error($attachment_id)) {
+                return $attachment_id;
+            }
+
+            $attachment_id =
+                (int) $attachment_id;
+
+            /**
+             * Attachment-Titel und Alt-Text auf Produkt beziehen.
+             */
+            $product_title =
+                sanitize_text_field(
+                    get_the_title(
+                        $post_id
+                    )
+                );
+
+            if ($product_title !== '') {
+                wp_update_post([
+                    'ID' =>
+                        $attachment_id,
+
+                    'post_title' =>
+                        $product_title,
+                ]);
+
+                if (
+                    trim(
+                        (string) get_post_meta(
+                            $attachment_id,
+                            '_wp_attachment_image_alt',
+                            true
+                        )
+                    ) === ''
+                ) {
+                    update_post_meta(
+                        $attachment_id,
+                        '_wp_attachment_image_alt',
+                        $product_title
+                    );
+                }
+            }
+
+            update_post_meta(
+                $attachment_id,
+                '_jl_source_image_url',
+                $image_url
+            );
+
+            delete_post_meta(
+                $attachment_id,
+                '_jl_source_image_preexisting'
+            );
+
+            if ($page_url !== '') {
+                update_post_meta(
+                    $attachment_id,
+                    '_jl_source_image_page_url',
+                    esc_url_raw(
+                        $page_url
+                    )
+                );
+            }
+
+            update_post_meta(
+                $post_id,
+                self::IMAGE_SOURCE_META_KEY,
+                $image_url
+            );
+
+            if ($page_url !== '') {
+                update_post_meta(
+                    $post_id,
+                    self::IMAGE_PAGE_META_KEY,
+                    esc_url_raw(
+                        $page_url
+                    )
+                );
+            }
+
+            update_post_meta(
+                $post_id,
+                self::IMAGE_IMPORTED_AT_META_KEY,
+                current_time(
+                    'mysql',
+                    true
+                )
+            );
+
+            set_post_thumbnail(
+                $post_id,
+                $attachment_id
+            );
+
+            return $attachment_id;
+
+        } finally {
+            /**
+             * media_handle_sideload() verschiebt die Datei bei
+             * Erfolg. Bei Fehlern bleibt sie temporär bestehen.
+             */
+            if (
+                is_string($temp_file)
+                && file_exists($temp_file)
+            ) {
+                @unlink(
+                    $temp_file
+                );
+            }
+        }
+    }
+
+    /**
+     * Bereits importiertes Attachment anhand der Originalquelle
+     * finden.
+     */
+    private static function find_existing_image_attachment(
+        string $image_url
+    ): int {
+        $attachments =
+            get_posts([
+                'post_type' =>
+                    'attachment',
+
+                'post_status' =>
+                    'inherit',
+
+                'posts_per_page' =>
+                    1,
+
+                'fields' =>
+                    'ids',
+
+                'meta_key' =>
+                    '_jl_source_image_url',
+
+                'meta_value' =>
+                    $image_url,
+
+                'no_found_rows' =>
+                    true,
+            ]);
+
+        if (
+            ! is_array($attachments)
+            || empty($attachments)
+        ) {
+            return 0;
+        }
+
+        $attachment_id =
+            (int) $attachments[0];
+
+        return
+            wp_attachment_is_image(
+                $attachment_id
+            )
+                ? $attachment_id
+                : 0;
+    }
+
+    /**
+     * Stabilen Dateinamen erzeugen.
+     */
+    private static function build_product_image_filename(
+        int $post_id,
+        string $image_url,
+        string $extension
+    ): string {
+        $path =
+            wp_parse_url(
+                $image_url,
+                PHP_URL_PATH
+            );
+
+        $basename =
+            is_string($path)
+                ? rawurldecode(
+                    basename($path)
+                )
+                : '';
+
+        $basename =
+            sanitize_file_name(
+                $basename
+            );
+
+        /**
+         * Ursprünglichen Basename ohne inkompatible Endung
+         * soweit möglich beibehalten.
+         */
+        $name_without_extension =
+            $basename !== ''
+                ? pathinfo(
+                    $basename,
+                    PATHINFO_FILENAME
+                )
+                : '';
+
+        if ($name_without_extension === '') {
+            $name_without_extension =
+                sanitize_title(
+                    get_the_title(
+                        $post_id
+                    )
+                );
+        }
+
+        if ($name_without_extension === '') {
+            $name_without_extension =
+                'produkt-'
+                . $post_id;
+        }
+
+        return
+            sanitize_file_name(
+                $name_without_extension
+                . '.'
+                . $extension
+            );
+    }
+
+    /**
+     * Bildimportfehler protokollieren, ohne den Inhaltsimport
+     * abzubrechen.
+     */
+    private static function log_image_import_error(
+        int $post_id,
+        string $source,
+        WP_Error $error
+    ): void {
+        error_log(
+            sprintf(
+                '[Jung Leben Produktbild] Produkt %d | %s | %s',
+                $post_id,
+                esc_url_raw(
+                    $source
+                ),
+                sanitize_text_field(
+                    $error->get_error_message()
+                )
+            )
+        );
     }
 
     /* =========================================================
@@ -3605,6 +5009,10 @@ final class Jung_Leben_Core_Content_Import
 
             'Favorit – effektive URL' =>
                 $product['favorite_url']
+                ?? '',
+
+            'Explizite Bild-URL' =>
+                $product['image_url']
                 ?? '',
 
             'Bemerkung Favorit' =>
