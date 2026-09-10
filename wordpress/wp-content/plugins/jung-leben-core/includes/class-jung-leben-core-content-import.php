@@ -6,6 +6,13 @@
  * hochgeladenen XLSX-Datei und legt Produkte sowie Erfahrungen
  * als WordPress-Entwürfe an.
  *
+ * Unterstützt die neue Kundendatei mit:
+ * - Status Aktiv / Inaktiv
+ * - Roberto's Favorit
+ * - bis zu zwei Alternativen
+ * - sichtbaren Zelltexten und hinterlegten Excel-Hyperlinks
+ * - KI-Markierung über blaue Schrift
+ *
  * @package Jung_Leben_Core
  */
 
@@ -73,20 +80,10 @@ final class Jung_Leben_Core_Content_Import
     public static function register_admin_page(): void
     {
         add_management_page(
-            __(
-                'Jung Leben Import',
-                'jung-leben-core'
-            ),
-
-            __(
-                'Jung Leben Import',
-                'jung-leben-core'
-            ),
-
+            __('Jung Leben Import', 'jung-leben-core'),
+            __('Jung Leben Import', 'jung-leben-core'),
             'manage_options',
-
             self::MENU_SLUG,
-
             [
                 self::class,
                 'render_admin_page',
@@ -100,74 +97,50 @@ final class Jung_Leben_Core_Content_Import
      */
     public static function render_admin_page(): void
     {
-        if (
-            ! current_user_can(
-                'manage_options'
-            )
-        ) {
+        if (! current_user_can('manage_options')) {
             return;
         }
 
-
         $result =
-            isset(
-                $_GET['jl_import']
-            )
+            isset($_GET['jl_import'])
                 ? sanitize_key(
-                    wp_unslash(
-                        $_GET['jl_import']
-                    )
+                    wp_unslash($_GET['jl_import'])
                 )
                 : '';
 
-
         $imported_products =
-            isset(
-                $_GET['products']
-            )
-                ? absint(
-                    $_GET['products']
-                )
+            isset($_GET['products'])
+                ? absint($_GET['products'])
                 : 0;
-
 
         $imported_experiences =
-            isset(
-                $_GET['experiences']
-            )
-                ? absint(
-                    $_GET['experiences']
-                )
+            isset($_GET['experiences'])
+                ? absint($_GET['experiences'])
                 : 0;
 
+        $updated =
+            isset($_GET['updated'])
+                ? absint($_GET['updated'])
+                : 0;
+
+        $inactive =
+            isset($_GET['inactive'])
+                ? absint($_GET['inactive'])
+                : 0;
 
         $skipped =
-            isset(
-                $_GET['skipped']
-            )
-                ? absint(
-                    $_GET['skipped']
-                )
+            isset($_GET['skipped'])
+                ? absint($_GET['skipped'])
                 : 0;
-
 
         $errors =
-            isset(
-                $_GET['errors']
-            )
-                ? absint(
-                    $_GET['errors']
-                )
+            isset($_GET['errors'])
+                ? absint($_GET['errors'])
                 : 0;
 
-
         $ai_count =
-            isset(
-                $_GET['ai']
-            )
-                ? absint(
-                    $_GET['ai']
-                )
+            isset($_GET['ai'])
+                ? absint($_GET['ai'])
                 : 0;
         ?>
 
@@ -193,22 +166,11 @@ final class Jung_Leben_Core_Content_Import
             </p>
 
 
-            <?php
-            if (
-                $result === 'done'
-            ) :
-                ?>
+            <?php if ($result === 'done') : ?>
 
-                <div
-                    class="
-                        notice
-                        notice-success
-                        is-dismissible
-                    "
-                >
+                <div class="notice notice-success is-dismissible">
 
                     <p>
-
                         <strong>
                             <?php
                             esc_html_e(
@@ -221,34 +183,25 @@ final class Jung_Leben_Core_Content_Import
                         <?php
                         printf(
                             esc_html__(
-                                '%1$d Produkte und %2$d Erfahrungen wurden neu angelegt. %3$d Datensätze waren bereits vorhanden und wurden übersprungen. %4$d KI-markierte Erfahrungen wurden erkannt. Fehler: %5$d.',
+                                '%1$d aktive Produkte und %2$d Erfahrungen wurden neu angelegt. %3$d bestehende Import-Datensätze wurden mit den neuen Quelldaten synchronisiert. %4$d inaktive Produktzeilen wurden nicht neu angelegt bzw. bestehende Import-Produkte deaktiviert. %5$d Datensätze wurden ohne Änderung übersprungen. %6$d KI-markierte Erfahrungen wurden erkannt. Fehler: %7$d.',
                                 'jung-leben-core'
                             ),
                             $imported_products,
                             $imported_experiences,
+                            $updated,
+                            $inactive,
                             $skipped,
                             $ai_count,
                             $errors
                         );
                         ?>
-
                     </p>
 
                 </div>
 
-            <?php
-            elseif (
-                $result === 'error'
-            ) :
-                ?>
+            <?php elseif ($result === 'error') : ?>
 
-                <div
-                    class="
-                        notice
-                        notice-error
-                        is-dismissible
-                    "
-                >
+                <div class="notice notice-error is-dismissible">
 
                     <p>
                         <?php
@@ -275,11 +228,7 @@ final class Jung_Leben_Core_Content_Import
                 "
             >
 
-                <h2
-                    style="
-                        margin-top:0;
-                    "
-                >
+                <h2 style="margin-top:0;">
                     <?php
                     esc_html_e(
                         'Kundendatei importieren',
@@ -292,7 +241,7 @@ final class Jung_Leben_Core_Content_Import
                 <p>
                     <?php
                     esc_html_e(
-                        'Importiert werden alle ausgefüllten Produktzeilen aus «Products» und alle Erfahrungen aus «Blogs». Sämtliche Inhalte werden zunächst als Entwurf angelegt.',
+                        'Importiert werden Produktzeilen mit Status «Aktiv» sowie die gültigen Erfahrungen aus «Blogs». Neue Inhalte werden als Entwurf angelegt. Produktzeilen mit Status «Inaktiv» werden nicht neu angelegt.',
                         'jung-leben-core'
                     );
                     ?>
@@ -302,29 +251,26 @@ final class Jung_Leben_Core_Content_Import
                 <p>
                     <?php
                     esc_html_e(
-                        'Blau formatierte Blogtexte werden automatisch mit dem Prüfstatus «KI-generiert – muss geprüft werden» versehen. Bereits importierte Datensätze werden nicht überschrieben.',
+                        'Bei bereits importierten Produkten werden redaktionelle Inhalte und manuell gepflegte Affiliate-Daten nicht überschrieben. Aktualisiert werden nur Import-Metadaten, Status, Excel-Zuordnungen, Marke, Gebiet, Alternativen und – wenn noch kein direkter Produktlink hinterlegt ist – die URL aus der Kundendatei.',
                         'jung-leben-core'
                     );
                     ?>
                 </p>
 
 
-                <?php
-                if (
-                    ! function_exists(
-                        'update_field'
-                    )
-                ) :
+                <p>
+                    <?php
+                    esc_html_e(
+                        'Blau formatierte Blogtexte werden automatisch mit dem Prüfstatus «KI-generiert – muss geprüft werden» versehen. Die Zeilen «Test» und «Blauer Text» werden ignoriert.',
+                        'jung-leben-core'
+                    );
                     ?>
+                </p>
 
-                    <div
-                        class="
-                            notice
-                            notice-error
-                            inline
-                        "
-                    >
 
+                <?php if (! function_exists('update_field')) : ?>
+
+                    <div class="notice notice-error inline">
                         <p>
                             <?php
                             esc_html_e(
@@ -333,19 +279,12 @@ final class Jung_Leben_Core_Content_Import
                             );
                             ?>
                         </p>
-
                     </div>
 
                 <?php else : ?>
 
                     <form
-                        action="<?php
-                        echo esc_url(
-                            admin_url(
-                                'admin-post.php'
-                            )
-                        );
-                        ?>"
+                        action="<?php echo esc_url(admin_url('admin-post.php')); ?>"
                         method="post"
                         enctype="multipart/form-data"
                     >
@@ -353,32 +292,17 @@ final class Jung_Leben_Core_Content_Import
                         <input
                             type="hidden"
                             name="action"
-                            value="<?php
-                            echo esc_attr(
-                                self::ACTION
-                            );
-                            ?>"
+                            value="<?php echo esc_attr(self::ACTION); ?>"
                         >
 
 
-                        <?php
-                        wp_nonce_field(
-                            self::NONCE_ACTION
-                        );
-                        ?>
+                        <?php wp_nonce_field(self::NONCE_ACTION); ?>
 
 
-                        <table
-                            class="form-table"
-                            role="presentation"
-                        >
-
+                        <table class="form-table" role="presentation">
                             <tbody>
-
                                 <tr>
-
                                     <th scope="row">
-
                                         <label for="jl-import-file">
                                             <?php
                                             esc_html_e(
@@ -387,12 +311,9 @@ final class Jung_Leben_Core_Content_Import
                                             );
                                             ?>
                                         </label>
-
                                     </th>
 
-
                                     <td>
-
                                         <input
                                             id="jl-import-file"
                                             type="file"
@@ -400,7 +321,6 @@ final class Jung_Leben_Core_Content_Import
                                             accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                                             required
                                         >
-
 
                                         <p class="description">
                                             <?php
@@ -410,22 +330,15 @@ final class Jung_Leben_Core_Content_Import
                                             );
                                             ?>
                                         </p>
-
                                     </td>
-
                                 </tr>
-
                             </tbody>
-
                         </table>
 
 
                         <?php
                         submit_button(
-                            __(
-                                'Alle Inhalte als Entwürfe importieren',
-                                'jung-leben-core'
-                            ),
+                            __('Import aktualisieren', 'jung-leben-core'),
                             'primary',
                             'submit',
                             false
@@ -453,15 +366,7 @@ final class Jung_Leben_Core_Content_Import
      */
     public static function handle_import(): void
     {
-        /* -----------------------------------------------------
-           Berechtigung
-           ----------------------------------------------------- */
-
-        if (
-            ! current_user_can(
-                'manage_options'
-            )
-        ) {
+        if (! current_user_can('manage_options')) {
             wp_die(
                 esc_html__(
                     'Du hast keine Berechtigung für diesen Import.',
@@ -471,24 +376,10 @@ final class Jung_Leben_Core_Content_Import
         }
 
 
-        /* -----------------------------------------------------
-           Nonce
-           ----------------------------------------------------- */
-
-        check_admin_referer(
-            self::NONCE_ACTION
-        );
+        check_admin_referer(self::NONCE_ACTION);
 
 
-        /* -----------------------------------------------------
-           ACF
-           ----------------------------------------------------- */
-
-        if (
-            ! function_exists(
-                'update_field'
-            )
-        ) {
+        if (! function_exists('update_field')) {
             wp_die(
                 esc_html__(
                     'Advanced Custom Fields muss für den Import aktiv sein.',
@@ -498,35 +389,16 @@ final class Jung_Leben_Core_Content_Import
         }
 
 
-        /* -----------------------------------------------------
-           Datei vorhanden?
-           ----------------------------------------------------- */
-
         if (
-            ! isset(
-                $_FILES[
-                    'jl_import_file'
-                ]
-            )
-            || ! is_array(
-                $_FILES[
-                    'jl_import_file'
-                ]
-            )
+            ! isset($_FILES['jl_import_file'])
+            || ! is_array($_FILES['jl_import_file'])
         ) {
             self::redirect_with_error();
         }
 
 
-        $file =
-            $_FILES[
-                'jl_import_file'
-            ];
+        $file = $_FILES['jl_import_file'];
 
-
-        /* -----------------------------------------------------
-           Upload prüfen
-           ----------------------------------------------------- */
 
         if (
             ! isset(
@@ -535,29 +407,14 @@ final class Jung_Leben_Core_Content_Import
                 $file['name'],
                 $file['size']
             )
-            || (
-                (int)
-                $file['error']
-            ) !== UPLOAD_ERR_OK
-            || ! is_uploaded_file(
-                (string)
-                $file['tmp_name']
-            )
+            || ((int) $file['error']) !== UPLOAD_ERR_OK
+            || ! is_uploaded_file((string) $file['tmp_name'])
         ) {
             self::redirect_with_error();
         }
 
 
-        /* -----------------------------------------------------
-           Dateigrösse
-           ----------------------------------------------------- */
-
-        if (
-            (
-                (int)
-                $file['size']
-            ) > self::MAX_FILE_SIZE
-        ) {
+        if (((int) $file['size']) > self::MAX_FILE_SIZE) {
             wp_die(
                 esc_html__(
                     'Die Excel-Datei ist grösser als 10 MB.',
@@ -567,23 +424,16 @@ final class Jung_Leben_Core_Content_Import
         }
 
 
-        /* -----------------------------------------------------
-           Dateiendung
-           ----------------------------------------------------- */
-
         $extension =
             strtolower(
                 pathinfo(
-                    (string)
-                    $file['name'],
+                    (string) $file['name'],
                     PATHINFO_EXTENSION
                 )
             );
 
 
-        if (
-            $extension !== 'xlsx'
-        ) {
+        if ($extension !== 'xlsx') {
             wp_die(
                 esc_html__(
                     'Bitte eine XLSX-Datei hochladen.',
@@ -593,28 +443,17 @@ final class Jung_Leben_Core_Content_Import
         }
 
 
-        /* -----------------------------------------------------
-           Excel lesen
-           ----------------------------------------------------- */
-
         try {
-
             $workbook =
                 self::read_xlsx(
-                    (string)
-                    $file['tmp_name']
+                    (string) $file['tmp_name']
                 );
-
 
             $data =
                 self::build_import_data(
                     $workbook
                 );
-
-        } catch (
-            Throwable $exception
-        ) {
-
+        } catch (Throwable $exception) {
             error_log(
                 '[Jung Leben Import] '
                 . sanitize_text_field(
@@ -622,47 +461,28 @@ final class Jung_Leben_Core_Content_Import
                 )
             );
 
-
             self::redirect_with_error();
         }
 
 
-        /* -----------------------------------------------------
-           Daten vorhanden?
-           ----------------------------------------------------- */
-
         if (
-            empty(
-                $data['products']
-            )
-            && empty(
-                $data['experiences']
-            )
+            empty($data['products'])
+            && empty($data['experiences'])
         ) {
             self::redirect_with_error();
         }
 
 
-        /* -----------------------------------------------------
-           Resultat
-           ----------------------------------------------------- */
-
         $result = [
-
-            'products' =>
-                0,
-
-            'experiences' =>
-                0,
-
-            'skipped' =>
-                0,
-
-            'errors' =>
-                0,
-
-            'ai' =>
-                0,
+            'products' => 0,
+            'experiences' => 0,
+            'updated' => 0,
+            'inactive' => 0,
+            'skipped' => 0,
+            'errors' => 0,
+            'ai' => self::count_ai_experiences(
+                $data['experiences']
+            ),
         ];
 
 
@@ -680,149 +500,89 @@ final class Jung_Leben_Core_Content_Import
            PRODUKTE
            ===================================================== */
 
-        foreach (
-            $data['products']
-            as $product
-        ) {
-
+        foreach ($data['products'] as $product) {
             $source_id =
-                sanitize_text_field(
-                    (string)
-                    (
-                        $product[
-                            'source_id'
-                        ]
+                self::canonical_source_id(
+                    (string) (
+                        $product['source_id']
+                        ?? ''
+                    )
+                );
+
+            $status =
+                self::normalize_product_status(
+                    (string) (
+                        $product['status']
                         ?? ''
                     )
                 );
 
 
-            if (
-                $source_id === ''
-            ) {
-                $result[
-                    'errors'
-                ]++;
-
+            if ($source_id === '' || $status === '') {
+                $result['errors']++;
                 continue;
             }
 
 
-            /**
-             * Bereits importiert?
-             */
             $existing_id =
-                self::find_imported_post(
-                    'product:'
-                    . $source_id,
-
-                    Jung_Leben_Core_Products::POST_TYPE
+                self::find_existing_product(
+                    $source_id
                 );
 
 
-            if (
-                $existing_id > 0
-            ) {
+            if ($existing_id > 0) {
+                $product_map[$source_id] = $existing_id;
 
-                $product_map[
+                self::migrate_product_import_identity(
+                    $existing_id,
                     $source_id
-                ] = $existing_id;
+                );
+
+                self::sync_existing_product_source_data(
+                    $existing_id,
+                    $product
+                );
 
 
-                $result[
-                    'skipped'
-                ]++;
+                if ($status === 'inactive') {
+                    self::deactivate_imported_product(
+                        $existing_id
+                    );
 
+                    $result['inactive']++;
+                }
+
+
+                $result['updated']++;
                 continue;
             }
 
 
             /**
-             * Neues Produkt.
+             * Inaktive Produkte werden nicht neu angelegt.
+             * Wird der Status später im Excel auf «Aktiv»
+             * gesetzt, kann der nächste Import sie anlegen.
              */
+            if ($status === 'inactive') {
+                $result['inactive']++;
+                continue;
+            }
+
+
             $product_id =
                 self::import_product(
                     $product
                 );
 
 
-            if (
-                $product_id <= 0
-            ) {
-
-                $result[
-                    'errors'
-                ]++;
-
+            if ($product_id <= 0) {
+                $result['errors']++;
                 continue;
             }
 
 
-            $product_map[
-                $source_id
-            ] = $product_id;
-
-
-            $result[
-                'products'
-            ]++;
-        }
-
-
-        /* =====================================================
-           BEREITS IMPORTIERTE PRODUKTE ZUORDNEN
-           ===================================================== */
-
-        /**
-         * Wenn der Import ein zweites Mal ausgeführt wird,
-         * müssen bestehende Produkte trotzdem für die
-         * Erfahrungs-Verknüpfung zur Verfügung stehen.
-         */
-        foreach (
-            $data['products']
-            as $product
-        ) {
-
-            $source_id =
-                sanitize_text_field(
-                    (string)
-                    (
-                        $product[
-                            'source_id'
-                        ]
-                        ?? ''
-                    )
-                );
-
-
-            if (
-                $source_id === ''
-                || isset(
-                    $product_map[
-                        $source_id
-                    ]
-                )
-            ) {
-                continue;
-            }
-
-
-            $existing_id =
-                self::find_imported_post(
-                    'product:'
-                    . $source_id,
-
-                    Jung_Leben_Core_Products::POST_TYPE
-                );
-
-
-            if (
-                $existing_id > 0
-            ) {
-                $product_map[
-                    $source_id
-                ] = $existing_id;
-            }
+            $product_map[$source_id] = $product_id;
+            $result['products']++;
         }
 
 
@@ -830,48 +590,27 @@ final class Jung_Leben_Core_Content_Import
            ERFAHRUNGEN
            ===================================================== */
 
-        foreach (
-            $data['experiences']
-            as $experience
-        ) {
-
+        foreach ($data['experiences'] as $experience) {
             $topic =
                 sanitize_text_field(
-                    (string)
-                    (
-                        $experience[
-                            'topic'
-                        ]
+                    (string) (
+                        $experience['topic']
                         ?? ''
                     )
                 );
 
 
-            if (
-                $topic === ''
-            ) {
-
-                $result[
-                    'errors'
-                ]++;
-
+            if ($topic === '') {
+                $result['errors']++;
                 continue;
             }
 
 
-            /**
-             * Eindeutige Import-ID.
-             */
             $import_key =
                 'experience:'
-                . sanitize_title(
-                    $topic
-                );
+                . sanitize_title($topic);
 
 
-            /**
-             * Bereits importiert?
-             */
             $existing_id =
                 self::find_imported_post(
                     $import_key,
@@ -879,41 +618,18 @@ final class Jung_Leben_Core_Content_Import
                 );
 
 
-            if (
-                $existing_id > 0
-            ) {
+            if ($existing_id > 0) {
+                self::sync_existing_experience_source_data(
+                    $existing_id,
+                    $experience,
+                    $product_map
+                );
 
-                $result[
-                    'skipped'
-                ]++;
-
+                $result['updated']++;
                 continue;
             }
 
 
-            /**
-             * KI-Text mitzählen.
-             */
-            if (
-                isset(
-                    $experience[
-                        'review_status'
-                    ]
-                )
-                && $experience[
-                    'review_status'
-                ] === 'ai_review'
-            ) {
-
-                $result[
-                    'ai'
-                ]++;
-            }
-
-
-            /**
-             * Erfahrung importieren.
-             */
             $experience_id =
                 self::import_experience(
                     $experience,
@@ -922,74 +638,34 @@ final class Jung_Leben_Core_Content_Import
                 );
 
 
-            if (
-                $experience_id <= 0
-            ) {
-
-                $result[
-                    'errors'
-                ]++;
-
+            if ($experience_id <= 0) {
+                $result['errors']++;
                 continue;
             }
 
 
-            $result[
-                'experiences'
-            ]++;
+            $result['experiences']++;
         }
 
-
-        /* =====================================================
-           ERGEBNIS
-           ===================================================== */
 
         $redirect_url =
             add_query_arg(
                 [
-
-                    'page' =>
-                        self::MENU_SLUG,
-
-                    'jl_import' =>
-                        'done',
-
-                    'products' =>
-                        $result[
-                            'products'
-                        ],
-
-                    'experiences' =>
-                        $result[
-                            'experiences'
-                        ],
-
-                    'skipped' =>
-                        $result[
-                            'skipped'
-                        ],
-
-                    'errors' =>
-                        $result[
-                            'errors'
-                        ],
-
-                    'ai' =>
-                        $result[
-                            'ai'
-                        ],
+                    'page' => self::MENU_SLUG,
+                    'jl_import' => 'done',
+                    'products' => $result['products'],
+                    'experiences' => $result['experiences'],
+                    'updated' => $result['updated'],
+                    'inactive' => $result['inactive'],
+                    'skipped' => $result['skipped'],
+                    'errors' => $result['errors'],
+                    'ai' => $result['ai'],
                 ],
-
-                admin_url(
-                    'tools.php'
-                )
+                admin_url('tools.php')
             );
 
 
-        wp_safe_redirect(
-            $redirect_url
-        );
-
+        wp_safe_redirect($redirect_url);
         exit;
     }
 
@@ -1004,26 +680,19 @@ final class Jung_Leben_Core_Content_Import
     private static function read_xlsx(
         string $path
     ): array {
-
         require_once
             ABSPATH
             . 'wp-admin/includes/file.php';
 
 
-        if (
-            ! function_exists(
-                'WP_Filesystem'
-            )
-        ) {
+        if (! function_exists('WP_Filesystem')) {
             throw new RuntimeException(
                 'Die WordPress-Dateifunktionen sind nicht verfügbar.'
             );
         }
 
 
-        if (
-            ! WP_Filesystem()
-        ) {
+        if (! WP_Filesystem()) {
             throw new RuntimeException(
                 'Das WordPress-Dateisystem konnte nicht initialisiert werden.'
             );
@@ -1033,22 +702,15 @@ final class Jung_Leben_Core_Content_Import
         global $wp_filesystem;
 
 
-        if (
-            ! $wp_filesystem
-        ) {
+        if (! $wp_filesystem) {
             throw new RuntimeException(
                 'Das WordPress-Dateisystem ist nicht verfügbar.'
             );
         }
 
 
-        /**
-         * Temporäres Verzeichnis.
-         */
         $temp_dir =
-            trailingslashit(
-                get_temp_dir()
-            )
+            trailingslashit(get_temp_dir())
             . 'jung-leben-xlsx-'
             . wp_generate_password(
                 16,
@@ -1057,11 +719,7 @@ final class Jung_Leben_Core_Content_Import
             );
 
 
-        if (
-            ! wp_mkdir_p(
-                $temp_dir
-            )
-        ) {
+        if (! wp_mkdir_p($temp_dir)) {
             throw new RuntimeException(
                 'Das temporäre Importverzeichnis konnte nicht erstellt werden.'
             );
@@ -1069,10 +727,6 @@ final class Jung_Leben_Core_Content_Import
 
 
         try {
-
-            /**
-             * XLSX ist technisch ein ZIP-Archiv.
-             */
             $unzipped =
                 unzip_file(
                     $path,
@@ -1080,14 +734,9 @@ final class Jung_Leben_Core_Content_Import
                 );
 
 
-            if (
-                is_wp_error(
-                    $unzipped
-                )
-            ) {
+            if (is_wp_error($unzipped)) {
                 throw new RuntimeException(
-                    $unzipped
-                        ->get_error_message()
+                    $unzipped->get_error_message()
                 );
             }
 
@@ -1096,17 +745,11 @@ final class Jung_Leben_Core_Content_Import
                 self::read_extracted_xlsx(
                     $temp_dir
                 );
-
         } finally {
-
-            /**
-             * Temporäre Excel-Daten wieder entfernen.
-             */
-            $wp_filesystem
-                ->delete(
-                    $temp_dir,
-                    true
-                );
+            $wp_filesystem->delete(
+                $temp_dir,
+                true
+            );
         }
     }
 
@@ -1117,24 +760,20 @@ final class Jung_Leben_Core_Content_Import
     private static function read_extracted_xlsx(
         string $base_dir
     ): array {
-
         $shared_strings =
             self::read_shared_strings(
                 $base_dir
             );
-
 
         $style_colors =
             self::read_style_colors(
                 $base_dir
             );
 
-
         $sheet_targets =
             self::read_sheet_targets(
                 $base_dir
             );
-
 
         $result = [];
 
@@ -1146,14 +785,7 @@ final class Jung_Leben_Core_Content_Import
             ]
             as $sheet_name
         ) {
-
-            if (
-                ! isset(
-                    $sheet_targets[
-                        $sheet_name
-                    ]
-                )
-            ) {
+            if (! isset($sheet_targets[$sheet_name])) {
                 throw new RuntimeException(
                     sprintf(
                         'Die Tabelle «%s» wurde nicht gefunden.',
@@ -1163,16 +795,13 @@ final class Jung_Leben_Core_Content_Import
             }
 
 
-            $result[
-                $sheet_name
-            ] = self::read_sheet(
-                $base_dir,
-                $sheet_targets[
-                    $sheet_name
-                ],
-                $shared_strings,
-                $style_colors
-            );
+            $result[$sheet_name] =
+                self::read_sheet(
+                    $base_dir,
+                    $sheet_targets[$sheet_name],
+                    $shared_strings,
+                    $style_colors
+                );
         }
 
 
@@ -1190,35 +819,20 @@ final class Jung_Leben_Core_Content_Import
     private static function read_shared_strings(
         string $base_dir
     ): array {
-
         $path =
-            trailingslashit(
-                $base_dir
-            )
+            trailingslashit($base_dir)
             . 'xl/sharedStrings.xml';
 
 
-        if (
-            ! file_exists(
-                $path
-            )
-        ) {
+        if (! file_exists($path)) {
             return [];
         }
 
 
-        $xml =
-            file_get_contents(
-                $path
-            );
+        $xml = file_get_contents($path);
 
 
-        if (
-            ! is_string(
-                $xml
-            )
-            || $xml === ''
-        ) {
+        if (! is_string($xml) || $xml === '') {
             return [];
         }
 
@@ -1228,12 +842,10 @@ final class Jung_Leben_Core_Content_Import
                 $xml
             );
 
-
         $xpath =
             new DOMXPath(
                 $document
             );
-
 
         $items =
             $xpath->query(
@@ -1241,9 +853,7 @@ final class Jung_Leben_Core_Content_Import
             );
 
 
-        if (
-            ! $items
-        ) {
+        if (! $items) {
             return [];
         }
 
@@ -1251,43 +861,24 @@ final class Jung_Leben_Core_Content_Import
         $strings = [];
 
 
-        foreach (
-            $items
-            as $item
-        ) {
-
-            /**
-             * Auch Rich-Text-Zellen können mehrere
-             * <t>-Elemente enthalten.
-             */
+        foreach ($items as $item) {
             $text_nodes =
                 $xpath->query(
                     './/*[local-name()="t"]',
                     $item
                 );
 
-
             $value = '';
 
 
-            if (
-                $text_nodes
-            ) {
-
-                foreach (
-                    $text_nodes
-                    as $text_node
-                ) {
-
-                    $value .=
-                        $text_node
-                            ->textContent;
+            if ($text_nodes) {
+                foreach ($text_nodes as $text_node) {
+                    $value .= $text_node->textContent;
                 }
             }
 
 
-            $strings[] =
-                $value;
+            $strings[] = $value;
         }
 
 
@@ -1305,35 +896,20 @@ final class Jung_Leben_Core_Content_Import
     private static function read_style_colors(
         string $base_dir
     ): array {
-
         $path =
-            trailingslashit(
-                $base_dir
-            )
+            trailingslashit($base_dir)
             . 'xl/styles.xml';
 
 
-        if (
-            ! file_exists(
-                $path
-            )
-        ) {
+        if (! file_exists($path)) {
             return [];
         }
 
 
-        $xml =
-            file_get_contents(
-                $path
-            );
+        $xml = file_get_contents($path);
 
 
-        if (
-            ! is_string(
-                $xml
-            )
-            || $xml === ''
-        ) {
+        if (! is_string($xml) || $xml === '') {
             return [];
         }
 
@@ -1343,19 +919,13 @@ final class Jung_Leben_Core_Content_Import
                 $xml
             );
 
-
         $xpath =
             new DOMXPath(
                 $document
             );
 
 
-        /* -----------------------------------------------------
-           Fonts
-           ----------------------------------------------------- */
-
         $font_colors = [];
-
 
         $fonts =
             $xpath->query(
@@ -1365,21 +935,13 @@ final class Jung_Leben_Core_Content_Import
             );
 
 
-        if (
-            $fonts
-        ) {
-
-            foreach (
-                $fonts
-                as $index => $font
-            ) {
-
+        if ($fonts) {
+            foreach ($fonts as $index => $font) {
                 $color_nodes =
                     $xpath->query(
                         './*[local-name()="color"]',
                         $font
                     );
-
 
                 $color = '';
 
@@ -1388,82 +950,37 @@ final class Jung_Leben_Core_Content_Import
                     $color_nodes
                     && $color_nodes->length > 0
                 ) {
-
                     $color_node =
-                        $color_nodes
-                            ->item(
-                                0
-                            );
+                        $color_nodes->item(0);
 
 
-                    if (
-                        $color_node
-                        instanceof DOMElement
-                    ) {
-
-                        if (
-                            $color_node
-                                ->hasAttribute(
-                                    'rgb'
-                                )
-                        ) {
-
-                            /**
-                             * Excel kann ARGB verwenden:
-                             *
-                             * FF00B0F0
-                             *
-                             * Wir benötigen nur:
-                             *
-                             * 00B0F0
-                             */
+                    if ($color_node instanceof DOMElement) {
+                        if ($color_node->hasAttribute('rgb')) {
                             $rgb =
                                 strtoupper(
-                                    $color_node
-                                        ->getAttribute(
-                                            'rgb'
-                                        )
+                                    $color_node->getAttribute('rgb')
                                 );
-
 
                             $color =
                                 substr(
                                     $rgb,
                                     -6
                                 );
-
-                        } elseif (
-                            $color_node
-                                ->hasAttribute(
-                                    'theme'
-                                )
-                        ) {
-
+                        } elseif ($color_node->hasAttribute('theme')) {
                             $color =
                                 'theme:'
-                                . $color_node
-                                    ->getAttribute(
-                                        'theme'
-                                    );
+                                . $color_node->getAttribute('theme');
                         }
                     }
                 }
 
 
-                $font_colors[
-                    (int)
-                    $index
-                ] = $color;
+                $font_colors[(int) $index] = $color;
             }
         }
 
 
-        /* -----------------------------------------------------
-           Zellstyles
-           ----------------------------------------------------- */
-
         $style_colors = [];
-
 
         $xfs =
             $xpath->query(
@@ -1473,43 +990,22 @@ final class Jung_Leben_Core_Content_Import
             );
 
 
-        if (
-            $xfs
-        ) {
-
-            foreach (
-                $xfs
-                as $index => $xf
-            ) {
-
+        if ($xfs) {
+            foreach ($xfs as $index => $xf) {
                 $font_id = 0;
 
 
                 if (
-                    $xf
-                    instanceof DOMElement
-                    && $xf
-                        ->hasAttribute(
-                            'fontId'
-                        )
+                    $xf instanceof DOMElement
+                    && $xf->hasAttribute('fontId')
                 ) {
-
                     $font_id =
-                        (int)
-                        $xf
-                            ->getAttribute(
-                                'fontId'
-                            );
+                        (int) $xf->getAttribute('fontId');
                 }
 
 
-                $style_colors[
-                    (int)
-                    $index
-                ] =
-                    $font_colors[
-                        $font_id
-                    ]
+                $style_colors[(int) $index] =
+                    $font_colors[$font_id]
                     ?? '';
             }
         }
@@ -1529,28 +1025,18 @@ final class Jung_Leben_Core_Content_Import
     private static function read_sheet_targets(
         string $base_dir
     ): array {
-
         $workbook_path =
-            trailingslashit(
-                $base_dir
-            )
+            trailingslashit($base_dir)
             . 'xl/workbook.xml';
 
-
         $rels_path =
-            trailingslashit(
-                $base_dir
-            )
+            trailingslashit($base_dir)
             . 'xl/_rels/workbook.xml.rels';
 
 
         if (
-            ! file_exists(
-                $workbook_path
-            )
-            || ! file_exists(
-                $rels_path
-            )
+            ! file_exists($workbook_path)
+            || ! file_exists($rels_path)
         ) {
             throw new RuntimeException(
                 'Die Excel-Arbeitsmappe ist unvollständig.'
@@ -1558,25 +1044,13 @@ final class Jung_Leben_Core_Content_Import
         }
 
 
-        $workbook_xml =
-            file_get_contents(
-                $workbook_path
-            );
-
-
-        $rels_xml =
-            file_get_contents(
-                $rels_path
-            );
+        $workbook_xml = file_get_contents($workbook_path);
+        $rels_xml = file_get_contents($rels_path);
 
 
         if (
-            ! is_string(
-                $workbook_xml
-            )
-            || ! is_string(
-                $rels_xml
-            )
+            ! is_string($workbook_xml)
+            || ! is_string($rels_xml)
         ) {
             throw new RuntimeException(
                 'Die Excel-Arbeitsmappe konnte nicht gelesen werden.'
@@ -1589,25 +1063,18 @@ final class Jung_Leben_Core_Content_Import
                 $workbook_xml
             );
 
-
         $rels_document =
             self::load_xml_document(
                 $rels_xml
             );
 
 
-        /* -----------------------------------------------------
-           Relationships
-           ----------------------------------------------------- */
-
         $rels_xpath =
             new DOMXPath(
                 $rels_document
             );
 
-
         $relationships = [];
-
 
         $relationship_nodes =
             $rels_xpath->query(
@@ -1615,45 +1082,22 @@ final class Jung_Leben_Core_Content_Import
             );
 
 
-        if (
-            $relationship_nodes
-        ) {
-
-            foreach (
-                $relationship_nodes
-                as $relationship
-            ) {
-
-                if (
-                    ! $relationship
-                    instanceof DOMElement
-                ) {
+        if ($relationship_nodes) {
+            foreach ($relationship_nodes as $relationship) {
+                if (! $relationship instanceof DOMElement) {
                     continue;
                 }
 
 
                 $id =
-                    $relationship
-                        ->getAttribute(
-                            'Id'
-                        );
-
+                    $relationship->getAttribute('Id');
 
                 $target =
-                    $relationship
-                        ->getAttribute(
-                            'Target'
-                        );
+                    $relationship->getAttribute('Target');
 
 
-                if (
-                    $id !== ''
-                    && $target !== ''
-                ) {
-
-                    $relationships[
-                        $id
-                    ] =
+                if ($id !== '' && $target !== '') {
+                    $relationships[$id] =
                         self::normalize_xlsx_target(
                             $target
                         );
@@ -1662,73 +1106,43 @@ final class Jung_Leben_Core_Content_Import
         }
 
 
-        /* -----------------------------------------------------
-           Tabellen
-           ----------------------------------------------------- */
-
         $workbook_xpath =
             new DOMXPath(
                 $workbook_document
             );
-
 
         $sheet_nodes =
             $workbook_xpath->query(
                 '//*[local-name()="sheet"]'
             );
 
-
         $targets = [];
 
 
-        if (
-            $sheet_nodes
-        ) {
-
-            foreach (
-                $sheet_nodes
-                as $sheet
-            ) {
-
-                if (
-                    ! $sheet
-                    instanceof DOMElement
-                ) {
+        if ($sheet_nodes) {
+            foreach ($sheet_nodes as $sheet) {
+                if (! $sheet instanceof DOMElement) {
                     continue;
                 }
 
 
                 $name =
-                    $sheet
-                        ->getAttribute(
-                            'name'
-                        );
-
+                    $sheet->getAttribute('name');
 
                 $relationship_id =
-                    $sheet
-                        ->getAttributeNS(
-                            'http://schemas.openxmlformats.org/officeDocument/2006/relationships',
-                            'id'
-                        );
+                    $sheet->getAttributeNS(
+                        'http://schemas.openxmlformats.org/officeDocument/2006/relationships',
+                        'id'
+                    );
 
 
                 if (
                     $name !== ''
                     && $relationship_id !== ''
-                    && isset(
-                        $relationships[
-                            $relationship_id
-                        ]
-                    )
+                    && isset($relationships[$relationship_id])
                 ) {
-
-                    $targets[
-                        $name
-                    ] =
-                        $relationships[
-                            $relationship_id
-                        ];
+                    $targets[$name] =
+                        $relationships[$relationship_id];
                 }
             }
         }
@@ -1744,6 +1158,12 @@ final class Jung_Leben_Core_Content_Import
 
     /**
      * Einzelnes Tabellenblatt lesen.
+     *
+     * Zusätzlich zum sichtbaren Zellwert wird auch ein
+     * hinterlegter Excel-Hyperlink ausgelesen. Das ist für
+     * die neue Products-Tabelle wichtig, weil mehrere Zellen
+     * einen Produktnamen anzeigen, aber im Hintergrund einen
+     * echten Link enthalten.
      */
     private static function read_sheet(
         string $base_dir,
@@ -1751,40 +1171,25 @@ final class Jung_Leben_Core_Content_Import
         array $shared_strings,
         array $style_colors
     ): array {
-
         $path =
-            trailingslashit(
-                $base_dir
-            )
+            trailingslashit($base_dir)
             . ltrim(
                 $target,
                 '/'
             );
 
 
-        if (
-            ! file_exists(
-                $path
-            )
-        ) {
+        if (! file_exists($path)) {
             throw new RuntimeException(
                 'Eine Excel-Tabelle konnte nicht gefunden werden.'
             );
         }
 
 
-        $xml =
-            file_get_contents(
-                $path
-            );
+        $xml = file_get_contents($path);
 
 
-        if (
-            ! is_string(
-                $xml
-            )
-            || $xml === ''
-        ) {
+        if (! is_string($xml) || $xml === '') {
             throw new RuntimeException(
                 'Eine Excel-Tabelle konnte nicht gelesen werden.'
             );
@@ -1796,12 +1201,10 @@ final class Jung_Leben_Core_Content_Import
                 $xml
             );
 
-
         $xpath =
             new DOMXPath(
                 $document
             );
-
 
         $cell_nodes =
             $xpath->query(
@@ -1809,192 +1212,287 @@ final class Jung_Leben_Core_Content_Import
                 . '//*[local-name()="c"]'
             );
 
-
         $rows = [];
 
 
-        if (
-            ! $cell_nodes
-        ) {
-            return $rows;
-        }
+        if ($cell_nodes) {
+            foreach ($cell_nodes as $cell) {
+                if (! $cell instanceof DOMElement) {
+                    continue;
+                }
 
 
-        foreach (
-            $cell_nodes
-            as $cell
-        ) {
-
-            if (
-                ! $cell
-                instanceof DOMElement
-            ) {
-                continue;
-            }
-
-
-            /**
-             * Beispiel:
-             *
-             * C12
-             */
-            $reference =
-                $cell
-                    ->getAttribute(
-                        'r'
-                    );
-
-
-            if (
-                ! preg_match(
-                    '/^([A-Z]+)(\d+)$/',
-                    $reference,
-                    $matches
-                )
-            ) {
-                continue;
-            }
-
-
-            $column =
-                $matches[1];
-
-
-            $row =
-                (int)
-                $matches[2];
-
-
-            $type =
-                $cell
-                    ->getAttribute(
-                        't'
-                    );
-
-
-            $style_id =
-                $cell
-                    ->hasAttribute(
-                        's'
-                    )
-                    ? (int)
-                        $cell
-                            ->getAttribute(
-                                's'
-                            )
-                    : 0;
-
-
-            $value = '';
-
-
-            /* -------------------------------------------------
-               Inline String
-               ------------------------------------------------- */
-
-            if (
-                $type === 'inlineStr'
-            ) {
-
-                $text_nodes =
-                    $xpath->query(
-                        './/*[local-name()="is"]'
-                        . '//*[local-name()="t"]',
-                        $cell
-                    );
+                $reference =
+                    $cell->getAttribute('r');
 
 
                 if (
-                    $text_nodes
+                    ! preg_match(
+                        '/^([A-Z]+)(\d+)$/',
+                        $reference,
+                        $matches
+                    )
                 ) {
+                    continue;
+                }
 
-                    foreach (
-                        $text_nodes
-                        as $text_node
+
+                $column = $matches[1];
+                $row = (int) $matches[2];
+
+                $type =
+                    $cell->getAttribute('t');
+
+                $style_id =
+                    $cell->hasAttribute('s')
+                        ? (int) $cell->getAttribute('s')
+                        : 0;
+
+                $value = '';
+
+
+                if ($type === 'inlineStr') {
+                    $text_nodes =
+                        $xpath->query(
+                            './/*[local-name()="is"]'
+                            . '//*[local-name()="t"]',
+                            $cell
+                        );
+
+
+                    if ($text_nodes) {
+                        foreach ($text_nodes as $text_node) {
+                            $value .= $text_node->textContent;
+                        }
+                    }
+                } else {
+                    $value_nodes =
+                        $xpath->query(
+                            './*[local-name()="v"]',
+                            $cell
+                        );
+
+                    $raw_value = '';
+
+
+                    if (
+                        $value_nodes
+                        && $value_nodes->length > 0
                     ) {
-
-                        $value .=
-                            $text_node
+                        $raw_value =
+                            $value_nodes
+                                ->item(0)
                                 ->textContent;
+                    }
+
+
+                    if ($type === 's') {
+                        $shared_index = (int) $raw_value;
+
+                        $value =
+                            $shared_strings[$shared_index]
+                            ?? '';
+                    } else {
+                        $value = $raw_value;
                     }
                 }
 
-            } else {
 
-                /* ---------------------------------------------
-                   Standardwert
-                   --------------------------------------------- */
-
-                $value_nodes =
-                    $xpath->query(
-                        './*[local-name()="v"]',
-                        $cell
-                    );
-
-
-                $raw_value = '';
-
-
-                if (
-                    $value_nodes
-                    && $value_nodes->length > 0
-                ) {
-
-                    $raw_value =
-                        $value_nodes
-                            ->item(
-                                0
-                            )
-                            ->textContent;
-                }
-
-
-                /* ---------------------------------------------
-                   Shared String
-                   --------------------------------------------- */
-
-                if (
-                    $type === 's'
-                ) {
-
-                    $shared_index =
-                        (int)
-                        $raw_value;
-
-
-                    $value =
-                        $shared_strings[
-                            $shared_index
-                        ]
-                        ?? '';
-
-                } else {
-
-                    $value =
-                        $raw_value;
-                }
+                $rows[$row][$column] = [
+                    'value' => $value,
+                    'font_color' =>
+                        $style_colors[$style_id]
+                        ?? '',
+                    'hyperlink' => '',
+                ];
             }
-
-
-            $rows[
-                $row
-            ][
-                $column
-            ] = [
-
-                'value' =>
-                    $value,
-
-                'font_color' =>
-                    $style_colors[
-                        $style_id
-                    ]
-                    ?? '',
-            ];
         }
 
 
+        /* -----------------------------------------------------
+           Excel-Hyperlinks ergänzen
+           ----------------------------------------------------- */
+
+        $relationships =
+            self::read_sheet_external_relationships(
+                $base_dir,
+                $target
+            );
+
+
+        $hyperlink_nodes =
+            $xpath->query(
+                '//*[local-name()="hyperlinks"]'
+                . '/*[local-name()="hyperlink"]'
+            );
+
+
+        if ($hyperlink_nodes) {
+            foreach ($hyperlink_nodes as $hyperlink) {
+                if (! $hyperlink instanceof DOMElement) {
+                    continue;
+                }
+
+
+                $reference =
+                    $hyperlink->getAttribute('ref');
+
+                $relationship_id =
+                    $hyperlink->getAttributeNS(
+                        'http://schemas.openxmlformats.org/officeDocument/2006/relationships',
+                        'id'
+                    );
+
+
+                if (
+                    $reference === ''
+                    || $relationship_id === ''
+                    || ! isset($relationships[$relationship_id])
+                ) {
+                    continue;
+                }
+
+
+                /**
+                 * In der Kundendatei sind Hyperlinks jeweils
+                 * einer einzelnen Zelle zugeordnet.
+                 */
+                if (
+                    ! preg_match(
+                        '/^([A-Z]+)(\d+)$/',
+                        $reference,
+                        $matches
+                    )
+                ) {
+                    continue;
+                }
+
+
+                $column = $matches[1];
+                $row = (int) $matches[2];
+
+
+                if (! isset($rows[$row][$column])) {
+                    $rows[$row][$column] = [
+                        'value' => '',
+                        'font_color' => '',
+                        'hyperlink' => '',
+                    ];
+                }
+
+
+                $rows[$row][$column]['hyperlink'] =
+                    $relationships[$relationship_id];
+            }
+        }
+
+
+        ksort($rows);
+
         return $rows;
+    }
+
+
+    /**
+     * Externe Beziehungen eines Tabellenblatts lesen.
+     *
+     * Benötigt für echte Excel-Hyperlinks.
+     */
+    private static function read_sheet_external_relationships(
+        string $base_dir,
+        string $sheet_target
+    ): array {
+        $sheet_target =
+            str_replace(
+                '\\',
+                '/',
+                ltrim($sheet_target, '/')
+            );
+
+        $directory =
+            dirname($sheet_target);
+
+        $filename =
+            basename($sheet_target);
+
+        $rels_path =
+            trailingslashit($base_dir)
+            . $directory
+            . '/_rels/'
+            . $filename
+            . '.rels';
+
+
+        if (! file_exists($rels_path)) {
+            return [];
+        }
+
+
+        $xml = file_get_contents($rels_path);
+
+
+        if (! is_string($xml) || $xml === '') {
+            return [];
+        }
+
+
+        $document =
+            self::load_xml_document(
+                $xml
+            );
+
+        $xpath =
+            new DOMXPath(
+                $document
+            );
+
+        $nodes =
+            $xpath->query(
+                '//*[local-name()="Relationship"]'
+            );
+
+        $relationships = [];
+
+
+        if (! $nodes) {
+            return $relationships;
+        }
+
+
+        foreach ($nodes as $node) {
+            if (! $node instanceof DOMElement) {
+                continue;
+            }
+
+
+            $id =
+                $node->getAttribute('Id');
+
+            $type =
+                $node->getAttribute('Type');
+
+            $target =
+                $node->getAttribute('Target');
+
+            $target_mode =
+                $node->getAttribute('TargetMode');
+
+
+            if (
+                $id === ''
+                || $target === ''
+                || $target_mode !== 'External'
+                || ! str_ends_with($type, '/hyperlink')
+            ) {
+                continue;
+            }
+
+
+            $relationships[$id] = $target;
+        }
+
+
+        return $relationships;
     }
 
 
@@ -2008,33 +1506,29 @@ final class Jung_Leben_Core_Content_Import
     private static function build_import_data(
         array $workbook
     ): array {
-
         $products =
             self::build_products(
-                $workbook[
-                    'Products'
-                ]
+                $workbook['Products']
                 ?? []
             );
 
-
         $experiences =
             self::build_experiences(
-                $workbook[
-                    'Blogs'
-                ]
+                $workbook['Blogs']
                 ?? [],
                 $products
             );
 
+        $products =
+            self::apply_experience_flags_to_products(
+                $products,
+                $experiences
+            );
+
 
         return [
-
-            'products' =>
-                $products,
-
-            'experiences' =>
-                $experiences,
+            'products' => $products,
+            'experiences' => $experiences,
         ];
     }
 
@@ -2049,149 +1543,276 @@ final class Jung_Leben_Core_Content_Import
     private static function build_products(
         array $rows
     ): array {
+        $header_row_number =
+            self::find_header_row(
+                $rows,
+                [
+                    'id',
+                    'produkt',
+                    'status',
+                ]
+            );
+
+
+        if ($header_row_number <= 0) {
+            throw new RuntimeException(
+                'Die Kopfzeile der Tabelle «Products» wurde nicht gefunden.'
+            );
+        }
+
+
+        $header_row =
+            $rows[$header_row_number]
+            ?? [];
+
+        $columns =
+            self::build_product_column_map(
+                $header_row
+            );
+
+
+        foreach (
+            [
+                'id',
+                'product',
+                'area',
+                'description',
+                'status',
+                'favorite',
+                'main_reference',
+                'main_remark',
+                'alternative_1',
+                'alternative_1_reference',
+                'alternative_1_remark',
+                'alternative_2',
+                'alternative_2_reference',
+            ]
+            as $required_key
+        ) {
+            if (! isset($columns[$required_key])) {
+                throw new RuntimeException(
+                    sprintf(
+                        'Die erwartete Spalte «%s» in «Products» wurde nicht gefunden.',
+                        $required_key
+                    )
+                );
+            }
+        }
+
 
         $products = [];
 
 
-        foreach (
-            $rows
-            as $row_number => $row
-        ) {
-
-            /**
-             * Zeilen 1–4 sind Kopfbereich.
-             */
-            if (
-                (
-                    (int)
-                    $row_number
-                ) < 5
-            ) {
+        foreach ($rows as $row_number => $row) {
+            if (((int) $row_number) <= $header_row_number) {
                 continue;
             }
 
 
             $source_id =
-                self::cell_value(
-                    $row,
-                    'B'
+                self::canonical_source_id(
+                    self::cell_value(
+                        $row,
+                        $columns['id']
+                    )
                 );
-
 
             $name =
                 self::cell_value(
                     $row,
-                    'C'
+                    $columns['product']
                 );
 
 
-            /**
-             * Leere vorbereitete Produktzeilen
-             * wie P_RO_025 und P_RO_026
-             * werden nicht importiert.
-             */
-            if (
-                $source_id === ''
-                || $name === ''
-            ) {
+            if ($source_id === '' || $name === '') {
                 continue;
             }
 
 
+            $main_reference =
+                self::cell_value(
+                    $row,
+                    $columns['main_reference']
+                );
+
+            $main_url =
+                self::cell_effective_url(
+                    $row,
+                    $columns['main_reference']
+                );
+
+            $alternative_1_reference =
+                self::cell_value(
+                    $row,
+                    $columns['alternative_1_reference']
+                );
+
+            $alternative_1_url =
+                self::cell_effective_url(
+                    $row,
+                    $columns['alternative_1_reference']
+                );
+
+            $alternative_2_reference =
+                self::cell_value(
+                    $row,
+                    $columns['alternative_2_reference']
+                );
+
+            $alternative_2_url =
+                self::cell_effective_url(
+                    $row,
+                    $columns['alternative_2_reference']
+                );
+
+
             $products[] = [
-
-                'source_id' =>
-                    $source_id,
-
-                'name' =>
-                    $name,
-
-                'area' =>
+                'source_id' => $source_id,
+                'name' => $name,
+                'area' => self::cell_value(
+                    $row,
+                    $columns['area']
+                ),
+                'description' => self::cell_value(
+                    $row,
+                    $columns['description']
+                ),
+                'status' => self::normalize_product_status(
                     self::cell_value(
                         $row,
-                        'D'
-                    ),
-
-                'description' =>
-                    self::cell_value(
-                        $row,
-                        'E'
-                    ),
-
-                'manufacturer' =>
-                    self::cell_value(
-                        $row,
-                        'F'
-                    ),
-
-                'manufacturer_url' =>
-                    self::cell_value(
-                        $row,
-                        'G'
-                    ),
-
-                'source' =>
-                    self::cell_value(
-                        $row,
-                        'H'
-                    ),
-
-                'source_url' =>
-                    self::cell_value(
-                        $row,
-                        'I'
-                    ),
-
-                'remark' =>
-                    self::cell_value(
-                        $row,
-                        'J'
-                    ),
-
-                'b2b' =>
-                    self::cell_value(
-                        $row,
-                        'K'
-                    ),
-
-                'alternative_product' =>
-                    self::cell_value(
-                        $row,
-                        'L'
-                    ),
-
-                'alternative_manufacturer' =>
-                    self::cell_value(
-                        $row,
-                        'M'
-                    ),
-
-                'alternative_url' =>
-                    self::cell_value(
-                        $row,
-                        'N'
-                    ),
-
-                'alternative_remark' =>
-                    self::cell_value(
-                        $row,
-                        'O'
-                    ),
-
-                'alternative_b2b' =>
-                    self::cell_value(
-                        $row,
-                        'P'
-                    ),
-
-                'source_row' =>
-                    (int)
-                    $row_number,
+                        $columns['status']
+                    )
+                ),
+                'favorite_brand' => self::cell_value(
+                    $row,
+                    $columns['favorite']
+                ),
+                'favorite_reference' => $main_reference,
+                'favorite_url' => $main_url,
+                'remark' => self::cell_value(
+                    $row,
+                    $columns['main_remark']
+                ),
+                'alternative_1_brand' => self::cell_value(
+                    $row,
+                    $columns['alternative_1']
+                ),
+                'alternative_1_reference' =>
+                    $alternative_1_reference,
+                'alternative_1_url' =>
+                    $alternative_1_url,
+                'alternative_1_remark' => self::cell_value(
+                    $row,
+                    $columns['alternative_1_remark']
+                ),
+                'alternative_2_brand' => self::cell_value(
+                    $row,
+                    $columns['alternative_2']
+                ),
+                'alternative_2_reference' =>
+                    $alternative_2_reference,
+                'alternative_2_url' =>
+                    $alternative_2_url,
+                'personally_tested' => false,
+                'source_row' => (int) $row_number,
             ];
         }
 
 
         return $products;
+    }
+
+
+    /**
+     * Products-Spalten anhand der tatsächlichen Kopfzeile
+     * auflösen.
+     *
+     * Die drei Spalten mit dem Titel «URL» und die zwei
+     * Spalten «Bemerkung» werden nach ihrem Auftreten
+     * unterschieden.
+     */
+    private static function build_product_column_map(
+        array $header_row
+    ): array {
+        $map = [];
+        $url_count = 0;
+        $remark_count = 0;
+
+
+        foreach ($header_row as $column => $cell) {
+            $label =
+                self::normalize_header(
+                    is_array($cell)
+                        ? (string) ($cell['value'] ?? '')
+                        : ''
+                );
+
+
+            if ($label === '') {
+                continue;
+            }
+
+
+            switch ($label) {
+                case 'id':
+                    $map['id'] = $column;
+                    break;
+
+                case 'produkt':
+                    $map['product'] = $column;
+                    break;
+
+                case 'gebiet':
+                    $map['area'] = $column;
+                    break;
+
+                case 'beschrieb wirkung':
+                    $map['description'] = $column;
+                    break;
+
+                case 'status':
+                    $map['status'] = $column;
+                    break;
+
+                case 'roberto s favorit':
+                case 'robertos favorit':
+                    $map['favorite'] = $column;
+                    break;
+
+                case 'alternative 1':
+                    $map['alternative_1'] = $column;
+                    break;
+
+                case 'alternative 2':
+                    $map['alternative_2'] = $column;
+                    break;
+
+                case 'url':
+                    $url_count++;
+
+                    if ($url_count === 1) {
+                        $map['main_reference'] = $column;
+                    } elseif ($url_count === 2) {
+                        $map['alternative_1_reference'] = $column;
+                    } elseif ($url_count === 3) {
+                        $map['alternative_2_reference'] = $column;
+                    }
+                    break;
+
+                case 'bemerkung':
+                    $remark_count++;
+
+                    if ($remark_count === 1) {
+                        $map['main_remark'] = $column;
+                    } elseif ($remark_count === 2) {
+                        $map['alternative_1_remark'] = $column;
+                    }
+                    break;
+            }
+        }
+
+
+        return $map;
     }
 
 
@@ -2206,27 +1827,54 @@ final class Jung_Leben_Core_Content_Import
         array $rows,
         array $products
     ): array {
+        $header_row_number =
+            self::find_header_row(
+                $rows,
+                [
+                    'thema',
+                    'blog',
+                    'wirkungsbeschrieb',
+                ]
+            );
+
+
+        if ($header_row_number <= 0) {
+            throw new RuntimeException(
+                'Die Kopfzeile der Tabelle «Blogs» wurde nicht gefunden.'
+            );
+        }
+
+
+        $columns =
+            self::build_simple_column_map(
+                $rows[$header_row_number]
+                ?? []
+            );
+
+
+        if (
+            ! isset(
+                $columns['thema'],
+                $columns['blog'],
+                $columns['wirkungsbeschrieb']
+            )
+        ) {
+            throw new RuntimeException(
+                'Die erwarteten Spalten in «Blogs» wurden nicht gefunden.'
+            );
+        }
+
 
         $product_map =
             self::build_product_source_map(
                 $products
             );
 
-
         $experiences = [];
 
 
-        foreach (
-            $rows
-            as $row_number => $row
-        ) {
-
-            if (
-                (
-                    (int)
-                    $row_number
-                ) < 5
-            ) {
+        foreach ($rows as $row_number => $row) {
+            if (((int) $row_number) <= $header_row_number) {
                 continue;
             }
 
@@ -2234,19 +1882,25 @@ final class Jung_Leben_Core_Content_Import
             $topic =
                 self::cell_value(
                     $row,
-                    'B'
+                    $columns['thema']
+                );
+
+            $normalized_topic =
+                self::normalize_match_text(
+                    $topic
                 );
 
 
-            /**
-             * Leerzeilen sowie die Legende
-             * «Blauer Text» überspringen.
-             */
             if (
                 $topic === ''
-                || mb_strtolower(
-                    $topic
-                ) === 'blauer text'
+                || in_array(
+                    $normalized_topic,
+                    [
+                        'test',
+                        'blauer text',
+                    ],
+                    true
+                )
             ) {
                 continue;
             }
@@ -2255,29 +1909,21 @@ final class Jung_Leben_Core_Content_Import
             $blog =
                 self::cell_value(
                     $row,
-                    'C'
+                    $columns['blog']
                 );
-
 
             $background =
                 self::cell_value(
                     $row,
-                    'D'
+                    $columns['wirkungsbeschrieb']
                 );
 
 
-            if (
-                $blog === ''
-                && $background === ''
-            ) {
+            if ($blog === '' && $background === '') {
                 continue;
             }
 
 
-            /**
-             * Erste Zeile des Blogtextes
-             * wird zum Beitragstitel.
-             */
             [
                 $title,
                 $body,
@@ -2287,11 +1933,6 @@ final class Jung_Leben_Core_Content_Import
                     $topic
                 );
 
-
-            /**
-             * Erste Zeile des Wirkungsbeschriebs
-             * wird zur Zwischenüberschrift.
-             */
             [
                 $background_title,
                 $background_body,
@@ -2302,56 +1943,172 @@ final class Jung_Leben_Core_Content_Import
                 );
 
 
-            /**
-             * Blau = KI-generiert.
-             */
             $is_ai =
                 self::cell_font_color(
                     $row,
-                    'C'
+                    $columns['blog']
                 ) === self::AI_FONT_COLOR
                 || self::cell_font_color(
                     $row,
-                    'D'
+                    $columns['wirkungsbeschrieb']
                 ) === self::AI_FONT_COLOR;
 
 
             $experiences[] = [
-
-                'topic' =>
-                    $topic,
-
-                'title' =>
-                    $title,
-
-                'body' =>
-                    $body,
-
-                'background_title' =>
-                    $background_title,
-
-                'background' =>
-                    $background_body,
-
+                'topic' => $topic,
+                'title' => $title,
+                'body' => $body,
+                'background_title' => $background_title,
+                'background' => $background_body,
                 'review_status' =>
                     $is_ai
                         ? 'ai_review'
                         : 'customer_source',
-
                 'related_product_source_id' =>
                     self::match_product_source_id(
                         $topic,
                         $product_map
                     ),
-
-                'source_row' =>
-                    (int)
-                    $row_number,
+                'source_row' => (int) $row_number,
             ];
         }
 
 
         return $experiences;
+    }
+
+
+    /**
+     * Einfaches Header-Mapping für eindeutige Spaltennamen.
+     */
+    private static function build_simple_column_map(
+        array $header_row
+    ): array {
+        $map = [];
+
+
+        foreach ($header_row as $column => $cell) {
+            if (! is_array($cell)) {
+                continue;
+            }
+
+
+            $label =
+                self::normalize_header(
+                    (string) ($cell['value'] ?? '')
+                );
+
+
+            if ($label !== '') {
+                $map[$label] = $column;
+            }
+        }
+
+
+        return $map;
+    }
+
+
+    /**
+     * Kopfzeile anhand erwarteter Bezeichnungen finden.
+     */
+    private static function find_header_row(
+        array $rows,
+        array $required_labels
+    ): int {
+        foreach ($rows as $row_number => $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+
+
+            $labels = [];
+
+
+            foreach ($row as $cell) {
+                if (! is_array($cell)) {
+                    continue;
+                }
+
+
+                $label =
+                    self::normalize_header(
+                        (string) ($cell['value'] ?? '')
+                    );
+
+
+                if ($label !== '') {
+                    $labels[] = $label;
+                }
+            }
+
+
+            $all_found = true;
+
+
+            foreach ($required_labels as $required_label) {
+                if (! in_array($required_label, $labels, true)) {
+                    $all_found = false;
+                    break;
+                }
+            }
+
+
+            if ($all_found) {
+                return (int) $row_number;
+            }
+        }
+
+
+        return 0;
+    }
+
+
+    /**
+     * Header-Bezeichnungen vereinheitlichen.
+     */
+    private static function normalize_header(
+        string $value
+    ): string {
+        $value =
+            mb_strtolower(
+                trim($value)
+            );
+
+        $value =
+            str_replace(
+                [
+                    "'",
+                    '’',
+                    '‘',
+                    '-',
+                    '–',
+                    '—',
+                    '/',
+                    '_',
+                ],
+                ' ',
+                $value
+            );
+
+        $value =
+            preg_replace(
+                '/[^\p{L}\p{N}]+/u',
+                ' ',
+                $value
+            )
+            ?? $value;
+
+        $value =
+            preg_replace(
+                '/\s+/u',
+                ' ',
+                $value
+            )
+            ?? $value;
+
+
+        return trim($value);
     }
 
 
@@ -2365,49 +2122,33 @@ final class Jung_Leben_Core_Content_Import
     private static function build_product_source_map(
         array $products
     ): array {
-
         $map = [];
 
 
-        foreach (
-            $products
-            as $product
-        ) {
-
+        foreach ($products as $product) {
             $source_id =
-                (string)
-                (
-                    $product[
-                        'source_id'
-                    ]
-                    ?? ''
+                self::canonical_source_id(
+                    (string) (
+                        $product['source_id']
+                        ?? ''
+                    )
                 );
-
 
             $name =
-                (string)
-                (
-                    $product[
-                        'name'
-                    ]
+                (string) (
+                    $product['name']
                     ?? ''
                 );
 
 
-            if (
-                $source_id === ''
-                || $name === ''
-            ) {
+            if ($source_id === '' || $name === '') {
                 continue;
             }
 
 
             $map[
-                self::normalize_match_text(
-                    $name
-                )
-            ] =
-                $source_id;
+                self::normalize_match_text($name)
+            ] = $source_id;
         }
 
 
@@ -2422,57 +2163,90 @@ final class Jung_Leben_Core_Content_Import
         string $topic,
         array $product_map
     ): string {
-
         $normalized =
             self::normalize_match_text(
                 $topic
             );
 
 
-        /**
-         * Direkte Übereinstimmung.
-         */
-        if (
-            isset(
-                $product_map[
-                    $normalized
-                ]
-            )
-        ) {
-            return
-                $product_map[
-                    $normalized
-                ];
+        if (isset($product_map[$normalized])) {
+            return $product_map[$normalized];
         }
 
 
         /**
-         * Namensabweichungen in der Kundendatei.
+         * Namensabweichungen zwischen Blogs und Products.
          */
         $aliases = [
-
-            'deo roll on' =>
-                'P_RO_003',
-
-            'hydroxiapatite zahnpasta' =>
-                'P_RO_002',
-
-            'l tryptophan' =>
-                'P_RO_023',
-
-            'omega 3 6 9' =>
-                'P_RO_004',
-
-            'ashwaganda' =>
-                'P_RO_005',
+            'deo roll on' => '003',
+            'deo rollon' => '003',
+            'hydroxiapatite zahnpasta' => '002',
+            'hydroxyapatite zahnpasta' => '002',
+            'l tryptophan' => '023',
+            'l tryptophane' => '023',
+            'omega 3 6 9' => '004',
+            'ashwaganda' => '005',
+            'ashwagandha' => '005',
         ];
 
 
         return
-            $aliases[
-                $normalized
-            ]
+            $aliases[$normalized]
             ?? '';
+    }
+
+
+    /**
+     * Persönlich getestete Produkte aus nicht blau markierten
+     * Erfahrungsbeiträgen ableiten.
+     */
+    private static function apply_experience_flags_to_products(
+        array $products,
+        array $experiences
+    ): array {
+        $tested_source_ids = [];
+
+
+        foreach ($experiences as $experience) {
+            if (
+                ($experience['review_status'] ?? '')
+                !== 'customer_source'
+            ) {
+                continue;
+            }
+
+
+            $source_id =
+                self::canonical_source_id(
+                    (string) (
+                        $experience['related_product_source_id']
+                        ?? ''
+                    )
+                );
+
+
+            if ($source_id !== '') {
+                $tested_source_ids[$source_id] = true;
+            }
+        }
+
+
+        foreach ($products as $index => $product) {
+            $source_id =
+                self::canonical_source_id(
+                    (string) (
+                        $product['source_id']
+                        ?? ''
+                    )
+                );
+
+
+            $products[$index]['personally_tested'] =
+                isset($tested_source_ids[$source_id]);
+        }
+
+
+        return $products;
     }
 
 
@@ -2481,81 +2255,54 @@ final class Jung_Leben_Core_Content_Import
        ========================================================= */
 
     /**
-     * Einzelnes Produkt importieren.
+     * Einzelnes aktives Produkt importieren.
      */
     private static function import_product(
         array $product
     ): int {
-
         $name =
             sanitize_text_field(
-                (string)
-                (
-                    $product[
-                        'name'
-                    ]
+                (string) (
+                    $product['name']
                     ?? ''
                 )
             );
-
 
         $source_id =
-            sanitize_text_field(
-                (string)
-                (
-                    $product[
-                        'source_id'
-                    ]
+            self::canonical_source_id(
+                (string) (
+                    $product['source_id']
                     ?? ''
                 )
             );
 
 
-        if (
-            $name === ''
-            || $source_id === ''
-        ) {
+        if ($name === '' || $source_id === '') {
             return 0;
         }
 
 
         $description =
             sanitize_textarea_field(
-                (string)
-                (
-                    $product[
-                        'description'
-                    ]
+                (string) (
+                    $product['description']
                     ?? ''
                 )
             );
 
 
-        /* -----------------------------------------------------
-           WordPress-Produkt
-           ----------------------------------------------------- */
-
         $post_id =
             wp_insert_post(
                 [
-
                     'post_type' =>
                         Jung_Leben_Core_Products::POST_TYPE,
-
-                    'post_status' =>
-                        'draft',
-
-                    'post_title' =>
-                        $name,
-
-                    'post_excerpt' =>
-                        $description,
-
+                    'post_status' => 'draft',
+                    'post_title' => $name,
+                    'post_excerpt' => $description,
                     'post_content' =>
                         self::text_to_blocks(
                             $description
                         ),
-
                     'post_author' =>
                         get_current_user_id(),
                 ],
@@ -2563,157 +2310,29 @@ final class Jung_Leben_Core_Content_Import
             );
 
 
-        if (
-            is_wp_error(
-                $post_id
-            )
-        ) {
+        if (is_wp_error($post_id)) {
             return 0;
         }
 
 
-        $post_id =
-            (int)
-            $post_id;
+        $post_id = (int) $post_id;
 
 
-        /* -----------------------------------------------------
-           Import-Metadaten
-           ----------------------------------------------------- */
-
-        update_post_meta(
+        self::migrate_product_import_identity(
             $post_id,
-            self::IMPORT_META_KEY,
-            'product:'
-            . $source_id
-        );
-
-
-        update_post_meta(
-            $post_id,
-            '_jl_source_product_id',
             $source_id
         );
 
-
-        update_post_meta(
+        self::sync_product_source_meta(
             $post_id,
-            '_jl_source_sheet',
-            'Products'
+            $product
         );
 
-
-        update_post_meta(
+        self::sync_product_taxonomies(
             $post_id,
-            '_jl_source_row',
-            absint(
-                $product[
-                    'source_row'
-                ]
-                ?? 0
-            )
+            $product
         );
 
-
-        /* -----------------------------------------------------
-           Marke
-           ----------------------------------------------------- */
-
-        $manufacturer =
-            sanitize_text_field(
-                (string)
-                (
-                    $product[
-                        'manufacturer'
-                    ]
-                    ?? ''
-                )
-            );
-
-
-        if (
-            $manufacturer !== ''
-        ) {
-
-            wp_set_object_terms(
-                $post_id,
-                [
-                    $manufacturer,
-                ],
-                Jung_Leben_Core_Products::TAXONOMY_BRAND,
-                false
-            );
-        }
-
-
-        /* -----------------------------------------------------
-           Gebiet / Produktkategorie
-           ----------------------------------------------------- */
-
-        $area =
-            sanitize_text_field(
-                (string)
-                (
-                    $product[
-                        'area'
-                    ]
-                    ?? ''
-                )
-            );
-
-
-        if (
-            $area !== ''
-        ) {
-
-            /**
-             * Die Kundenbezeichnungen werden zunächst
-             * unverändert übernommen:
-             *
-             * Wohlbefinden
-             * Hygiene/Beauty
-             *
-             * Die Kategorien können danach direkt
-             * in WordPress verfeinert werden.
-             */
-            wp_set_object_terms(
-                $post_id,
-                [
-                    $area,
-                ],
-                Jung_Leben_Core_Products::TAXONOMY_CATEGORY,
-                false
-            );
-        }
-
-
-        /* -----------------------------------------------------
-           Persönlich getestet
-           ----------------------------------------------------- */
-
-        /**
-         * Bei diesen vier Produkten existiert bereits
-         * ein nicht blau markierter persönlicher
-         * Erfahrungsbeitrag in der Kundendatei.
-         */
-        $personally_tested =
-            in_array(
-                $source_id,
-                [
-                    'P_RO_002',
-                    'P_RO_003',
-                    'P_RO_004',
-                    'P_RO_023',
-                ],
-                true
-            )
-                ? 1
-                : 0;
-
-
-        /* -----------------------------------------------------
-           ACF – Einordnung
-           ----------------------------------------------------- */
 
         update_field(
             'jl_product_recommendation_status',
@@ -2721,20 +2340,19 @@ final class Jung_Leben_Core_Content_Import
             $post_id
         );
 
-
         update_field(
             'jl_product_personally_tested',
-            $personally_tested,
+            ! empty($product['personally_tested'])
+                ? 1
+                : 0,
             $post_id
         );
-
 
         update_field(
             'jl_product_featured',
             0,
             $post_id
         );
-
 
         update_field(
             'jl_product_sort_priority',
@@ -2743,16 +2361,11 @@ final class Jung_Leben_Core_Content_Import
         );
 
 
-        /* -----------------------------------------------------
-           ACF – Anwendung & Erfahrung
-           ----------------------------------------------------- */
-
         update_field(
             'jl_product_purpose',
             '',
             $post_id
         );
-
 
         update_field(
             'jl_product_routine_time',
@@ -2760,27 +2373,17 @@ final class Jung_Leben_Core_Content_Import
             $post_id
         );
 
-
-        /**
-         * Lange Erfahrungen werden bewusst nicht
-         * nochmals im Produkt gespeichert.
-         *
-         * Dafür haben wir den verknüpften
-         * Erfahrungsbeitrag.
-         */
         update_field(
             'jl_product_personal_experience',
             '',
             $post_id
         );
 
-
         update_field(
             'jl_product_benefits',
             '',
             $post_id
         );
-
 
         update_field(
             'jl_product_limitations',
@@ -2789,18 +2392,29 @@ final class Jung_Leben_Core_Content_Import
         );
 
 
-        /* -----------------------------------------------------
-           ACF – Partner
-           ----------------------------------------------------- */
-
+        /**
+         * Die neue Partnerlogik läuft zentral über Marke →
+         * Affiliate-Partner. Das alte Freitextfeld bleibt leer.
+         */
         update_field(
             'jl_product_partner_name',
-            sanitize_text_field(
-                (string)
-                (
-                    $product[
-                        'source'
-                    ]
+            '',
+            $post_id
+        );
+
+
+        /**
+         * Nur ein tatsächlich aus Excel ermittelter Weblink
+         * wird als direkte Produktseite gespeichert.
+         *
+         * Hinterlegte Excel-Hyperlinks haben Vorrang vor dem
+         * sichtbaren Zelltext.
+         */
+        update_field(
+            'jl_product_original_url',
+            esc_url_raw(
+                (string) (
+                    $product['favorite_url']
                     ?? ''
                 )
             ),
@@ -2809,33 +2423,21 @@ final class Jung_Leben_Core_Content_Import
 
 
         /**
-         * Die Excel-Datei enthält teilweise nur
-         * allgemeine Shop-Websites und keine
-         * konkreten Produktlinks.
-         *
-         * Deshalb werden noch keine öffentlichen
-         * Kaufbuttons erzeugt.
+         * Keine Excel-URL wird automatisch als Affiliate-Link
+         * interpretiert. Persönliche Affiliate-Links bleiben
+         * bewusst ein separates, manuell gepflegtes Feld.
          */
-        update_field(
-            'jl_product_original_url',
-            '',
-            $post_id
-        );
-
-
         update_field(
             'jl_product_affiliate_url',
             '',
             $post_id
         );
 
-
         update_field(
             'jl_product_price_display',
             '',
             $post_id
         );
-
 
         update_field(
             'jl_product_discount_code',
@@ -2844,15 +2446,15 @@ final class Jung_Leben_Core_Content_Import
         );
 
 
+        /**
+         * Leer lassen, damit der zentrale Partner-Buttontext
+         * verwendet werden kann, z.B. «Bei Luvy ansehen».
+         */
         update_field(
             'jl_product_button_text',
-            __(
-                'Produkt beim Partner ansehen',
-                'jung-leben-core'
-            ),
+            '',
             $post_id
         );
-
 
         update_field(
             'jl_product_link_new_tab',
@@ -2861,16 +2463,11 @@ final class Jung_Leben_Core_Content_Import
         );
 
 
-        /* -----------------------------------------------------
-           ACF – Transparenz
-           ----------------------------------------------------- */
-
         update_field(
             'jl_product_affiliate_notice',
             '',
             $post_id
         );
-
 
         update_field(
             'jl_product_health_notice',
@@ -2882,10 +2479,6 @@ final class Jung_Leben_Core_Content_Import
         );
 
 
-        /* -----------------------------------------------------
-           Interne Quellenangaben
-           ----------------------------------------------------- */
-
         update_field(
             'jl_product_internal_source_note',
             self::build_product_source_note(
@@ -2896,6 +2489,381 @@ final class Jung_Leben_Core_Content_Import
 
 
         return $post_id;
+    }
+
+
+    /**
+     * Bestehendes Import-Produkt mit den neuen Quelldaten
+     * synchronisieren, ohne redaktionelle bzw. manuell
+     * gepflegte Affiliate-Felder zu überschreiben.
+     */
+    private static function sync_existing_product_source_data(
+        int $post_id,
+        array $product
+    ): void {
+        self::sync_product_source_meta(
+            $post_id,
+            $product
+        );
+
+        self::sync_product_taxonomies(
+            $post_id,
+            $product
+        );
+
+
+        update_field(
+            'jl_product_personally_tested',
+            ! empty($product['personally_tested'])
+                ? 1
+                : 0,
+            $post_id
+        );
+
+
+        /**
+         * Direkte Produkt-URL nur ergänzen, wenn dieses Feld
+         * bisher leer ist. So bleiben manuell verbesserte oder
+         * persönliche Links unangetastet.
+         */
+        $current_original_url =
+            function_exists('get_field')
+                ? trim(
+                    (string) get_field(
+                        'jl_product_original_url',
+                        $post_id
+                    )
+                )
+                : trim(
+                    (string) get_post_meta(
+                        $post_id,
+                        'jl_product_original_url',
+                        true
+                    )
+                );
+
+        $favorite_url =
+            trim(
+                (string) (
+                    $product['favorite_url']
+                    ?? ''
+                )
+            );
+
+
+        if (
+            $current_original_url === ''
+            && $favorite_url !== ''
+        ) {
+            update_field(
+                'jl_product_original_url',
+                esc_url_raw($favorite_url),
+                $post_id
+            );
+        }
+
+
+        update_field(
+            'jl_product_internal_source_note',
+            self::build_product_source_note(
+                $product
+            ),
+            $post_id
+        );
+    }
+
+
+    /**
+     * Import-Metadaten und strukturierte Alternativen speichern.
+     */
+    private static function sync_product_source_meta(
+        int $post_id,
+        array $product
+    ): void {
+        $source_id =
+            self::canonical_source_id(
+                (string) (
+                    $product['source_id']
+                    ?? ''
+                )
+            );
+
+
+        update_post_meta(
+            $post_id,
+            '_jl_source_product_id',
+            $source_id
+        );
+
+        update_post_meta(
+            $post_id,
+            '_jl_source_sheet',
+            'Products'
+        );
+
+        update_post_meta(
+            $post_id,
+            '_jl_source_row',
+            absint(
+                $product['source_row']
+                ?? 0
+            )
+        );
+
+        update_post_meta(
+            $post_id,
+            '_jl_source_product_status',
+            (string) (
+                $product['status']
+                ?? ''
+            )
+        );
+
+        update_post_meta(
+            $post_id,
+            '_jl_source_favorite_brand',
+            sanitize_text_field(
+                (string) (
+                    $product['favorite_brand']
+                    ?? ''
+                )
+            )
+        );
+
+        update_post_meta(
+            $post_id,
+            '_jl_source_favorite_reference',
+            sanitize_textarea_field(
+                (string) (
+                    $product['favorite_reference']
+                    ?? ''
+                )
+            )
+        );
+
+        update_post_meta(
+            $post_id,
+            '_jl_source_favorite_url',
+            esc_url_raw(
+                (string) (
+                    $product['favorite_url']
+                    ?? ''
+                )
+            )
+        );
+
+        update_post_meta(
+            $post_id,
+            '_jl_source_product_remark',
+            sanitize_textarea_field(
+                (string) (
+                    $product['remark']
+                    ?? ''
+                )
+            )
+        );
+
+
+        update_post_meta(
+            $post_id,
+            '_jl_source_alternative_1_brand',
+            sanitize_text_field(
+                (string) (
+                    $product['alternative_1_brand']
+                    ?? ''
+                )
+            )
+        );
+
+        update_post_meta(
+            $post_id,
+            '_jl_source_alternative_1_reference',
+            sanitize_textarea_field(
+                (string) (
+                    $product['alternative_1_reference']
+                    ?? ''
+                )
+            )
+        );
+
+        update_post_meta(
+            $post_id,
+            '_jl_source_alternative_1_url',
+            esc_url_raw(
+                (string) (
+                    $product['alternative_1_url']
+                    ?? ''
+                )
+            )
+        );
+
+        update_post_meta(
+            $post_id,
+            '_jl_source_alternative_1_remark',
+            sanitize_textarea_field(
+                (string) (
+                    $product['alternative_1_remark']
+                    ?? ''
+                )
+            )
+        );
+
+
+        update_post_meta(
+            $post_id,
+            '_jl_source_alternative_2_brand',
+            sanitize_text_field(
+                (string) (
+                    $product['alternative_2_brand']
+                    ?? ''
+                )
+            )
+        );
+
+        update_post_meta(
+            $post_id,
+            '_jl_source_alternative_2_reference',
+            sanitize_textarea_field(
+                (string) (
+                    $product['alternative_2_reference']
+                    ?? ''
+                )
+            )
+        );
+
+        update_post_meta(
+            $post_id,
+            '_jl_source_alternative_2_url',
+            esc_url_raw(
+                (string) (
+                    $product['alternative_2_url']
+                    ?? ''
+                )
+            )
+        );
+    }
+
+
+    /**
+     * Marke und Gebiet aus der neuen Products-Tabelle
+     * synchronisieren.
+     */
+    private static function sync_product_taxonomies(
+        int $post_id,
+        array $product
+    ): void {
+        $favorite_brand =
+            sanitize_text_field(
+                (string) (
+                    $product['favorite_brand']
+                    ?? ''
+                )
+            );
+
+
+        if ($favorite_brand !== '') {
+            wp_set_object_terms(
+                $post_id,
+                [
+                    $favorite_brand,
+                ],
+                Jung_Leben_Core_Products::TAXONOMY_BRAND,
+                false
+            );
+        }
+
+
+        $area =
+            sanitize_text_field(
+                (string) (
+                    $product['area']
+                    ?? ''
+                )
+            );
+
+
+        if ($area !== '') {
+            wp_set_object_terms(
+                $post_id,
+                [
+                    $area,
+                ],
+                Jung_Leben_Core_Products::TAXONOMY_CATEGORY,
+                false
+            );
+        }
+    }
+
+
+    /**
+     * Alte P_RO_###-Importidentität auf die neue numerische
+     * ID ### migrieren.
+     */
+    private static function migrate_product_import_identity(
+        int $post_id,
+        string $source_id
+    ): void {
+        $source_id =
+            self::canonical_source_id(
+                $source_id
+            );
+
+
+        if ($source_id === '') {
+            return;
+        }
+
+
+        update_post_meta(
+            $post_id,
+            self::IMPORT_META_KEY,
+            'product:'
+            . $source_id
+        );
+
+        update_post_meta(
+            $post_id,
+            '_jl_source_product_id',
+            $source_id
+        );
+    }
+
+
+    /**
+     * Ein bestehendes, aus Excel importiertes Produkt bei
+     * Status «Inaktiv» sicher auf Entwurf setzen.
+     */
+    private static function deactivate_imported_product(
+        int $post_id
+    ): void {
+        $current_status =
+            get_post_status(
+                $post_id
+            );
+
+
+        if (
+            ! is_string($current_status)
+            || in_array(
+                $current_status,
+                [
+                    'draft',
+                    'trash',
+                    'auto-draft',
+                ],
+                true
+            )
+        ) {
+            return;
+        }
+
+
+        wp_update_post(
+            [
+                'ID' => $post_id,
+                'post_status' => 'draft',
+            ]
+        );
     }
 
 
@@ -2911,65 +2879,44 @@ final class Jung_Leben_Core_Content_Import
         array $product_map,
         string $import_key
     ): int {
-
         $title =
             sanitize_text_field(
-                (string)
-                (
-                    $experience[
-                        'title'
-                    ]
+                (string) (
+                    $experience['title']
                     ?? ''
                 )
             );
 
 
-        if (
-            $title === ''
-        ) {
+        if ($title === '') {
             return 0;
         }
 
 
         $body =
             sanitize_textarea_field(
-                (string)
-                (
-                    $experience[
-                        'body'
-                    ]
+                (string) (
+                    $experience['body']
                     ?? ''
                 )
             );
-
 
         $background_title =
             sanitize_text_field(
-                (string)
-                (
-                    $experience[
-                        'background_title'
-                    ]
+                (string) (
+                    $experience['background_title']
                     ?? ''
                 )
             );
-
 
         $background =
             sanitize_textarea_field(
-                (string)
-                (
-                    $experience[
-                        'background'
-                    ]
+                (string) (
+                    $experience['background']
                     ?? ''
                 )
             );
 
-
-        /* -----------------------------------------------------
-           Gutenberg-Content
-           ----------------------------------------------------- */
 
         $content =
             self::text_to_blocks(
@@ -2977,32 +2924,18 @@ final class Jung_Leben_Core_Content_Import
             );
 
 
-        /**
-         * Wirkungsbeschrieb als Zwischenüberschrift.
-         */
-        if (
-            $background_title !== ''
-        ) {
-
+        if ($background_title !== '') {
             $content .=
                 "\n\n"
                 . "<!-- wp:heading -->\n"
                 . '<h2 class="wp-block-heading">'
-                . esc_html(
-                    $background_title
-                )
+                . esc_html($background_title)
                 . "</h2>\n"
                 . "<!-- /wp:heading -->";
         }
 
 
-        /**
-         * Fachlicher Hintergrund.
-         */
-        if (
-            $background !== ''
-        ) {
-
+        if ($background !== '') {
             $content .=
                 "\n\n"
                 . self::text_to_blocks(
@@ -3011,33 +2944,19 @@ final class Jung_Leben_Core_Content_Import
         }
 
 
-        /* -----------------------------------------------------
-           Beitrag
-           ----------------------------------------------------- */
-
         $post_id =
             wp_insert_post(
                 [
-
-                    'post_type' =>
-                        'post',
-
-                    'post_status' =>
-                        'draft',
-
-                    'post_title' =>
-                        $title,
-
+                    'post_type' => 'post',
+                    'post_status' => 'draft',
+                    'post_title' => $title,
                     'post_excerpt' =>
                         wp_trim_words(
                             $body,
                             32,
                             ' …'
                         ),
-
-                    'post_content' =>
-                        $content,
-
+                    'post_content' => $content,
                     'post_author' =>
                         get_current_user_id(),
                 ],
@@ -3045,23 +2964,13 @@ final class Jung_Leben_Core_Content_Import
             );
 
 
-        if (
-            is_wp_error(
-                $post_id
-            )
-        ) {
+        if (is_wp_error($post_id)) {
             return 0;
         }
 
 
-        $post_id =
-            (int)
-            $post_id;
+        $post_id = (int) $post_id;
 
-
-        /* -----------------------------------------------------
-           Import-Metadaten
-           ----------------------------------------------------- */
 
         update_post_meta(
             $post_id,
@@ -3069,93 +2978,87 @@ final class Jung_Leben_Core_Content_Import
             $import_key
         );
 
-
         update_post_meta(
             $post_id,
             '_jl_source_sheet',
             'Blogs'
         );
 
-
         update_post_meta(
             $post_id,
             '_jl_source_row',
             absint(
-                $experience[
-                    'source_row'
-                ]
+                $experience['source_row']
                 ?? 0
             )
         );
 
 
-        /* -----------------------------------------------------
-           WordPress-Kategorie
-           ----------------------------------------------------- */
+        self::assign_experience_category(
+            $post_id
+        );
 
-        $category =
-            term_exists(
-                'Erfahrungen',
-                'category'
-            );
-
-
-        if (
-            ! $category
-        ) {
-
-            $category =
-                wp_insert_term(
-                    'Erfahrungen',
-                    'category'
-                );
-        }
+        self::sync_experience_fields(
+            $post_id,
+            $experience,
+            $product_map
+        );
 
 
-        if (
-            ! is_wp_error(
-                $category
+        return $post_id;
+    }
+
+
+    /**
+     * Bei bestehenden Erfahrungen nur Importstatus und
+     * Produktbeziehung aktualisieren – nicht den redaktionellen
+     * Beitragstext überschreiben.
+     */
+    private static function sync_existing_experience_source_data(
+        int $post_id,
+        array $experience,
+        array $product_map
+    ): void {
+        update_post_meta(
+            $post_id,
+            '_jl_source_sheet',
+            'Blogs'
+        );
+
+        update_post_meta(
+            $post_id,
+            '_jl_source_row',
+            absint(
+                $experience['source_row']
+                ?? 0
             )
-        ) {
-
-            $category_id =
-                is_array(
-                    $category
-                )
-                    ? (int)
-                        $category[
-                            'term_id'
-                        ]
-                    : (int)
-                        $category;
+        );
 
 
-            if (
-                $category_id > 0
-            ) {
+        self::assign_experience_category(
+            $post_id
+        );
 
-                wp_set_post_categories(
-                    $post_id,
-                    [
-                        $category_id,
-                    ],
-                    false
-                );
-            }
-        }
+        self::sync_experience_fields(
+            $post_id,
+            $experience,
+            $product_map
+        );
+    }
 
 
-        /* -----------------------------------------------------
-           Prüfstatus
-           ----------------------------------------------------- */
-
+    /**
+     * ACF-Felder einer Erfahrung synchronisieren.
+     */
+    private static function sync_experience_fields(
+        int $post_id,
+        array $experience,
+        array $product_map
+    ): void {
         $review_status =
             sanitize_key(
-                (string)
-                (
-                    $experience[
-                        'review_status'
-                    ]
+                (string) (
+                    $experience['review_status']
                     ?? 'customer_source'
                 )
             );
@@ -3172,9 +3075,7 @@ final class Jung_Leben_Core_Content_Import
                 true
             )
         ) {
-
-            $review_status =
-                'customer_source';
+            $review_status = 'customer_source';
         }
 
 
@@ -3184,19 +3085,11 @@ final class Jung_Leben_Core_Content_Import
             $post_id
         );
 
-
-        /* -----------------------------------------------------
-           Original-Thema
-           ----------------------------------------------------- */
-
         update_field(
             'jl_experience_source_topic',
             sanitize_text_field(
-                (string)
-                (
-                    $experience[
-                        'topic'
-                    ]
+                (string) (
+                    $experience['topic']
                     ?? ''
                 )
             ),
@@ -3204,17 +3097,10 @@ final class Jung_Leben_Core_Content_Import
         );
 
 
-        /* -----------------------------------------------------
-           Produkt verknüpfen
-           ----------------------------------------------------- */
-
         $related_source_id =
-            sanitize_text_field(
-                (string)
-                (
-                    $experience[
-                        'related_product_source_id'
-                    ]
+            self::canonical_source_id(
+                (string) (
+                    $experience['related_product_source_id']
                     ?? ''
                 )
             );
@@ -3222,31 +3108,140 @@ final class Jung_Leben_Core_Content_Import
 
         if (
             $related_source_id !== ''
-            && isset(
-                $product_map[
-                    $related_source_id
-                ]
-            )
+            && isset($product_map[$related_source_id])
         ) {
-
             update_field(
                 'jl_experience_related_product',
-                (int)
-                $product_map[
-                    $related_source_id
-                ],
+                (int) $product_map[$related_source_id],
                 $post_id
             );
         }
+    }
 
 
-        return $post_id;
+    /**
+     * WordPress-Kategorie «Erfahrungen» sicher zuweisen.
+     */
+    private static function assign_experience_category(
+        int $post_id
+    ): void {
+        $category =
+            term_exists(
+                'Erfahrungen',
+                'category'
+            );
+
+
+        if (! $category) {
+            $category =
+                wp_insert_term(
+                    'Erfahrungen',
+                    'category'
+                );
+        }
+
+
+        if (is_wp_error($category)) {
+            return;
+        }
+
+
+        $category_id =
+            is_array($category)
+                ? (int) $category['term_id']
+                : (int) $category;
+
+
+        if ($category_id > 0) {
+            wp_set_post_categories(
+                $post_id,
+                [
+                    $category_id,
+                ],
+                false
+            );
+        }
     }
 
 
     /* =========================================================
-       DUPLIKATE VERHINDERN
+       DUPLIKATE / LEGACY-IDs
        ========================================================= */
+
+    /**
+     * Bestehendes Produkt sowohl über die neue ID ### als auch
+     * über die alte ID P_RO_### finden.
+     */
+    private static function find_existing_product(
+        string $source_id
+    ): int {
+        $source_id =
+            self::canonical_source_id(
+                $source_id
+            );
+
+
+        if ($source_id === '') {
+            return 0;
+        }
+
+
+        $candidates = [
+            $source_id,
+            'P_RO_' . $source_id,
+        ];
+
+
+        foreach ($candidates as $candidate) {
+            $post_id =
+                self::find_imported_post(
+                    'product:'
+                    . $candidate,
+                    Jung_Leben_Core_Products::POST_TYPE
+                );
+
+
+            if ($post_id > 0) {
+                return $post_id;
+            }
+        }
+
+
+        /**
+         * Zusätzlicher Fallback auf die separat gespeicherte
+         * Quell-ID älterer Importversionen.
+         */
+        foreach ($candidates as $candidate) {
+            $posts =
+                get_posts(
+                    [
+                        'post_type' =>
+                            Jung_Leben_Core_Products::POST_TYPE,
+                        'post_status' => [
+                            'publish',
+                            'draft',
+                            'pending',
+                            'private',
+                            'future',
+                        ],
+                        'posts_per_page' => 1,
+                        'fields' => 'ids',
+                        'meta_key' => '_jl_source_product_id',
+                        'meta_value' => $candidate,
+                        'no_found_rows' => true,
+                    ]
+                );
+
+
+            if (is_array($posts) && ! empty($posts)) {
+                return (int) $posts[0];
+            }
+        }
+
+
+        return 0;
+    }
+
 
     /**
      * Bereits importierten Datensatz finden.
@@ -3255,14 +3250,10 @@ final class Jung_Leben_Core_Content_Import
         string $import_key,
         string $post_type
     ): int {
-
         $posts =
             get_posts(
                 [
-
-                    'post_type' =>
-                        $post_type,
-
+                    'post_type' => $post_type,
                     'post_status' => [
                         'publish',
                         'draft',
@@ -3270,40 +3261,115 @@ final class Jung_Leben_Core_Content_Import
                         'private',
                         'future',
                     ],
-
-                    'posts_per_page' =>
-                        1,
-
-                    'fields' =>
-                        'ids',
-
-                    'meta_key' =>
-                        self::IMPORT_META_KEY,
-
-                    'meta_value' =>
-                        $import_key,
-
-                    'no_found_rows' =>
-                        true,
+                    'posts_per_page' => 1,
+                    'fields' => 'ids',
+                    'meta_key' => self::IMPORT_META_KEY,
+                    'meta_value' => $import_key,
+                    'no_found_rows' => true,
                 ]
             );
 
 
-        if (
-            ! is_array(
-                $posts
-            )
-            || empty(
-                $posts
-            )
-        ) {
+        if (! is_array($posts) || empty($posts)) {
             return 0;
         }
 
 
-        return
-            (int)
-            $posts[0];
+        return (int) $posts[0];
+    }
+
+
+    /**
+     * Neue numerische IDs und alte P_RO_###-IDs auf ein
+     * gemeinsames Format ### bringen.
+     */
+    private static function canonical_source_id(
+        string $value
+    ): string {
+        $value = trim($value);
+
+
+        if ($value === '') {
+            return '';
+        }
+
+
+        if (
+            preg_match(
+                '/(\d+)$/',
+                $value,
+                $matches
+            )
+        ) {
+            $number = (int) $matches[1];
+
+
+            if ($number > 0) {
+                return
+                    str_pad(
+                        (string) $number,
+                        3,
+                        '0',
+                        STR_PAD_LEFT
+                    );
+            }
+        }
+
+
+        return sanitize_text_field($value);
+    }
+
+
+    /* =========================================================
+       STATUS / COUNTS
+       ========================================================= */
+
+    /**
+     * Produktstatus vereinheitlichen.
+     */
+    private static function normalize_product_status(
+        string $value
+    ): string {
+        $value =
+            self::normalize_match_text(
+                $value
+            );
+
+
+        if ($value === 'aktiv' || $value === 'active') {
+            return 'active';
+        }
+
+
+        if ($value === 'inaktiv' || $value === 'inactive') {
+            return 'inactive';
+        }
+
+
+        return '';
+    }
+
+
+    /**
+     * KI-markierte Erfahrungen zählen.
+     */
+    private static function count_ai_experiences(
+        array $experiences
+    ): int {
+        $count = 0;
+
+
+        foreach ($experiences as $experience) {
+            if (
+                ($experience['review_status'] ?? '')
+                === 'ai_review'
+            ) {
+                $count++;
+            }
+        }
+
+
+        return $count;
     }
 
 
@@ -3318,18 +3384,9 @@ final class Jung_Leben_Core_Content_Import
         array $row,
         string $column
     ): string {
-
         if (
-            ! isset(
-                $row[
-                    $column
-                ]
-            )
-            || ! is_array(
-                $row[
-                    $column
-                ]
-            )
+            ! isset($row[$column])
+            || ! is_array($row[$column])
         ) {
             return '';
         }
@@ -3337,16 +3394,118 @@ final class Jung_Leben_Core_Content_Import
 
         return
             trim(
-                (string)
-                (
-                    $row[
-                        $column
-                    ][
-                        'value'
-                    ]
+                (string) (
+                    $row[$column]['value']
                     ?? ''
                 )
             );
+    }
+
+
+    /**
+     * Hinterlegten Excel-Hyperlink lesen.
+     */
+    private static function cell_hyperlink(
+        array $row,
+        string $column
+    ): string {
+        if (
+            ! isset($row[$column])
+            || ! is_array($row[$column])
+        ) {
+            return '';
+        }
+
+
+        return
+            trim(
+                (string) (
+                    $row[$column]['hyperlink']
+                    ?? ''
+                )
+            );
+    }
+
+
+    /**
+     * Effektive Webadresse einer Zelle bestimmen.
+     *
+     * 1. Excel-Hyperlink
+     * 2. sichtbarer Zellwert, falls er selbst eine URL ist
+     */
+    private static function cell_effective_url(
+        array $row,
+        string $column
+    ): string {
+        $hyperlink =
+            self::normalize_web_url(
+                self::cell_hyperlink(
+                    $row,
+                    $column
+                )
+            );
+
+
+        if ($hyperlink !== '') {
+            return $hyperlink;
+        }
+
+
+        return
+            self::normalize_web_url(
+                self::cell_value(
+                    $row,
+                    $column
+                )
+            );
+    }
+
+
+    /**
+     * Sichtbaren Text nur dann als URL akzeptieren, wenn
+     * tatsächlich eine Webadresse vorliegt.
+     */
+    private static function normalize_web_url(
+        string $value
+    ): string {
+        $value = trim($value);
+
+
+        if ($value === '') {
+            return '';
+        }
+
+
+        if (
+            str_starts_with(
+                mb_strtolower($value),
+                'www.'
+            )
+        ) {
+            $value = 'https://' . $value;
+        }
+
+
+        if (
+            ! preg_match(
+                '#^https?://#i',
+                $value
+            )
+        ) {
+            return '';
+        }
+
+
+        $validated =
+            wp_http_validate_url(
+                $value
+            );
+
+
+        return
+            is_string($validated)
+                ? esc_url_raw($validated)
+                : '';
     }
 
 
@@ -3357,18 +3516,9 @@ final class Jung_Leben_Core_Content_Import
         array $row,
         string $column
     ): string {
-
         if (
-            ! isset(
-                $row[
-                    $column
-                ]
-            )
-            || ! is_array(
-                $row[
-                    $column
-                ]
-            )
+            ! isset($row[$column])
+            || ! is_array($row[$column])
         ) {
             return '';
         }
@@ -3376,13 +3526,8 @@ final class Jung_Leben_Core_Content_Import
 
         return
             strtoupper(
-                (string)
-                (
-                    $row[
-                        $column
-                    ][
-                        'font_color'
-                    ]
+                (string) (
+                    $row[$column]['font_color']
                     ?? ''
                 )
             );
@@ -3400,16 +3545,10 @@ final class Jung_Leben_Core_Content_Import
         string $text,
         string $fallback_title
     ): array {
-
-        $text =
-            trim(
-                $text
-            );
+        $text = trim($text);
 
 
-        if (
-            $text === ''
-        ) {
+        if ($text === '') {
             return [
                 $fallback_title,
                 '',
@@ -3425,14 +3564,7 @@ final class Jung_Leben_Core_Content_Import
             );
 
 
-        if (
-            ! is_array(
-                $parts
-            )
-            || empty(
-                $parts
-            )
-        ) {
+        if (! is_array($parts) || empty($parts)) {
             return [
                 $fallback_title,
                 $text,
@@ -3442,29 +3574,23 @@ final class Jung_Leben_Core_Content_Import
 
         $title =
             trim(
-                (string)
-                (
+                (string) (
                     $parts[0]
                     ?? ''
                 )
             );
 
-
         $body =
             trim(
-                (string)
-                (
+                (string) (
                     $parts[1]
                     ?? ''
                 )
             );
 
 
-        if (
-            $title === ''
-        ) {
-            $title =
-                $fallback_title;
+        if ($title === '') {
+            $title = $fallback_title;
         }
 
 
@@ -3485,14 +3611,10 @@ final class Jung_Leben_Core_Content_Import
     private static function normalize_match_text(
         string $value
     ): string {
-
         $value =
             mb_strtolower(
-                trim(
-                    $value
-                )
+                trim($value)
             );
-
 
         $value =
             str_replace(
@@ -3500,7 +3622,7 @@ final class Jung_Leben_Core_Content_Import
                     '-',
                     '–',
                     '—',
-                    '-',
+                    '‑',
                     '_',
                     '/',
                     '&',
@@ -3509,7 +3631,6 @@ final class Jung_Leben_Core_Content_Import
                 $value
             );
 
-
         $value =
             preg_replace(
                 '/[^\p{L}\p{N}]+/u',
@@ -3517,7 +3638,6 @@ final class Jung_Leben_Core_Content_Import
                 $value
             )
             ?? $value;
-
 
         $value =
             preg_replace(
@@ -3528,10 +3648,7 @@ final class Jung_Leben_Core_Content_Import
             ?? $value;
 
 
-        return
-            trim(
-                $value
-            );
+        return trim($value);
     }
 
 
@@ -3545,14 +3662,12 @@ final class Jung_Leben_Core_Content_Import
     private static function normalize_xlsx_target(
         string $target
     ): string {
-
         $target =
             str_replace(
                 '\\',
                 '/',
                 $target
             );
-
 
         $target =
             ltrim(
@@ -3561,12 +3676,7 @@ final class Jung_Leben_Core_Content_Import
             );
 
 
-        if (
-            str_starts_with(
-                $target,
-                'xl/'
-            )
-        ) {
+        if (str_starts_with($target, 'xl/')) {
             return $target;
         }
 
@@ -3578,45 +3688,26 @@ final class Jung_Leben_Core_Content_Import
                 . $target
             );
 
-
         $normalized = [];
 
 
-        foreach (
-            $parts
-            as $part
-        ) {
-
-            if (
-                $part === ''
-                || $part === '.'
-            ) {
+        foreach ($parts as $part) {
+            if ($part === '' || $part === '.') {
                 continue;
             }
 
 
-            if (
-                $part === '..'
-            ) {
-
-                array_pop(
-                    $normalized
-                );
-
+            if ($part === '..') {
+                array_pop($normalized);
                 continue;
             }
 
 
-            $normalized[] =
-                $part;
+            $normalized[] = $part;
         }
 
 
-        return
-            implode(
-                '/',
-                $normalized
-            );
+        return implode('/', $normalized);
     }
 
 
@@ -3630,16 +3721,13 @@ final class Jung_Leben_Core_Content_Import
     private static function load_xml_document(
         string $xml
     ): DOMDocument {
-
         $document =
             new DOMDocument();
-
 
         $previous =
             libxml_use_internal_errors(
                 true
             );
-
 
         $loaded =
             $document->loadXML(
@@ -3649,18 +3737,11 @@ final class Jung_Leben_Core_Content_Import
                 | LIBXML_NOWARNING
             );
 
-
         libxml_clear_errors();
+        libxml_use_internal_errors($previous);
 
 
-        libxml_use_internal_errors(
-            $previous
-        );
-
-
-        if (
-            ! $loaded
-        ) {
+        if (! $loaded) {
             throw new RuntimeException(
                 'Eine XML-Datei innerhalb der XLSX-Datei ist ungültig.'
             );
@@ -3681,16 +3762,10 @@ final class Jung_Leben_Core_Content_Import
     private static function text_to_blocks(
         string $text
     ): string {
-
-        $text =
-            trim(
-                $text
-            );
+        $text = trim($text);
 
 
-        if (
-            $text === ''
-        ) {
+        if ($text === '') {
             return '';
         }
 
@@ -3702,11 +3777,7 @@ final class Jung_Leben_Core_Content_Import
             );
 
 
-        if (
-            ! is_array(
-                $paragraphs
-            )
-        ) {
+        if (! is_array($paragraphs)) {
             return '';
         }
 
@@ -3714,33 +3785,18 @@ final class Jung_Leben_Core_Content_Import
         $blocks = [];
 
 
-        foreach (
-            $paragraphs
-            as $paragraph
-        ) {
-
-            $paragraph =
-                trim(
-                    $paragraph
-                );
+        foreach ($paragraphs as $paragraph) {
+            $paragraph = trim($paragraph);
 
 
-            if (
-                $paragraph === ''
-            ) {
+            if ($paragraph === '') {
                 continue;
             }
 
 
-            /**
-             * Einzelne Zeilenumbrüche im Absatz
-             * beibehalten.
-             */
             $safe =
                 nl2br(
-                    esc_html(
-                        $paragraph
-                    ),
+                    esc_html($paragraph),
                     false
                 );
 
@@ -3754,11 +3810,7 @@ final class Jung_Leben_Core_Content_Import
         }
 
 
-        return
-            implode(
-                "\n\n",
-                $blocks
-            );
+        return implode("\n\n", $blocks);
     }
 
 
@@ -3767,142 +3819,81 @@ final class Jung_Leben_Core_Content_Import
        ========================================================= */
 
     /**
-     * Nicht direkt verwendete Excel-Angaben
-     * als interne Notiz speichern.
+     * Excel-Angaben zusätzlich als gut lesbare interne
+     * Quellennotiz speichern.
      */
     private static function build_product_source_note(
         array $product
     ): string {
-
         $lines = [
-
             'Importquelle: Kundendatei / Products',
-
             'Excel-Zeile: '
                 . absint(
-                    $product[
-                        'source_row'
-                    ]
+                    $product['source_row']
                     ?? 0
                 ),
-
             'Interne Produkt-ID: '
-                . (string)
-                (
-                    $product[
-                        'source_id'
-                    ]
+                . (string) (
+                    $product['source_id']
                     ?? ''
                 ),
-
+            'Status: '
+                . (string) (
+                    $product['status']
+                    ?? ''
+                ),
             'Gebiet: '
-                . (string)
-                (
-                    $product[
-                        'area'
-                    ]
+                . (string) (
+                    $product['area']
                     ?? ''
                 ),
-
-            'Hersteller: '
-                . (string)
-                (
-                    $product[
-                        'manufacturer'
-                    ]
-                    ?? ''
-                ),
-
-            'Hersteller-Website: '
-                . (string)
-                (
-                    $product[
-                        'manufacturer_url'
-                    ]
-                    ?? ''
-                ),
-
-            'Bezug: '
-                . (string)
-                (
-                    $product[
-                        'source'
-                    ]
-                    ?? ''
-                ),
-
-            'Bezugs-Website: '
-                . (string)
-                (
-                    $product[
-                        'source_url'
-                    ]
+            "Roberto's Favorit: "
+                . (string) (
+                    $product['favorite_brand']
                     ?? ''
                 ),
         ];
 
 
         $optional = [
-
-            'Bemerkung' =>
-                $product[
-                    'remark'
-                ]
+            'Favorit – Zellinhalt' =>
+                $product['favorite_reference']
                 ?? '',
-
-            'B2B möglich?' =>
-                $product[
-                    'b2b'
-                ]
+            'Favorit – effektive URL' =>
+                $product['favorite_url']
                 ?? '',
-
-            'Alternative / ergänzendes Produkt' =>
-                $product[
-                    'alternative_product'
-                ]
+            'Bemerkung Favorit' =>
+                $product['remark']
                 ?? '',
-
-            'Alternativer Hersteller' =>
-                $product[
-                    'alternative_manufacturer'
-                ]
+            'Alternative 1' =>
+                $product['alternative_1_brand']
                 ?? '',
-
-            'Alternative Website' =>
-                $product[
-                    'alternative_url'
-                ]
+            'Alternative 1 – Zellinhalt' =>
+                $product['alternative_1_reference']
                 ?? '',
-
-            'Bemerkung zur Alternative' =>
-                $product[
-                    'alternative_remark'
-                ]
+            'Alternative 1 – effektive URL' =>
+                $product['alternative_1_url']
                 ?? '',
-
-            'B2B Alternative möglich?' =>
-                $product[
-                    'alternative_b2b'
-                ]
+            'Bemerkung Alternative 1' =>
+                $product['alternative_1_remark']
+                ?? '',
+            'Alternative 2' =>
+                $product['alternative_2_brand']
+                ?? '',
+            'Alternative 2 – Zellinhalt' =>
+                $product['alternative_2_reference']
+                ?? '',
+            'Alternative 2 – effektive URL' =>
+                $product['alternative_2_url']
                 ?? '',
         ];
 
 
-        foreach (
-            $optional
-            as $label => $value
-        ) {
-
-            $value =
-                trim(
-                    (string)
-                    $value
-                );
+        foreach ($optional as $label => $value) {
+            $value = trim((string) $value);
 
 
-            if (
-                $value === ''
-            ) {
+            if ($value === '') {
                 continue;
             }
 
@@ -3914,11 +3905,7 @@ final class Jung_Leben_Core_Content_Import
         }
 
 
-        return
-            implode(
-                "\n",
-                $lines
-            );
+        return implode("\n", $lines);
     }
 
 
@@ -3934,24 +3921,14 @@ final class Jung_Leben_Core_Content_Import
         $url =
             add_query_arg(
                 [
-
-                    'page' =>
-                        self::MENU_SLUG,
-
-                    'jl_import' =>
-                        'error',
+                    'page' => self::MENU_SLUG,
+                    'jl_import' => 'error',
                 ],
-
-                admin_url(
-                    'tools.php'
-                )
+                admin_url('tools.php')
             );
 
 
-        wp_safe_redirect(
-            $url
-        );
-
+        wp_safe_redirect($url);
         exit;
     }
 }
