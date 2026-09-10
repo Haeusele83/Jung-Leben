@@ -1,7 +1,11 @@
 <?php
 /**
- * Frontend-Verknüpfungen zwischen
- * Produkten und Erfahrungsbeiträgen.
+ * Frontend-Verknüpfungen zwischen Produkten und Beiträgen.
+ *
+ * Nur bestätigte persönliche Quellen werden als
+ * «Robertos Erfahrung» bezeichnet. KI-markierte oder
+ * redaktionell geprüfte Beiträge erscheinen als
+ * Hintergrund & Einordnung.
  *
  * @package Jung_Leben_Core
  */
@@ -12,20 +16,8 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-
-/**
- * Stellt Beziehungen zwischen Produkten und
- * den dazugehörigen Erfahrungsartikeln dar.
- */
 final class Jung_Leben_Core_Content_Relations
 {
-    /* =========================================================
-       INITIALISIERUNG
-       ========================================================= */
-
-    /**
-     * Hooks registrieren.
-     */
     public static function init(): void
     {
         add_action(
@@ -35,7 +27,6 @@ final class Jung_Leben_Core_Content_Relations
                 'enqueue_assets',
             ]
         );
-
 
         add_filter(
             'the_content',
@@ -47,15 +38,6 @@ final class Jung_Leben_Core_Content_Relations
         );
     }
 
-
-    /* =========================================================
-       ASSETS
-       ========================================================= */
-
-    /**
-     * Styles nur dort laden, wo
-     * Verknüpfungen vorkommen können.
-     */
     public static function enqueue_assets(): void
     {
         if (
@@ -69,42 +51,25 @@ final class Jung_Leben_Core_Content_Relations
             return;
         }
 
-
         $css_path =
             JUNG_LEBEN_CORE_PATH
             . 'assets/css/content-relations.css';
 
-
-        if (
-            ! file_exists(
-                $css_path
-            )
-        ) {
+        if (! file_exists($css_path)) {
             return;
         }
-
 
         wp_enqueue_style(
             'jung-leben-content-relations',
             JUNG_LEBEN_CORE_URL
                 . 'assets/css/content-relations.css',
             [],
-            (string)
-            filemtime(
+            (string) filemtime(
                 $css_path
             )
         );
     }
 
-
-    /* =========================================================
-       CONTENT-FILTER
-       ========================================================= */
-
-    /**
-     * Passende Verknüpfung nach dem eigentlichen
-     * Inhalt ergänzen.
-     */
     public static function append_relations(
         string $content
     ): string {
@@ -117,90 +82,52 @@ final class Jung_Leben_Core_Content_Relations
             return $content;
         }
 
-
         $post_id =
             get_the_ID();
 
-
-        if (
-            $post_id <= 0
-        ) {
+        if ($post_id <= 0) {
             return $content;
         }
-
 
         $post_type =
             get_post_type(
                 $post_id
             );
 
-
         /* =====================================================
-           PRODUKT → ERFAHRUNG
+           PRODUKT → BEITRÄGE
            ===================================================== */
 
         if (
-            $post_type ===
-            Jung_Leben_Core_Products::POST_TYPE
+            $post_type
+            === Jung_Leben_Core_Products::POST_TYPE
         ) {
-            $relation =
-                self::render_product_experiences(
-                    $post_id
-                );
-
-
-            if (
-                $relation === ''
-            ) {
-                return $content;
-            }
-
-
             return
                 $content
-                . $relation;
+                . self::render_product_experiences(
+                    $post_id
+                );
         }
-
 
         /* =====================================================
-           ERFAHRUNG → PRODUKT
+           BEITRAG → PRODUKT
            ===================================================== */
 
-        if (
-            $post_type ===
-            'post'
-        ) {
-            $relation =
-                self::render_experience_product(
-                    $post_id
-                );
-
-
-            if (
-                $relation === ''
-            ) {
-                return $content;
-            }
-
-
+        if ($post_type === 'post') {
             return
                 $content
-                . $relation;
+                . self::render_experience_product(
+                    $post_id
+                );
         }
-
 
         return $content;
     }
 
-
     /* =========================================================
-       PRODUKT → ERFAHRUNGEN
+       PRODUKT → BEITRÄGE
        ========================================================= */
 
-    /**
-     * Mit einem Produkt verknüpfte
-     * Erfahrungsartikel ausgeben.
-     */
     private static function render_product_experiences(
         int $product_id
     ): string {
@@ -208,10 +135,8 @@ final class Jung_Leben_Core_Content_Relations
             'publish',
         ];
 
-
         /**
-         * Redakteure dürfen auch noch nicht
-         * veröffentlichte Erfahrungen sehen.
+         * Eingeloggte Redakteure dürfen auch Entwürfe sehen.
          */
         if (
             is_user_logged_in()
@@ -228,8 +153,7 @@ final class Jung_Leben_Core_Content_Relations
             ];
         }
 
-
-        $experience_query =
+        $query =
             new WP_Query([
                 'post_type' =>
                     'post',
@@ -238,7 +162,7 @@ final class Jung_Leben_Core_Content_Relations
                     $statuses,
 
                 'posts_per_page' =>
-                    3,
+                    6,
 
                 'orderby' =>
                     'date',
@@ -263,19 +187,15 @@ final class Jung_Leben_Core_Content_Relations
                     true,
             ]);
 
-
-        if (
-            ! $experience_query->have_posts()
-        ) {
+        if (! $query->have_posts()) {
             return '';
         }
 
-
-        $cards = '';
-
+        $personal_cards = '';
+        $background_cards = '';
 
         foreach (
-            $experience_query->posts
+            $query->posts
             as $experience
         ) {
             if (
@@ -285,79 +205,199 @@ final class Jung_Leben_Core_Content_Relations
                 continue;
             }
 
-
-            $experience_url =
+            $url =
                 self::get_frontend_url(
                     $experience
                 );
 
-
-            if (
-                $experience_url === ''
-            ) {
+            if ($url === '') {
                 continue;
             }
 
+            /**
+             * Entscheidend:
+             *
+             * Nicht jeder Blogbeitrag ist automatisch
+             * eine persönliche Erfahrung.
+             */
+            $type =
+                self::get_experience_relation_type(
+                    $experience
+                );
 
-            $cards .=
+            $card =
                 self::render_experience_card(
                     $experience,
-                    $experience_url
+                    $url,
+                    $type
                 );
-        }
 
+            if ($type === 'personal') {
+                $personal_cards .= $card;
+
+            } else {
+                $background_cards .= $card;
+            }
+        }
 
         wp_reset_postdata();
 
+        $product_title =
+            get_the_title(
+                $product_id
+            );
 
-        if (
-            $cards === ''
-        ) {
-            return '';
-        }
+        $html = '';
 
+        /* -----------------------------------------------------
+           Persönliche Erfahrungen
+           ----------------------------------------------------- */
 
-        return
-            sprintf(
-                '<section class="jl-relation jl-relation--experience">
-                    <div class="jl-relation__inner">
-                        <header class="jl-relation__header">
-                            <span class="jl-relation__eyebrow">%1$s</span>
-                            <h2>%2$s</h2>
-                        </header>
-                        <div class="jl-relation__cards">
-                            %3$s
-                        </div>
-                    </div>
-                </section>',
-                esc_html__(
-                    'Persönliche Erfahrung',
-                    'jung-leben-core'
-                ),
-                esc_html(
+        if ($personal_cards !== '') {
+            $html .=
+                self::render_relation_section(
+                    'personal',
+
+                    __(
+                        'Persönliche Erfahrung',
+                        'jung-leben-core'
+                    ),
+
                     sprintf(
                         __(
                             'Robertos Erfahrung mit %s',
                             'jung-leben-core'
                         ),
-                        get_the_title(
-                            $product_id
-                        )
+                        $product_title
+                    ),
+
+                    $personal_cards
+                );
+        }
+
+        /* -----------------------------------------------------
+           Hintergrund / Einordnung
+           ----------------------------------------------------- */
+
+        if ($background_cards !== '') {
+            $html .=
+                self::render_relation_section(
+                    'background',
+
+                    __(
+                        'Hintergrund & Einordnung',
+                        'jung-leben-core'
+                    ),
+
+                    sprintf(
+                        __(
+                            'Mehr über %s',
+                            'jung-leben-core'
+                        ),
+                        $product_title
+                    ),
+
+                    $background_cards
+                );
+        }
+
+        return $html;
+    }
+
+    /**
+     * Einheitlichen Beziehungsbereich ausgeben.
+     */
+    private static function render_relation_section(
+        string $type,
+        string $eyebrow,
+        string $title,
+        string $cards
+    ): string {
+        if ($cards === '') {
+            return '';
+        }
+
+        return
+            sprintf(
+                '<section class="jl-relation jl-relation--experience jl-relation--%1$s">
+
+                    <div class="jl-relation__inner">
+
+                        <header class="jl-relation__header">
+
+                            <span class="jl-relation__eyebrow">
+                                %2$s
+                            </span>
+
+                            <h2>
+                                %3$s
+                            </h2>
+
+                        </header>
+
+                        <div class="jl-relation__cards">
+                            %4$s
+                        </div>
+
+                    </div>
+
+                </section>',
+
+                esc_attr(
+                    sanitize_html_class(
+                        $type
                     )
                 ),
+
+                esc_html(
+                    $eyebrow
+                ),
+
+                esc_html(
+                    $title
+                ),
+
                 $cards
             );
     }
 
+    /**
+     * Beziehungstyp bestimmen.
+     *
+     * customer_source
+     * = bestätigte persönliche Quelle
+     *
+     * ai_review
+     * = KI-/Redaktionsentwurf
+     *
+     * reviewed
+     * = redaktionell geprüfter Beitrag
+     *
+     * Nur customer_source darf automatisch als
+     * persönliche Erfahrung von Roberto bezeichnet werden.
+     */
+    private static function get_experience_relation_type(
+        WP_Post $experience
+    ): string {
+        $review_status =
+            sanitize_key(
+                (string) get_post_meta(
+                    $experience->ID,
+                    'jl_experience_review_status',
+                    true
+                )
+            );
+
+        return
+            $review_status === 'customer_source'
+                ? 'personal'
+                : 'background';
+    }
 
     /* =========================================================
-       ERFAHRUNG → PRODUKT
+       BEITRAG → PRODUKT
        ========================================================= */
 
-    /**
-     * Das mit einem Erfahrungsartikel
-     * verknüpfte Produkt ausgeben.
-     */
     private static function render_experience_product(
         int $experience_id
     ): string {
@@ -370,135 +410,115 @@ final class Jung_Leben_Core_Content_Relations
                 )
             );
 
-
-        if (
-            $product_id <= 0
-        ) {
+        if ($product_id <= 0) {
             return '';
         }
-
 
         $product =
             get_post(
                 $product_id
             );
 
-
         if (
-            ! $product
-            instanceof WP_Post
-            || $product->post_type !==
-                Jung_Leben_Core_Products::POST_TYPE
+            ! $product instanceof WP_Post
+            || $product->post_type
+            !== Jung_Leben_Core_Products::POST_TYPE
         ) {
             return '';
         }
 
-
-        $product_url =
+        $url =
             self::get_frontend_url(
                 $product
             );
 
-
-        if (
-            $product_url === ''
-        ) {
+        if ($url === '') {
             return '';
         }
-
 
         $card =
             self::render_product_card(
                 $product,
-                $product_url
+                $url
             );
 
-
-        if (
-            $card === ''
-        ) {
+        if ($card === '') {
             return '';
         }
-
 
         return
             sprintf(
                 '<section class="jl-relation jl-relation--product">
+
                     <div class="jl-relation__inner">
+
                         <header class="jl-relation__header">
-                            <span class="jl-relation__eyebrow">%1$s</span>
-                            <h2>%2$s</h2>
+
+                            <span class="jl-relation__eyebrow">
+                                %1$s
+                            </span>
+
+                            <h2>
+                                %2$s
+                            </h2>
+
                         </header>
+
                         <div class="jl-relation__cards">
                             %3$s
                         </div>
+
                     </div>
+
                 </section>',
+
                 esc_html__(
                     'Passendes Produkt',
                     'jung-leben-core'
                 ),
+
                 esc_html__(
                     'Das Produkt im Überblick.',
                     'jung-leben-core'
                 ),
+
                 $card
             );
     }
-
 
     /* =========================================================
        PRODUKTKARTE
        ========================================================= */
 
-    /**
-     * Produktkarte innerhalb eines
-     * Erfahrungsartikels rendern.
-     */
     private static function render_product_card(
         WP_Post $product,
         string $product_url
     ): string {
         $product_id =
-            (int)
-            $product->ID;
-
+            (int) $product->ID;
 
         $has_image =
             has_post_thumbnail(
                 $product_id
             );
 
-
-        $card_classes = [
+        $classes = [
             'jl-relation-card',
             'jl-relation-card--product',
+
             $has_image
                 ? 'jl-relation-card--with-image'
                 : 'jl-relation-card--no-image',
         ];
-
-
-        /* =====================================================
-           MARKE
-           ===================================================== */
 
         $brand_markup =
             self::get_product_brand_markup(
                 $product_id
             );
 
-
-        /* =====================================================
-           BILD
-           ===================================================== */
-
         $media_html = '';
 
-
-        if (
-            $has_image
-        ) {
+        if ($has_image) {
             $image =
                 get_the_post_thumbnail(
                     $product_id,
@@ -512,11 +532,8 @@ final class Jung_Leben_Core_Content_Relations
                     ]
                 );
 
-
             if (
-                is_string(
-                    $image
-                )
+                is_string($image)
                 && $image !== ''
             ) {
                 $media_html =
@@ -528,34 +545,30 @@ final class Jung_Leben_Core_Content_Relations
                         >
                             %3$s
                         </a>',
+
                         esc_url(
                             $product_url
                         ),
+
                         esc_attr(
                             sprintf(
                                 __(
                                     '%s ansehen',
                                     'jung-leben-core'
                                 ),
-                                $product
-                                    ->post_title
+                                $product->post_title
                             )
                         ),
+
                         $image
                     );
             }
         }
 
-
-        /* =====================================================
-           BESCHREIBUNG
-           ===================================================== */
-
         $excerpt =
             self::get_content_excerpt(
                 $product
             );
-
 
         $excerpt_html =
             $excerpt !== ''
@@ -567,10 +580,10 @@ final class Jung_Leben_Core_Content_Relations
                 )
                 : '';
 
-
         return
             sprintf(
                 '<article class="%1$s">
+
                     %2$s
 
                     <div class="jl-relation-card__content">
@@ -580,9 +593,11 @@ final class Jung_Leben_Core_Content_Relations
                         </div>
 
                         <h3 class="jl-relation-card__title">
+
                             <a href="%4$s">
                                 %5$s
                             </a>
+
                         </h3>
 
                         %6$s
@@ -591,7 +606,10 @@ final class Jung_Leben_Core_Content_Relations
                             href="%4$s"
                             class="jl-relation-card__link"
                         >
-                            <span>%7$s</span>
+
+                            <span>
+                                %7$s
+                            </span>
 
                             <span
                                 class="jl-relation-card__link-arrow"
@@ -599,26 +617,34 @@ final class Jung_Leben_Core_Content_Relations
                             >
                                 →
                             </span>
+
                         </a>
 
                     </div>
+
                 </article>',
+
                 esc_attr(
                     implode(
                         ' ',
-                        $card_classes
+                        $classes
                     )
                 ),
+
                 $media_html,
+
                 $brand_markup,
+
                 esc_url(
                     $product_url
                 ),
+
                 esc_html(
-                    $product
-                        ->post_title
+                    $product->post_title
                 ),
+
                 $excerpt_html,
+
                 esc_html__(
                     'Produkt ansehen',
                     'jung-leben-core'
@@ -626,49 +652,42 @@ final class Jung_Leben_Core_Content_Relations
             );
     }
 
-
     /* =========================================================
-       ERFAHRUNGSKARTE
+       BEITRAGSKARTE
        ========================================================= */
 
-    /**
-     * Erfahrungsartikel innerhalb
-     * einer Produktseite rendern.
-     */
     private static function render_experience_card(
         WP_Post $experience,
-        string $experience_url
+        string $experience_url,
+        string $relation_type
     ): string {
         $experience_id =
-            (int)
-            $experience->ID;
-
+            (int) $experience->ID;
 
         $has_image =
             has_post_thumbnail(
                 $experience_id
             );
 
+        $is_personal =
+            $relation_type === 'personal';
 
-        $card_classes = [
+        $classes = [
             'jl-relation-card',
             'jl-relation-card--experience',
+
+            $is_personal
+                ? 'jl-relation-card--personal'
+                : 'jl-relation-card--background',
+
             $has_image
                 ? 'jl-relation-card--with-image'
                 : 'jl-relation-card--no-image',
         ];
 
-
-        /* =====================================================
-           BILD
-           ===================================================== */
-
         $media_html = '';
 
-
-        if (
-            $has_image
-        ) {
+        if ($has_image) {
             $image =
                 get_the_post_thumbnail(
                     $experience_id,
@@ -682,11 +701,8 @@ final class Jung_Leben_Core_Content_Relations
                     ]
                 );
 
-
             if (
-                is_string(
-                    $image
-                )
+                is_string($image)
                 && $image !== ''
             ) {
                 $media_html =
@@ -698,34 +714,30 @@ final class Jung_Leben_Core_Content_Relations
                         >
                             %3$s
                         </a>',
+
                         esc_url(
                             $experience_url
                         ),
+
                         esc_attr(
                             sprintf(
                                 __(
                                     '%s lesen',
                                     'jung-leben-core'
                                 ),
-                                $experience
-                                    ->post_title
+                                $experience->post_title
                             )
                         ),
+
                         $image
                     );
             }
         }
 
-
-        /* =====================================================
-           BESCHREIBUNG
-           ===================================================== */
-
         $excerpt =
             self::get_content_excerpt(
                 $experience
             );
-
 
         $excerpt_html =
             $excerpt !== ''
@@ -737,10 +749,36 @@ final class Jung_Leben_Core_Content_Relations
                 )
                 : '';
 
+        /**
+         * Persönliche und redaktionelle Inhalte
+         * klar unterschiedlich benennen.
+         */
+        $label =
+            $is_personal
+                ? __(
+                    'Erfahrungsbericht',
+                    'jung-leben-core'
+                )
+                : __(
+                    'Hintergrundbeitrag',
+                    'jung-leben-core'
+                );
+
+        $link_text =
+            $is_personal
+                ? __(
+                    'Erfahrung lesen',
+                    'jung-leben-core'
+                )
+                : __(
+                    'Beitrag lesen',
+                    'jung-leben-core'
+                );
 
         return
             sprintf(
                 '<article class="%1$s">
+
                     %2$s
 
                     <div class="jl-relation-card__content">
@@ -750,9 +788,11 @@ final class Jung_Leben_Core_Content_Relations
                         </span>
 
                         <h3 class="jl-relation-card__title">
+
                             <a href="%4$s">
                                 %5$s
                             </a>
+
                         </h3>
 
                         %6$s
@@ -761,7 +801,10 @@ final class Jung_Leben_Core_Content_Relations
                             href="%4$s"
                             class="jl-relation-card__link"
                         >
-                            <span>%7$s</span>
+
+                            <span>
+                                %7$s
+                            </span>
 
                             <span
                                 class="jl-relation-card__link-arrow"
@@ -769,45 +812,46 @@ final class Jung_Leben_Core_Content_Relations
                             >
                                 →
                             </span>
+
                         </a>
 
                     </div>
+
                 </article>',
+
                 esc_attr(
                     implode(
                         ' ',
-                        $card_classes
+                        $classes
                     )
                 ),
+
                 $media_html,
-                esc_html__(
-                    'Erfahrungsbericht',
-                    'jung-leben-core'
+
+                esc_html(
+                    $label
                 ),
+
                 esc_url(
                     $experience_url
                 ),
+
                 esc_html(
-                    $experience
-                        ->post_title
+                    $experience->post_title
                 ),
+
                 $excerpt_html,
-                esc_html__(
-                    'Erfahrung lesen',
-                    'jung-leben-core'
+
+                esc_html(
+                    $link_text
                 )
             );
     }
 
-
     /* =========================================================
-       MARKENAUSGABE
+       MARKE
        ========================================================= */
 
-    /**
-     * Zentrale Marken-/Logo-Ausgabe
-     * für ein Produkt.
-     */
     private static function get_product_brand_markup(
         int $product_id
     ): string {
@@ -817,17 +861,10 @@ final class Jung_Leben_Core_Content_Relations
                 Jung_Leben_Core_Products::TAXONOMY_BRAND
             );
 
-
         if (
-            ! is_array(
-                $brands
-            )
-            || is_wp_error(
-                $brands
-            )
-            || empty(
-                $brands
-            )
+            ! is_array($brands)
+            || is_wp_error($brands)
+            || empty($brands)
         ) {
             return
                 '<span class="jl-brand jl-brand--relation">'
@@ -840,22 +877,13 @@ final class Jung_Leben_Core_Content_Relations
                 . '</span>';
         }
 
-
         $brand =
             $brands[0];
 
-
-        if (
-            ! $brand
-            instanceof WP_Term
-        ) {
+        if (! $brand instanceof WP_Term) {
             return '';
         }
 
-
-        /**
-         * Neue zentrale Markenlogik verwenden.
-         */
         if (
             class_exists(
                 'Jung_Leben_Core_Brand_Fields'
@@ -869,11 +897,6 @@ final class Jung_Leben_Core_Content_Relations
                     );
         }
 
-
-        /**
-         * Fallback, falls die Markenklasse
-         * aus irgendeinem Grund nicht verfügbar ist.
-         */
         return
             '<span class="jl-brand jl-brand--relation">'
             . '<span class="jl-brand__name">'
@@ -884,36 +907,27 @@ final class Jung_Leben_Core_Content_Relations
             . '</span>';
     }
 
-
     /* =========================================================
-       FRONTEND-URL
+       URL
        ========================================================= */
 
-    /**
-     * Öffentliche oder – für Redakteure –
-     * Vorschau-URL ermitteln.
-     */
     private static function get_frontend_url(
         WP_Post $post
     ): string {
         if (
-            $post->post_status ===
-            'publish'
+            $post->post_status
+            === 'publish'
         ) {
             $url =
                 get_permalink(
                     $post
                 );
 
-
             return
-                is_string(
-                    $url
-                )
+                is_string($url)
                     ? $url
                     : '';
         }
-
 
         if (
             ! is_user_logged_in()
@@ -925,58 +939,42 @@ final class Jung_Leben_Core_Content_Relations
             return '';
         }
 
-
         $preview_url =
             get_preview_post_link(
                 $post
             );
 
-
         if (
-            is_string(
-                $preview_url
-            )
+            is_string($preview_url)
             && $preview_url !== ''
         ) {
             return $preview_url;
         }
-
 
         $permalink =
             get_permalink(
                 $post
             );
 
-
         return
-            is_string(
-                $permalink
-            )
+            is_string($permalink)
                 ? $permalink
                 : '';
     }
-
 
     /* =========================================================
        EXCERPT
        ========================================================= */
 
-    /**
-     * Kurzen Kartentext erstellen.
-     */
     private static function get_content_excerpt(
         WP_Post $post
     ): string {
         $excerpt =
             trim(
-                (string)
-                $post->post_excerpt
+                (string) $post->post_excerpt
             );
 
-
-        if (
-            $excerpt !== ''
-        ) {
+        if ($excerpt !== '') {
             return
                 wp_trim_words(
                     wp_strip_all_tags(
@@ -987,18 +985,12 @@ final class Jung_Leben_Core_Content_Relations
                 );
         }
 
-
-        $content =
-            strip_shortcodes(
-                $post->post_content
-            );
-
-
         $content =
             wp_strip_all_tags(
-                $content
+                strip_shortcodes(
+                    $post->post_content
+                )
             );
-
 
         $content =
             trim(
@@ -1010,19 +1002,13 @@ final class Jung_Leben_Core_Content_Relations
                 ?? ''
             );
 
-
-        if (
-            $content === ''
-        ) {
-            return '';
-        }
-
-
         return
-            wp_trim_words(
-                $content,
-                28,
-                ' …'
-            );
+            $content !== ''
+                ? wp_trim_words(
+                    $content,
+                    28,
+                    ' …'
+                )
+                : '';
     }
 }
