@@ -277,6 +277,71 @@ $get_product_mark =
     };
 
 
+
+/**
+ * Anzeigenamen für eine importierte Alternative bestimmen.
+ *
+ * In der Excel-Datei kann im sichtbaren URL-Feld entweder
+ * ein Produktname oder bereits eine URL stehen.
+ */
+$get_alternative_title =
+    static function (
+        string $brand,
+        string $reference
+    ): string {
+        $brand =
+            trim(
+                wp_strip_all_tags(
+                    $brand
+                )
+            );
+
+
+        $reference =
+            trim(
+                wp_strip_all_tags(
+                    $reference
+                )
+            );
+
+
+        /**
+         * Ist der sichtbare Zellinhalt keine URL,
+         * verwenden wir ihn als Produktbezeichnung.
+         */
+        if (
+            $reference !== ''
+            && ! preg_match(
+                '#^https?://#i',
+                $reference
+            )
+        ) {
+            return $reference;
+        }
+
+
+        if (
+            $brand !== ''
+        ) {
+            return
+                sprintf(
+                    __(
+                        'Alternative von %s',
+                        'jung-leben'
+                    ),
+                    $brand
+                );
+        }
+
+
+        return
+            __(
+                'Weitere Produktoption',
+                'jung-leben'
+            );
+    };
+
+
 /* =========================================================
    LABELS
    ========================================================= */
@@ -864,6 +929,116 @@ if (
         }
 
 
+
+        /* =====================================================
+           IMPORTIERTE ALTERNATIVEN
+           ===================================================== */
+
+        /**
+         * Alternative Produkte werden vom Excel-Import
+         * als interne Produkt-Metadaten gespeichert.
+         *
+         * Bemerkungsfelder werden hier bewusst NICHT
+         * öffentlich ausgegeben. Sie können interne
+         * Partner- oder Prüfhinweise enthalten.
+         */
+        $alternatives = [];
+
+
+        foreach (
+            [
+                1,
+                2,
+            ]
+            as $alternative_index
+        ) {
+            $alternative_brand =
+                trim(
+                    (string)
+                    get_post_meta(
+                        $product_id,
+                        '_jl_source_alternative_'
+                        . $alternative_index
+                        . '_brand',
+                        true
+                    )
+                );
+
+
+            $alternative_reference =
+                trim(
+                    (string)
+                    get_post_meta(
+                        $product_id,
+                        '_jl_source_alternative_'
+                        . $alternative_index
+                        . '_reference',
+                        true
+                    )
+                );
+
+
+            $alternative_url =
+                trim(
+                    (string)
+                    get_post_meta(
+                        $product_id,
+                        '_jl_source_alternative_'
+                        . $alternative_index
+                        . '_url',
+                        true
+                    )
+                );
+
+
+            /**
+             * Nur gültige Webadressen als Link verwenden.
+             */
+            if (
+                $alternative_url !== ''
+                && ! wp_http_validate_url(
+                    $alternative_url
+                )
+            ) {
+                $alternative_url = '';
+            }
+
+
+            if (
+                $alternative_brand === ''
+                && $alternative_reference === ''
+                && $alternative_url === ''
+            ) {
+                continue;
+            }
+
+
+            $alternatives[] = [
+
+                'index' =>
+                    $alternative_index,
+
+                'brand' =>
+                    $alternative_brand,
+
+                'title' =>
+                    $get_alternative_title(
+                        $alternative_brand,
+                        $alternative_reference
+                    ),
+
+                'url' =>
+                    $alternative_url,
+            ];
+        }
+
+
+        $has_alternatives =
+            ! empty(
+                $alternatives
+            );
+
+
         /* =====================================================
            LISTEN
            ===================================================== */
@@ -911,6 +1086,49 @@ if (
             );
 
 
+        /**
+         * Die Relations-Klasse hängt verknüpfte Beiträge
+         * normalerweise direkt an "the_content".
+         *
+         * Auf der Produktdetailseite lösen wir diese Ausgabe
+         * bewusst vom eigentlichen Produkttext, damit die
+         * Reihenfolge sauber bleibt:
+         *
+         * Produkttext
+         * → Alternativen
+         * → Hintergrund / persönliche Erfahrung
+         */
+        $relations_callback = [
+            'Jung_Leben_Core_Content_Relations',
+            'append_relations',
+        ];
+
+
+        $relations_filter_removed =
+            false;
+
+
+        if (
+            class_exists(
+                'Jung_Leben_Core_Content_Relations'
+            )
+            && has_filter(
+                'the_content',
+                $relations_callback
+            ) !== false
+        ) {
+            remove_filter(
+                'the_content',
+                $relations_callback,
+                30
+            );
+
+
+            $relations_filter_removed =
+                true;
+        }
+
+
         $rendered_content =
             apply_filters(
                 'the_content',
@@ -918,10 +1136,54 @@ if (
             );
 
 
+        if (
+            $relations_filter_removed
+        ) {
+            add_filter(
+                'the_content',
+                $relations_callback,
+                30
+            );
+        }
+
+
         $has_rendered_content =
             trim(
                 wp_strip_all_tags(
                     $rendered_content
+                )
+            ) !== '';
+
+
+        /**
+         * Verknüpfte Beiträge anschliessend separat
+         * aufbauen, damit sie hinter den Alternativen
+         * platziert werden können.
+         */
+        $relation_content = '';
+
+
+        if (
+            class_exists(
+                'Jung_Leben_Core_Content_Relations'
+            )
+            && method_exists(
+                'Jung_Leben_Core_Content_Relations',
+                'append_relations'
+            )
+        ) {
+            $relation_content =
+                Jung_Leben_Core_Content_Relations
+                    ::append_relations(
+                        ''
+                    );
+        }
+
+
+        $has_relation_content =
+            trim(
+                wp_strip_all_tags(
+                    $relation_content
                 )
             ) !== '';
 
@@ -956,6 +1218,8 @@ if (
         $has_main_details =
             $has_purpose_section
             || $has_rendered_content
+            || $has_alternatives
+            || $has_relation_content
             || $has_experience_section
             || $has_pros_cons;
 
@@ -1690,6 +1954,181 @@ if (
                                     </div>
 
                                 </section>
+
+                            <?php endif; ?>
+
+
+
+                            <!-- =================================
+                                 WEITERE PRODUKTOPTIONEN
+                                 ================================= -->
+
+                            <?php
+                            if (
+                                $has_alternatives
+                            ) :
+                                ?>
+
+                                <section
+                                    class="
+                                        product-section
+                                        product-alternatives
+                                    "
+                                >
+
+                                    <p class="eyebrow">
+                                        <?php
+                                        esc_html_e(
+                                            'Weitere Optionen',
+                                            'jung-leben'
+                                        );
+                                        ?>
+                                    </p>
+
+
+                                    <h2>
+                                        <?php
+                                        esc_html_e(
+                                            'Alternativen zum Favoriten.',
+                                            'jung-leben'
+                                        );
+                                        ?>
+                                    </h2>
+
+
+                                    <p class="product-alternatives__intro">
+                                        <?php
+                                        esc_html_e(
+                                            'Neben dem oben gezeigten Favoriten sind für dieses Produkt weitere Optionen hinterlegt.',
+                                            'jung-leben'
+                                        );
+                                        ?>
+                                    </p>
+
+
+                                    <div class="product-alternatives__grid">
+
+                                        <?php
+                                        foreach (
+                                            $alternatives
+                                            as $alternative
+                                        ) :
+                                            ?>
+
+                                            <article class="product-alternative-card">
+
+                                                <div class="product-alternative-card__header">
+
+                                                    <span class="product-alternative-card__label">
+                                                        <?php
+                                                        esc_html_e(
+                                                            'Alternative',
+                                                            'jung-leben'
+                                                        );
+                                                        ?>
+                                                    </span>
+
+
+                                                    <?php
+                                                    if (
+                                                        $alternative[
+                                                            'brand'
+                                                        ] !== ''
+                                                    ) :
+                                                        ?>
+
+                                                        <span class="product-alternative-card__brand">
+                                                            <?php
+                                                            echo esc_html(
+                                                                $alternative[
+                                                                    'brand'
+                                                                ]
+                                                            );
+                                                            ?>
+                                                        </span>
+
+                                                    <?php endif; ?>
+
+                                                </div>
+
+
+                                                <h3 class="product-alternative-card__title">
+                                                    <?php
+                                                    echo esc_html(
+                                                        $alternative[
+                                                            'title'
+                                                        ]
+                                                    );
+                                                    ?>
+                                                </h3>
+
+
+                                                <?php
+                                                if (
+                                                    $alternative[
+                                                        'url'
+                                                    ] !== ''
+                                                ) :
+                                                    ?>
+
+                                                    <a
+                                                        href="<?php
+                                                        echo esc_url(
+                                                            $alternative[
+                                                                'url'
+                                                            ]
+                                                        );
+                                                        ?>"
+                                                        class="product-alternative-card__link"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer external"
+                                                    >
+
+                                                        <span>
+                                                            <?php
+                                                            esc_html_e(
+                                                                'Alternative ansehen',
+                                                                'jung-leben'
+                                                            );
+                                                            ?>
+                                                        </span>
+
+                                                        <span aria-hidden="true">
+                                                            ↗
+                                                        </span>
+
+                                                    </a>
+
+                                                <?php endif; ?>
+
+                                            </article>
+
+                                        <?php endforeach; ?>
+
+                                    </div>
+
+                                </section>
+
+                            <?php endif; ?>
+
+
+                            <!-- =================================
+                                 VERKNÜPFTE BEITRÄGE
+                                 ================================= -->
+
+                            <?php
+                            if (
+                                $has_relation_content
+                            ) :
+                                ?>
+
+                                <div class="product-relations">
+                                    <?php
+                                    echo wp_kses_post(
+                                        $relation_content
+                                    );
+                                    ?>
+                                </div>
 
                             <?php endif; ?>
 

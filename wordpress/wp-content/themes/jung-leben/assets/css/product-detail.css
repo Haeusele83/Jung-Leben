@@ -1148,6 +1148,257 @@ span:last-child {
 }
 
 
+
+/* =========================================================
+   ALTERNATIVE PRODUKTE
+   ========================================================= */
+
+.product-alternatives {
+    margin-bottom:
+        clamp(
+            40px,
+            5vw,
+            54px
+        );
+}
+
+
+.product-alternatives__intro {
+    max-width: 690px;
+
+    margin:
+        -4px
+        0
+        23px;
+
+    color: #65766d;
+
+    font-size: 0.93rem;
+
+    line-height: 1.65;
+}
+
+
+.product-alternatives__grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap: 16px;
+}
+
+
+.product-alternative-card {
+    min-height: 210px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    padding:
+        23px
+        24px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #fbfcf9 0%,
+            #f4f7f1 100%
+        );
+
+    border:
+        1px solid
+        rgba(
+            23,
+            60,
+            50,
+            0.09
+        );
+
+    border-radius: 15px;
+
+    box-shadow:
+        0 9px 24px
+        rgba(
+            23,
+            60,
+            50,
+            0.035
+        );
+}
+
+
+.product-alternative-card__header {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    flex-wrap: wrap;
+
+    gap: 9px;
+}
+
+
+.product-alternative-card__label {
+    color: #7d8b83;
+
+    font-size: 0.67rem;
+    font-weight: 780;
+
+    letter-spacing: 0.11em;
+
+    text-transform: uppercase;
+}
+
+
+.product-alternative-card__brand {
+    display: inline-flex;
+
+    align-items: center;
+
+    min-height: 27px;
+
+    padding:
+        0
+        9px;
+
+    color: #4d675b;
+
+    background: #e9f1e5;
+
+    border-radius: 999px;
+
+    font-size: 0.7rem;
+    font-weight: 720;
+}
+
+
+.product-alternative-card__title {
+    margin:
+        20px
+        0
+        22px;
+
+    color: var(--jl-product-green);
+
+    font-size: 1.12rem;
+    font-weight: 720;
+
+    line-height: 1.35;
+
+    letter-spacing: -0.018em;
+}
+
+
+.product-alternative-card__link {
+    min-height: 42px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-top: auto;
+
+    padding:
+        0
+        13px;
+
+    color: #315b49;
+
+    background: #edf3e9;
+
+    border:
+        1px solid
+        rgba(
+            49,
+            91,
+            73,
+            0.10
+        );
+
+    border-radius: 10px;
+
+    font-size: 0.78rem;
+    font-weight: 730;
+
+    text-decoration: none;
+
+    transition:
+        background 180ms ease,
+        border-color 180ms ease,
+        transform 180ms ease;
+}
+
+
+.product-alternative-card__link:hover {
+    background: #e5eedf;
+
+    border-color:
+        rgba(
+            49,
+            91,
+            73,
+            0.18
+        );
+
+    transform:
+        translateY(-1px);
+}
+
+
+.product-alternative-card__link
+span:last-child {
+    flex: 0 0 auto;
+
+    transition:
+        transform 180ms ease;
+}
+
+
+.product-alternative-card__link:hover
+span:last-child {
+    transform:
+        translate(
+            2px,
+            -2px
+        );
+}
+
+
+/* =========================================================
+   VERKNÜPFTE BEITRÄGE IM DETAILBEREICH
+   ========================================================= */
+
+.product-relations {
+    margin:
+        clamp(
+            40px,
+            5vw,
+            54px
+        )
+        0;
+}
+
+
+.product-relations
+.jl-relation {
+    max-width: 820px;
+
+    margin-top: 0;
+}
+
+
 /* =========================================================
    PERSÖNLICHE ERFAHRUNG
    ========================================================= */
@@ -1654,10 +1905,22 @@ li::before {
    ========================================================= */
 
 .product-rich-text
+.jl-relation,
+.product-relations
 .jl-relation {
     max-width: 820px;
+}
 
+
+.product-rich-text
+.jl-relation {
     margin-top: 46px;
+}
+
+
+.product-relations
+.jl-relation {
+    margin-top: 0;
 }
 
 
@@ -1939,6 +2202,44 @@ li::before {
     .product-rich-text,
     .product-experience__text {
         font-size: 0.96rem;
+    }
+
+
+    .product-alternatives__intro {
+        margin-bottom: 19px;
+
+        font-size: 0.9rem;
+    }
+
+
+    .product-alternatives__grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .product-alternative-card {
+        min-height: 0;
+
+        padding:
+            21px
+            20px;
+    }
+
+
+    .product-alternative-card__title {
+        margin:
+            17px
+            0
+            20px;
+
+        font-size: 1.05rem;
+    }
+
+
+    .product-relations {
+        margin:
+            35px
+            0;
     }
 
 
