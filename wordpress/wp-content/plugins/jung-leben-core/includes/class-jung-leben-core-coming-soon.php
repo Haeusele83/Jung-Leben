@@ -9,6 +9,10 @@
  * Bearbeitungsrechten können die eigentliche
  * Website weiterhin vollständig aufrufen.
  *
+ * Einzelne Partner-Demoseiten können während
+ * der Aufbauphase gezielt öffentlich freigegeben
+ * werden.
+ *
  * Der öffentliche Launch erfolgt bewusst manuell.
  *
  * @package Jung_Leben_Core
@@ -33,6 +37,18 @@ final class Jung_Leben_Core_Coming_Soon
      * false = Website öffentlich freigeben
      */
     private const ENABLED = true;
+
+
+    /**
+     * Seiten, die trotz Coming-Soon-Modus
+     * öffentlich erreichbar sein dürfen.
+     *
+     * Es werden ausschliesslich die Slugs geprüft.
+     */
+    private const PUBLIC_PREVIEW_PAGE_SLUGS = [
+        'buecher',
+        'redcare',
+    ];
 
 
     /* =========================================================
@@ -140,9 +156,48 @@ final class Jung_Leben_Core_Coming_Soon
         }
 
 
+        /*
+         * Gezielt freigegebene Partner-Demoseiten
+         * dürfen öffentlich aufgerufen werden.
+         */
+        if (
+            self::is_public_preview_page()
+        ) {
+            return;
+        }
+
+
         self::render_page();
 
         exit;
+    }
+
+
+    /* =========================================================
+       ÖFFENTLICHE DEMOSEITEN
+       ========================================================= */
+
+    /**
+     * Prüfen, ob die aktuelle Seite trotz
+     * Coming-Soon-Modus öffentlich sein darf.
+     */
+    private static function is_public_preview_page(): bool
+    {
+        foreach (
+            self::PUBLIC_PREVIEW_PAGE_SLUGS
+            as $page_slug
+        ) {
+            if (
+                is_page(
+                    $page_slug
+                )
+            ) {
+                return true;
+            }
+        }
+
+
+        return false;
     }
 
 
@@ -208,6 +263,7 @@ final class Jung_Leben_Core_Coming_Soon
 
         nocache_headers();
         ?>
+
         <!DOCTYPE html>
 
         <html <?php language_attributes(); ?>>
@@ -359,9 +415,6 @@ final class Jung_Leben_Core_Coming_Soon
                 }
 
 
-                /*
-                 * Dezente organische Form oben rechts.
-                 */
                 .jl-coming-main::before {
                     content: "";
 
@@ -385,9 +438,6 @@ final class Jung_Leben_Core_Coming_Soon
                 }
 
 
-                /*
-                 * Dezente Form unten links.
-                 */
                 .jl-coming-main::after {
                     content: "";
 
@@ -765,10 +815,6 @@ final class Jung_Leben_Core_Coming_Soon
 
         <body>
 
-            <!-- =============================================
-                 HEADER
-                 ============================================= -->
-
             <header class="jl-coming-header">
 
                 <div class="jl-coming-header__inner">
@@ -791,10 +837,6 @@ final class Jung_Leben_Core_Coming_Soon
 
             </header>
 
-
-            <!-- =============================================
-                 CONTENT
-                 ============================================= -->
 
             <main class="jl-coming-main">
 
