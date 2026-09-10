@@ -1989,7 +1989,7 @@ if (
                                     <h2>
                                         <?php
                                         esc_html_e(
-                                            'Alternativen zum Favoriten.',
+                                            'Alternativen.',
                                             'jung-leben'
                                         );
                                         ?>
